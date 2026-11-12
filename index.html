@@ -81,7 +81,6 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
 <div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
-<div id="envBanner" style="display: block; background: rgb(254, 243, 199); border: 1px solid rgb(245, 158, 11); color: rgb(146, 64, 14); font-size: 12px; padding: 8px 10px; border-radius: 10px; margin: 8px 0px;">⚠️ Kau buka file ni dalam preview Meta AI — file picker &amp; PDF tak jalan kat sini. Kena <b>Save ke Files → Upload ke GitHub → Buka kat Safari</b> baru boleh test upload gambar / PDF.</div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
 <div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
 </div>
@@ -175,8 +174,6 @@ let customCats = JSON.parse(localStorage.getItem('ik_cats')||'[]');
 let hiddenCats = JSON.parse(localStorage.getItem('ik_cats_hidden')||'[]');
 const DEFAULT_CATS = ['stock','kegunaan kedai','utilities','gaji','personal'];
 migrateCN();
-// Detect preview dalam Meta AI - tunjuk banner
-try{ if(window.self!==window.top || /MetaAI|FBAN|FBAV/i.test(navigator.userAgent||'')){ const b=document.getElementById('envBanner'); if(b) b.style.display='block'; } }catch(e){ const b=document.getElementById('envBanner'); if(b) b.style.display='block'; }
 let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
 // ===== IndexedDB untuk PDF besar (multi-muka) - localStorage cuma ~5MB, PDF 2MB+ tak muat =====
