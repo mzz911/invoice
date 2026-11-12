@@ -151,6 +151,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="reportModal"><div class="sheet"><div class="closeRow"><button id="reportBack">← Kembali</button><b>Report</b><button id="reportClose">✕ Tutup</button></div>
 <div id="reportSummary" style="font-weight:700;margin:8px 0"></div><div id="reportPreview" style="overflow:auto;max-height:220px"></div>
 <div class="row" style="margin-top:12px"><button class="btn btn-green" id="dlCsv" style="flex:1">⬇️ Download CSV</button><button class="btn btn-light" id="copyCsv" style="flex:1">📋 Copy CSV</button></div>
+<button class="btn btn-dark" id="dlCsvAcc" style="width:100%;margin-top:8px">📊 Download CSV Accounting</button>
 <button class="btn btn-dark" id="dlPdf" style="width:100%;margin-top:8px">⬇️ Download PDF</button>
 <label>CSV</label><textarea class="csv" id="csvText" readonly=""></textarea>
 <button class="btn btn-light" id="reportDone" style="width:100%;margin-top:10px">Tutup</button></div></div>
@@ -744,6 +745,25 @@ function csvFor(list){
   });
   return head+'\n'+rows.join('\n');
 }
+function csvForAccounting(list){
+  // CSV untuk accountant - terus import Excel / Xero / AutoCount / SQL, tak payah edit
+  // Jenis: Invoice = Debit (belanja naik), CN = Kredit (belanja turun)
+  const akaunMap = {'stock':'Belian - Cost of Sales','kegunaan kedai':'Perbelanjaan Kedai','utilities':'Utiliti','gaji':'Gaji','personal':'Perbelanjaan Peribadi'};
+  const head='Tarikh Invoice,Bulan,Tahun,No Invoice,Supplier,Kategori,Akaun,Jenis,Cara Bayar,Split,Status,Tarikh Bayar,PV,Debit,Kredit,Jumlah,Nota';
+  const rows=list.map(x=>{
+    const split = x.payMethod==='Split Payment' && x.split ? Object.entries(x.split).filter(([k,v])=>v>0).map(([k,v])=>`${k} ${v}`).join(' • ') : '';
+    const esc=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
+    const amt = Math.abs(Number(signedPrice(x))||0);
+    const jenis = isCN(x) ? 'CN' : 'Invoice';
+    const debit = jenis==='Invoice' ? amt.toFixed(2) : '0.00';
+    const kredit = jenis==='CN' ? amt.toFixed(2) : '0.00';
+    const bulan = String(x.date||'').slice(0,7);
+    const tahun = String(x.date||'').slice(0,4);
+    const akaun = akaunMap[String(x.cat||'').trim().toLowerCase()] || (x.cat||'');
+    return [x.date,bulan,tahun,x.inv,x.name,x.cat,akaun,jenis,x.payMethod,split,x.paid?'Dah Bayar':'Belum Bayar',x.payDate,x.pv,debit,kredit,Number(signedPrice(x)).toFixed(2),x.note].map(esc).join(',');
+  });
+  return head+'\n'+rows.join('\n');
+}
 // ===== PDF: gambar dalam IDBIMG tak boleh terus masuk jsPDF, kena resolve + kecikkan dulu =====
 async function pdfImgForField(imgField){
   if(!imgField) return null;
@@ -913,6 +933,7 @@ document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getEle
 document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
 document.getElementById('reportBtn').onclick=()=>{ const list=filtered(); const total=list.reduce((s,x)=>s+signedPrice(x),0); document.getElementById('reportSummary').textContent=list.length+' invoice • '+fmt(total)+' • '; const csv=csvFor(list); document.getElementById('csvText').value=csv; document.getElementById('reportPreview').innerHTML=`<table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th>Tarikh</th><th>Supplier</th><th>PV</th><th>Harga</th></tr>${list.slice(0,20).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.pv||'-'}</td><td>${fmt(signedPrice(x))}</td></tr>`).join('')}</table>`; document.getElementById('reportModal').classList.add('open'); };
 document.getElementById('reportClose').onclick=document.getElementById('reportBack').onclick=document.getElementById('reportDone').onclick=()=>document.getElementById('reportModal').classList.remove('open');
+document.getElementById('dlCsvAcc').onclick=()=>{ const csv=csvForAccounting(filtered()); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-accounting-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV Accounting download'); };
 document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV download'); };
 document.getElementById('copyCsv').onclick=async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('csvText').value); showToast('CSV dah copy'); }catch(e){ document.getElementById('csvText').select(); document.execCommand('copy'); showToast('CSV dah copy'); } };
 document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(filtered());
