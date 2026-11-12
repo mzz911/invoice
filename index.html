@@ -71,7 +71,7 @@ label{font-weight:700;display:block;margin:12px 0 6px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;font-size:15px;background:#fff}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;z-index:99;display:none}
 textarea.csv{height:160px;font-size:12px;font-family:monospace}
-</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</style></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1></div></header>
@@ -364,15 +364,36 @@ function render(){
     if(_card.type==='group'){
       const g=_card.group; const gtotal=g.items.reduce((s,x)=>s+signedPrice(x),0); const invs=g.items.map(x=>x.inv||'').filter(Boolean).join(' • '); const hasResit=g.items.some(x=>x.paymentImg);
       const _names=[...new Set(g.items.map(x=>x.name).filter(Boolean))]; const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
-      const d=document.createElement('div'); d.className='card';
+      // SwipeWrap macam tab Dah Bayar - swipe kiri keluar Cancel PV
+      const _wrapAll=document.createElement('div'); _wrapAll.className='swipeWrap';
+      const _delAll=document.createElement('button'); _delAll.type='button'; _delAll.className='swipeDel'; _delAll.style.width='100px'; _delAll.style.background='#dc2626'; _delAll.style.fontSize='13px'; _delAll.textContent='Cancel PV';
+      const d=document.createElement('div'); d.className='card swipeInner';
+      _wrapAll.appendChild(_delAll); _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
       d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
       const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); else { _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail terus keluar viewer macam screenshot
-      d.onclick=()=>openPVDetail(g.pv,g.payDate); box.appendChild(d); return;
+      // Click + swipe Cancel PV - sama macam tab Dah Bayar
+      let _supAll=false; const _ccAll=d;
+      _ccAll.onclick=e=>{ if(_supAll){ _supAll=false; return; } if(_ccAll.dataset.open==='1'){ _closeAll(); return; } openPVDetail(g.pv,g.payDate); };
+      let _delDoneAll=false; function _doCancelAll(){ if(_delDoneAll) return; if(!confirm('Batal '+g.pv+'?\n\n'+g.items.length+' invoice akan jadi Belum Bayar.')) return; _delDoneAll=true; const _pv=g.pv, _pd=g.payDate, _n=g.items.length; const _ok=cancelPV(_pv,_pd); if(_ok) showToast('PV dibatalkan - '+_pv+' - '+_n+' invoice jadi Belum Bayar'); }
+      _delAll.addEventListener('click', e=>{ e.stopPropagation(); _doCancelAll(); });
+      _delAll.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); _doCancelAll(); }, {passive:false});
+      let _sxA=0, _syA=0, _curA=0, _swA=false, _opA=false;
+      function _closeAll(){ _curA=0; _opA=false; _ccAll.dataset.open=''; _ccAll.style.transition='transform .2s ease'; _ccAll.style.transform='translateX(0)'; }
+      function _closeOthersAll(){ document.querySelectorAll('.swipeInner').forEach(el=>{ if(el!==_ccAll){ el.dataset.open=''; el.style.transition='transform .2s ease'; el.style.transform='translateX(0)'; } }); }
+      _ccAll.addEventListener('touchstart', e=>{ const _tt=e.touches[0]; _sxA=_tt.clientX; _syA=_tt.clientY; _curA=_opA?-100:0; _swA=false; _ccAll.style.transition='none'; }, {passive:true});
+      _ccAll.addEventListener('touchmove', e=>{ const _tt=e.touches[0]; const _dx=_tt.clientX-_sxA, _dy=_tt.clientY-_syA; if(!_swA && Math.abs(_dx)<10) return; if(!_swA && Math.abs(_dy)>Math.abs(_dx)) return; _swA=true; if(e.cancelable) e.preventDefault(); let _nx=_curA+_dx; _nx=Math.max(-100, Math.min(0, _nx)); _ccAll.style.transform='translateX('+_nx+'px)'; }, {passive:false});
+      _ccAll.addEventListener('touchend', e=>{ if(!_swA){ _ccAll.style.transition='transform .2s ease'; return; } _swA=false; _ccAll.style.transition='transform .2s ease'; const _cur=parseFloat((_ccAll.style.transform||'').replace(/[^0-9\-\.]/g,''))||0; if(_cur<-50){ _ccAll.style.transform='translateX(-100px)'; _opA=true; _ccAll.dataset.open='1'; _closeOthersAll(); _ccAll.style.transform='translateX(-100px)'; } else { _closeAll(); } });
+      let _mdA=false, _mxA=0, _myA=0;
+      _ccAll.addEventListener('mousedown', e=>{ _mdA=true; _mxA=e.clientX; _myA=e.clientY; _curA=_opA?-100:0; _ccAll.style.transition='none'; });
+      _ccAll.addEventListener('mousemove', e=>{ if(!_mdA) return; const _dx=e.clientX-_mxA, _dy=e.clientY-_myA; if(Math.abs(_dy)>Math.abs(_dx)) return; if(Math.abs(_dx)<5) return; let _nx=_curA+_dx; _nx=Math.max(-100, Math.min(0, _nx)); _ccAll.style.transform='translateX('+_nx+'px)'; });
+      _ccAll.addEventListener('mouseup', e=>{ if(!_mdA) return; _mdA=false; if(Math.abs(e.clientX-_mxA)>10) _supAll=true; setTimeout(()=>_supAll=false,80); _ccAll.style.transition='transform .2s ease'; const _cur=parseFloat((_ccAll.style.transform||'').replace(/[^0-9\-\.]/g,''))||0; if(_cur<-50){ _ccAll.style.transform='translateX(-100px)'; _opA=true; _ccAll.dataset.open='1'; _closeOthersAll(); _ccAll.style.transform='translateX(-100px)'; } else { _closeAll(); } });
+      box.appendChild(_wrapAll); return;
     }
     const x=_card.item;
     const c=document.createElement('div'); c.className='swipeWrap';
-    const del=document.createElement('button'); del.type='button'; del.className='swipeDel'; del.textContent='Delete';
+    const _isPaidSingle = !!(x.paid && !x.pv);
+    const del=document.createElement('button'); del.type='button'; del.className='swipeDel'; del.textContent=_isPaidSingle?'Batal Bayar':'Delete'; if(_isPaidSingle){ del.style.width='100px'; del.style.background='#dc2626'; del.style.fontSize='13px'; }
     const inner=document.createElement('div'); inner.className='card swipeInner';
     c.appendChild(del); c.appendChild(inner);
     const cc=inner;
@@ -384,21 +405,22 @@ function render(){
     cc.querySelector('input').onchange=e=>{ if(e.target.checked)selected.add(x.id); else selected.delete(x.id); render(); };
     const th=cc.querySelector('[data-thumb]'); th.onclick=e=>{ e.stopPropagation(); if(x.img) openImgView(x.img,'Gambar Invoice - '+x.name,(x.inv||'')+' • '+x.date,x.pdf||'',{kind:'invoice',id:x.id}); else if(x.pdf) openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,(x.inv||'')+' • '+x.date,x.img,{kind:'invoice',id:x.id}); else { _viewCtx={kind:'invoice',id:x.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail terus keluar viewer macam screenshot
     let suppressClick=false; cc.onclick=e=>{ if(e.target.tagName==='INPUT')return; if(suppressClick){ suppressClick=false; return; } if(cc.dataset.open==='1'){ closeSwipe(); return; } openDetail(x.id); };
-    // Swipe kiri - macam iPhone, keluar Delete
-    let delDone=false; function doDel(){ if(delDone) return; delDone=true; invoices=invoices.filter(y=>y.id!==x.id); selected.delete(x.id); save(); render(); showToast('Invoice dipadam'); }
+    // Swipe kiri - Belum Bayar: Delete. Dah Bayar tanpa PV: Batal Bayar (sama macam tab Dah Bayar)
+    let delDone=false; function doDel(){ if(delDone) return; if(_isPaidSingle){ if(!confirm('Batal bayar '+x.name+' - '+x.inv+'?\n\nInvoice ni akan jadi Belum Bayar.')) return; delDone=true; x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.split=null; save(); render(); showToast('Bayar dibatalkan - '+x.inv+' jadi Belum Bayar'); return; } delDone=true; invoices=invoices.filter(y=>y.id!==x.id); selected.delete(x.id); save(); render(); showToast('Invoice dipadam'); }
     del.addEventListener('click', e=>{ e.stopPropagation(); doDel(); });
     del.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); doDel(); }, {passive:false});
     let sx=0, sy=0, curX=0, swiping=false, opened=false;
     function closeSwipe(){ curX=0; opened=false; cc.dataset.open=''; cc.style.transition='transform .2s ease'; cc.style.transform='translateX(0)'; }
     function closeOthers(){ document.querySelectorAll('.swipeInner').forEach(el=>{ if(el!==cc){ el.dataset.open=''; el.style.transition='transform .2s ease'; el.style.transform='translateX(0)'; } }); }
-    cc.addEventListener('touchstart', e=>{ const tt=e.touches[0]; sx=tt.clientX; sy=tt.clientY; curX=opened?-84:0; swiping=false; cc.style.transition='none'; }, {passive:true});
-    cc.addEventListener('touchmove', e=>{ const tt=e.touches[0]; const dx=tt.clientX-sx, dy=tt.clientY-sy; if(!swiping && Math.abs(dx)<10) return; if(!swiping && Math.abs(dy)>Math.abs(dx)) return; swiping=true; if(e.cancelable) e.preventDefault(); let nx=curX+dx; nx=Math.max(-84, Math.min(0, nx)); cc.style.transform='translateX('+nx+'px)'; }, {passive:false});
-    cc.addEventListener('touchend', e=>{ if(!swiping){ cc.style.transition='transform .2s ease'; return; } swiping=false; cc.style.transition='transform .2s ease'; const tr=cc.style.transform; const cur=parseFloat(tr.replace(/[^0-9\-\.]/g,''))||0; if(cur<-40){ cc.style.transform='translateX(-84px)'; opened=true; cc.dataset.open='1'; closeOthers(); cc.style.transform='translateX(-84px)'; } else { closeSwipe(); } });
+    const _swW = _isPaidSingle?100:84;
+    cc.addEventListener('touchstart', e=>{ const tt=e.touches[0]; sx=tt.clientX; sy=tt.clientY; curX=opened?-_swW:0; swiping=false; cc.style.transition='none'; }, {passive:true});
+    cc.addEventListener('touchmove', e=>{ const tt=e.touches[0]; const dx=tt.clientX-sx, dy=tt.clientY-sy; if(!swiping && Math.abs(dx)<10) return; if(!swiping && Math.abs(dy)>Math.abs(dx)) return; swiping=true; if(e.cancelable) e.preventDefault(); let nx=curX+dx; nx=Math.max(-_swW, Math.min(0, nx)); cc.style.transform='translateX('+nx+'px)'; }, {passive:false});
+    cc.addEventListener('touchend', e=>{ if(!swiping){ cc.style.transition='transform .2s ease'; return; } swiping=false; cc.style.transition='transform .2s ease'; const tr=cc.style.transform; const cur=parseFloat(tr.replace(/[^0-9\-\.]/g,''))||0; if(cur<-40){ cc.style.transform='translateX(-'+_swW+'px)'; opened=true; cc.dataset.open='1'; closeOthers(); cc.style.transform='translateX(-'+_swW+'px)'; } else { closeSwipe(); } });
     // Mouse untuk test kat laptop
     let mDown=false, mx=0, my=0;
-    cc.addEventListener('mousedown', e=>{ mDown=true; mx=e.clientX; my=e.clientY; curX=opened?-84:0; cc.style.transition='none'; });
-    cc.addEventListener('mousemove', e=>{ if(!mDown) return; const dx=e.clientX-mx, dy=e.clientY-my; if(Math.abs(dy)>Math.abs(dx)) return; if(Math.abs(dx)<5) return; let nx=curX+dx; nx=Math.max(-84, Math.min(0, nx)); cc.style.transform='translateX('+nx+'px)'; });
-    cc.addEventListener('mouseup', e=>{ if(!mDown) return; mDown=false; if(Math.abs(e.clientX-mx)>10) suppressClick=true; setTimeout(()=>suppressClick=false,80); cc.style.transition='transform .2s ease'; const cur=parseFloat((cc.style.transform||'').replace(/[^0-9\-\.]/g,''))||0; if(cur<-40){ cc.style.transform='translateX(-84px)'; opened=true; cc.dataset.open='1'; closeOthers(); cc.style.transform='translateX(-84px)'; } else { closeSwipe(); } });
+    cc.addEventListener('mousedown', e=>{ mDown=true; mx=e.clientX; my=e.clientY; curX=opened?-_swW:0; cc.style.transition='none'; });
+    cc.addEventListener('mousemove', e=>{ if(!mDown) return; const dx=e.clientX-mx, dy=e.clientY-my; if(Math.abs(dy)>Math.abs(dx)) return; if(Math.abs(dx)<5) return; let nx=curX+dx; nx=Math.max(-_swW, Math.min(0, nx)); cc.style.transform='translateX('+nx+'px)'; });
+    cc.addEventListener('mouseup', e=>{ if(!mDown) return; mDown=false; if(Math.abs(e.clientX-mx)>10) suppressClick=true; setTimeout(()=>suppressClick=false,80); cc.style.transition='transform .2s ease'; const cur=parseFloat((cc.style.transform||'').replace(/[^0-9\-\.]/g,''))||0; if(cur<-40){ cc.style.transform='translateX(-'+_swW+'px)'; opened=true; cc.dataset.open='1'; closeOthers(); cc.style.transform='translateX(-'+_swW+'px)'; } else { closeSwipe(); } });
     box.appendChild(c);
   });
   // bulk bar
