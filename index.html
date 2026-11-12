@@ -736,29 +736,66 @@ function csvFor(list){
   });
   return head+'\n'+rows.join('\n');
 }
+// ===== PDF: gambar dalam IDBIMG tak boleh terus masuk jsPDF, kena resolve + kecikkan dulu =====
+async function pdfImgForField(imgField){
+  if(!imgField) return null;
+  try{
+    let src = await resolveImgData(imgField);
+    if(!src || !String(src).startsWith('data:image')) return null;
+    return await new Promise((res)=>{
+      const im = new Image();
+      im.onload = ()=>{
+        try{
+          const maxW = 1000;
+          const sc = Math.min(1, maxW / im.width);
+          const w = Math.max(1, Math.round(im.width*sc)), h = Math.max(1, Math.round(im.height*sc));
+          const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+          const cx = cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,w,h); cx.drawImage(im,0,0,w,h);
+          res({url: cv.toDataURL('image/jpeg',0.70), w: w, h: h});
+        }catch(e){ res({url: src, w: im.width||1000, h: im.height||700}); }
+      };
+      im.onerror = ()=>res({url: src, w: 1000, h: 700});
+      im.src = src;
+    });
+  }catch(e){ return null; }
+}
+async function addPdfImgFit(doc, imgField, x, y, maxW, maxH){
+  const o = await pdfImgForField(imgField);
+  if(!o) return 0;
+  try{
+    let w = maxW, h = Math.round(maxW * o.h / o.w);
+    if(h > maxH){ h = maxH; w = Math.round(maxH * o.w / o.h); }
+    const cx = x + Math.round((maxW - w)/2);
+    doc.addImage(o.url, 'JPEG', cx, y, w, h);
+    return h;
+  }catch(e){
+    try{ doc.setFontSize(9); doc.text('Gambar tak dapat load', x, y+6); }catch(_){}
+    return 12;
+  }
+}
 async function downloadPdfOne(x){
   if(!window.jspdf){ alert('jsPDF belum load, check internet'); return; }
   const { jsPDF } = window.jspdf; const doc=new jsPDF(); let y=12;
   doc.setFontSize(16); doc.text('Invoice Kedai - Payment Voucher',10,y); y+=10;
   doc.setFontSize(11); doc.text(`Supplier: ${x.name}`,10,y); y+=7; doc.text(`No Invoice: ${x.inv}`,10,y); y+=7; doc.text(`Invoice Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}${isCN(x)?' (CN - Credit Note)':''}`,10,y); y+=7; doc.text(`PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}`,10,y); y+=7; doc.text(`Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10;
-  // Jimat pages: gambar invoice + resit sebelah-sebelah, 1 page je, tak payah page baru sorang-sorang
   const _hasImg=!!x.img; const _hasResit=!!x.paymentImg;
   if(_hasImg && _hasResit){
     if(y>200){ doc.addPage(); y=12; }
     doc.setFontSize(10); doc.text('Gambar Invoice:',10,y); doc.text('Resit Payment:',105,y); y+=4;
-    try{ doc.addImage(x.img,'JPEG',10,y,85,55); }catch(e){}
-    try{ doc.addImage(x.paymentImg,'JPEG',105,y,85,55); }catch(e){}
-    y+=60;
+    const _h1 = await addPdfImgFit(doc, x.img, 10, y, 85, 110);
+    const _h2 = await addPdfImgFit(doc, x.paymentImg, 105, y, 85, 110);
+    y += Math.max(_h1, _h2) + 6;
   } else if(_hasImg){
     if(y>200){ doc.addPage(); y=12; }
     doc.setFontSize(10); doc.text('Gambar Invoice:',10,y); y+=4;
-    try{ doc.addImage(x.img,'JPEG',10,y,90,60); }catch(e){}
-    y+=66;
+    const _h = await addPdfImgFit(doc, x.img, 10, y, 170, 180);
+    y += _h + 6;
+    if(!_h) doc.text('Gambar tak dapat load / tiada gambar',10,y);
   } else if(_hasResit){
     if(y>200){ doc.addPage(); y=12; }
     doc.setFontSize(10); doc.text('Resit Payment:',10,y); y+=4;
-    try{ doc.addImage(x.paymentImg,'JPEG',10,y,90,60); }catch(e){}
-    y+=66;
+    const _h = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180);
+    y += _h + 6;
   } else if(x.paid){ doc.text('Resit Payment: Tiada',10,y); }
   doc.save((x.pv||'')+'-'+x.inv+'.pdf');
 }
@@ -835,22 +872,26 @@ async function downloadPdfPV(pv, payDate){
   if(!_allImgs.length){ y+=8; doc.setFontSize(11); doc.text('Resit Payment: Tiada',10,y); }
   else {
     doc.addPage();
-    let _pageY=12;
-    _allImgs.forEach((im,idx)=>{
+    for(let idx=0; idx<_allImgs.length; idx++){
+      const im=_allImgs[idx];
       const _perPage=8; const _pos=idx%_perPage;
-      if(idx>0 && _pos===0){ doc.addPage(); _pageY=12; }
+      if(idx>0 && _pos===0){ doc.addPage(); }
       const _col=_pos%2; const _row=Math.floor(_pos/2);
       const _x=10+_col*95; const _y=12+_row*66;
       doc.setFontSize(9); doc.text(im.kind+' - '+im.label,_x,_y);
-      try{ doc.addImage(im.src,'JPEG',_x,_y+2,85,55); }catch(e){}
-    });
+      await addPdfImgFit(doc, im.src, _x, _y+2, 85, 55);
+    }
   }
   doc.save(pv+'.pdf');
 }
 async function downloadPdfBulk(list){
   if(!window.jspdf){ alert('jsPDF belum load'); return; }
   const { jsPDF } = window.jspdf; const doc=new jsPDF();
-  for(let i=0;i<list.length;i++){ const x=list[i]; if(i>0) doc.addPage(); let y=12; doc.setFontSize(14); doc.text(`${x.name}`,10,y); y+=8; doc.setFontSize(11); doc.text(`No Invoice: ${x.inv}  Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}  PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}  Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10; if(x.img){ doc.text('Gambar Invoice:',10,y); y+=4; try{ doc.addImage(x.img,'JPEG',10,y,90,60); y+=66; }catch(e){} } if(x.paymentImg){ if(y>200){ doc.addPage(); y=12; } doc.text('Resit Payment:',10,y); y+=4; try{ doc.addImage(x.paymentImg,'JPEG',10,y,90,60); }catch(e){} } showToast(`Generating PDF ${i+1}/${list.length}`); }
+  for(let i=0;i<list.length;i++){ const x=list[i]; if(i>0) doc.addPage(); let y=12; doc.setFontSize(14); doc.text(`${x.name}`,10,y); y+=8; doc.setFontSize(11); doc.text(`No Invoice: ${x.inv}  Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}  PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}  Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10;
+    if(x.img){ doc.text('Gambar Invoice:',10,y); y+=4; const _h = await addPdfImgFit(doc, x.img, 10, y, 170, 180); if(_h) y += _h + 6; else { doc.setFontSize(9); doc.text('Gambar tak dapat load',10,y); y+=8; } if(y>240){ doc.addPage(); y=12; } }
+    if(x.paymentImg){ doc.text('Resit Payment:',10,y); y+=4; const _h2 = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180); if(_h2) y += _h2 + 6; else { doc.setFontSize(9); doc.text('Resit tak dapat load',10,y); y+=8; } }
+    if(!x.img && !x.paymentImg){ doc.setFontSize(9); doc.text('Tiada gambar',10,y); }
+    showToast(`Generating PDF ${i+1}/${list.length}`); }
   doc.save('invoice-kedai-gambar-'+today()+'.pdf');
 }
 // Wiring
