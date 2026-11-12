@@ -175,6 +175,7 @@ let customCats = JSON.parse(localStorage.getItem('ik_cats')||'[]');
 let hiddenCats = JSON.parse(localStorage.getItem('ik_cats_hidden')||'[]');
 const DEFAULT_CATS = ['stock','kegunaan kedai','utilities','gaji','personal'];
 migrateCN();
+try{ offloadMedia(false); setTimeout(()=>{ try{ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); }catch(e){} }, 500); }catch(e){}
 let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
 let pendingInvImgs={}, pendingInvPdfs={}, deleteInvImgs={}, _payInvTargetId=null;
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
@@ -189,16 +190,66 @@ async function resolvePdfData(pdfField){
   if(String(pdfField).startsWith('IDB:')){ const key=String(pdfField).slice(4); const v=await idbLoadPdf(key); return v||''; }
   return pdfField;
 }
-function save(){ try{ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); }catch(e){
-  // Quota penuh - cuba pindah PDF besar dalam localStorage ke IndexedDB, lepas tu try simpan balik
+// ===== Gambar besar -> IndexedDB (jangan simpan base64 besar dalam localStorage, tu yang buat Storage penuh) =====
+let _imgCache={};
+function _offloadOne(val, prefix, id){
+  if(!val || typeof val!=='string' || !val.startsWith('data:')) return val;
+  if(val.length < 120*1024) return val; // kecil je, biar dalam localStorage
+  const k=prefix+id;
+  _imgCache[k]=val;
+  try{ idbSavePdf(k, val); }catch(e){}
+  return 'IDBIMG:'+k;
+}
+function offloadMedia(aggressive){
+  const _th = aggressive ? 30*1024 : 120*1024;
+  invoices.forEach(x=>{
+    if(x.img && String(x.img).startsWith('data:') && x.img.length>_th){ const k='img_'+x.id; _imgCache[k]=x.img; try{ idbSavePdf(k, x.img); }catch(e){} x.img='IDBIMG:'+k; }
+    if(x.paymentImg && String(x.paymentImg).startsWith('data:') && x.paymentImg.length>_th){ const k='payimg_'+x.id; _imgCache[k]=x.paymentImg; try{ idbSavePdf(k, x.paymentImg); }catch(e){} x.paymentImg='IDBIMG:'+k; }
+    if(x.pdf && String(x.pdf).startsWith('data:') && x.pdf.length>_th){ const k='inv_'+x.id; try{ idbSavePdf(k, x.pdf); }catch(e){} x.pdf='IDB:'+k; x.hasPdf=true; }
+    if(x.paymentPdf && String(x.paymentPdf).startsWith('data:') && x.paymentPdf.length>_th){ const k='pay_'+x.id; try{ idbSavePdf(k, x.paymentPdf); }catch(e){} x.paymentPdf='IDB:'+k; }
+  });
+}
+async function resolveImgData(imgField){
+  if(!imgField) return '';
+  if(String(imgField).startsWith('IDBIMG:')){ const k=String(imgField).slice(7); if(_imgCache[k]) return _imgCache[k]; const v=await idbLoadPdf(k); if(v) _imgCache[k]=v; return v||''; }
+  return imgField;
+}
+function hydrateIdbImages(root){
+  const _root=root||document;
+  _root.querySelectorAll('img').forEach(el=>{
+    const s=el.getAttribute('src')||'';
+    if(s.startsWith('IDBIMG:')){
+      const k=s.slice(7);
+      if(_imgCache[k]){ el.src=_imgCache[k]; return; }
+      el.removeAttribute('src'); el.dataset.idbKey=k;
+      idbLoadPdf(k).then(v=>{ if(v){ _imgCache[k]=v; document.querySelectorAll('img[data-idb-key="'+k+'"]').forEach(e=>{ e.src=v; e.removeAttribute('data-idb-key'); }); } });
+    }
+  });
+}
+// Auto-hydrate gambar IDBIMG yang baru masuk DOM (list, detail, payModal, viewer)
+try{
+  const _obs=new MutationObserver((muts)=>{ muts.forEach(mu=>{ mu.addedNodes.forEach(n=>{ if(n.nodeType===1){ if(n.tagName==='IMG') hydrateIdbImages(document); else if(n.querySelectorAll) hydrateIdbImages(n); } }); }); });
+  _obs.observe(document.body, {childList:true, subtree:true});
+}catch(e){}
+function save(){
+  // Proaktif: pindah gambar + PDF besar ke IndexedDB dulu, baru simpan localStorage yang ringan
+  try{ offloadMedia(false); }catch(e){}
+  try{ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); }catch(e){
+  // Masih penuh - pindah SEMUA yang tinggal (agresif) + cuba lagi
   try{
-    invoices.forEach(x=>{
-      if(x.pdf && String(x.pdf).startsWith('data:') && x.pdf.length>500*1024){ const k='inv_'+x.id; idbSavePdf(k, x.pdf); x.pdf='IDB:'+k; x.hasPdf=true; }
-      if(x.paymentPdf && String(x.paymentPdf).startsWith('data:') && x.paymentPdf.length>500*1024){ const k='pay_'+x.id; idbSavePdf(k, x.paymentPdf); x.paymentPdf='IDB:'+k; }
-    });
+    offloadMedia(true);
     localStorage.setItem('ik_invoices',JSON.stringify(invoices));
-    showToast('Storage penuh, PDF besar dipindah ke IndexedDB');
-  }catch(e2){ alert('Storage iPhone penuh! Padam invoice lama / gambar lama dulu. PDF multi-muka besar tak dapat simpan dalam localStorage.'); throw e2; }
+    showToast('Storage penuh, gambar + PDF besar dipindah ke IndexedDB');
+  }catch(e2){
+    // Last resort: simpan tanpa gambar lama yang paling besar (invoice text tetap selamat)
+    try{
+      const _backup = JSON.stringify(invoices);
+      // Kosongkan gambar yang paling besar dulu supaya invoice text boleh simpan
+      invoices.forEach(x=>{ if(x.img && String(x.img).startsWith('data:') && x.img.length>100*1024) x.img=''; if(x.paymentImg && String(x.paymentImg).startsWith('data:') && x.paymentImg.length>100*1024) x.paymentImg=''; });
+      localStorage.setItem('ik_invoices',JSON.stringify(invoices));
+      showToast('Storage penuh - gambar besar lama dikosongkan, invoice text selamat');
+    }catch(e3){ alert('Storage iPhone penuh! Padam invoice lama dulu.'); throw e3; }
+  }
 } localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
 function fmt(n){ return 'RM'+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return ''; const parts=String(d).split('-'); if(parts.length!==3) return d; return parts[2]+'/'+parts[1]+'/'+parts[0].slice(2); }
@@ -427,7 +478,22 @@ async function openImgView(src,title,meta,pdfSrc,ctx){ if(ctx) _viewCtx=ctx;
     openImgView(src,title,meta,pdf,ctx); return;
   }
   const imgSrc = (src && !String(src).startsWith('data:application/pdf')) ? src : '';
-  _viewImgSrc = imgSrc; _viewPdfSrc = pdf;
+  // Kalau gambar dalam IDB (IDBIMG:), load dulu dari cache / IDB
+  if(imgSrc && String(imgSrc).startsWith('IDBIMG:')){
+    const _k=String(imgSrc).slice(7);
+    if(_imgCache[_k]){ _viewImgSrc=_imgCache[_k]; _viewPdfSrc=pdf; }
+    else {
+      _viewImgSrc=''; _viewPdfSrc=pdf;
+      const _box=document.getElementById('imgViewPdfPages');
+      document.getElementById('imgViewTitle').textContent=title||'Gambar';
+      document.getElementById('imgViewMeta').textContent=meta||'';
+      document.getElementById('imgViewModal').classList.add('open');
+      idbLoadPdf(_k).then(v=>{ if(v){ _imgCache[_k]=v; _viewImgSrc=v; const _el=document.getElementById('imgViewImg'); if(_el) _el.src=v; showViewTab(pdf?'pdf':'img'); } else { const _el=document.getElementById('imgViewImg'); if(_el) _el.src=''; } });
+      // Teruskan flow bawah dengan src kosong dulu, gambar akan masuk bila load siap
+    }
+  } else {
+    _viewImgSrc = imgSrc; _viewPdfSrc = pdf;
+  }
   const imgEl=document.getElementById('imgViewImg'), pdfEl=document.getElementById('imgViewPdf'), bar=document.getElementById('imgViewPdfBar');
   document.getElementById('imgViewTitle').textContent=title||'Gambar';
   document.getElementById('imgViewMeta').textContent=meta||'';
