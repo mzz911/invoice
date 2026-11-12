@@ -246,7 +246,11 @@ function render(){
       if(g.pv){
         const _names=[...new Set(g.items.map(x=>x.name).filter(Boolean))];
         const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
-        d.innerHTML=`<div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+        const _firstImg=g.items.find(x=>x.img)?.img||'';
+        const _firstItem=g.items.find(x=>x.img)||g.items[0];
+        d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?`<img src="${_firstImg}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+        // Thumb - tekan gambar view gambar invoice macam Belum Bayar, bukan buka PV
+        const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(_firstItem && _firstItem.img) openImgView(_firstItem.img,'Gambar Invoice - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.pdf||''); else if(_firstItem && _firstItem.pdf) openImgViewOnlyPdf(_firstItem.pdf,'PDF - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.img); };
       } else {
         const x=g.items[0];
         d.innerHTML=`<div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div></div><div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill paid">Dah Bayar</span></div>`;
@@ -309,7 +313,9 @@ function render(){
       const g=_card.group; const gtotal=g.items.reduce((s,x)=>s+signedPrice(x),0); const invs=g.items.map(x=>x.inv||'').filter(Boolean).join(' • '); const hasResit=g.items.some(x=>x.paymentImg);
       const _names=[...new Set(g.items.map(x=>x.name).filter(Boolean))]; const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
       const d=document.createElement('div'); d.className='card';
-      d.innerHTML=`<div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+      const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
+      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+      const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||''); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img); };
       d.onclick=()=>openPVDetail(g.pv,g.payDate); box.appendChild(d); return;
     }
     const x=_card.item;
