@@ -179,7 +179,28 @@ migrateCN();
 try{ if(window.self!==window.top || /MetaAI|FBAN|FBAV/i.test(navigator.userAgent||'')){ const b=document.getElementById('envBanner'); if(b) b.style.display='block'; } }catch(e){ const b=document.getElementById('envBanner'); if(b) b.style.display='block'; }
 let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
-function save(){ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
+// ===== IndexedDB untuk PDF besar (multi-muka) - localStorage cuma ~5MB, PDF 2MB+ tak muat =====
+const IDB_DB='invoiceKedaiDB', IDB_STORE='pdfs';
+function idbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open(IDB_DB,1); r.onupgradeneeded=()=>{ try{ if(!r.result.objectStoreNames.contains(IDB_STORE)) r.result.createObjectStore(IDB_STORE); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbSavePdf(key, dataUrl){ try{ const db=await idbOpen(); return new Promise((res,rej)=>{ const tx=db.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).put(dataUrl, key); tx.oncomplete=()=>res(true); tx.onerror=()=>rej(tx.error); }); }catch(e){ return false; } }
+async function idbLoadPdf(key){ try{ const db=await idbOpen(); return new Promise((res,rej)=>{ const tx=db.transaction(IDB_STORE,'readonly'); const q=tx.objectStore(IDB_STORE).get(key); q.onsuccess=()=>res(q.result||null); q.onerror=()=>rej(q.error); }); }catch(e){ return null; } }
+async function idbDeletePdf(key){ try{ const db=await idbOpen(); return new Promise(res=>{ const tx=db.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).delete(key); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }catch(e){} }
+async function resolvePdfData(pdfField){
+  if(!pdfField) return '';
+  if(String(pdfField).startsWith('IDB:')){ const key=String(pdfField).slice(4); const v=await idbLoadPdf(key); return v||''; }
+  return pdfField;
+}
+function save(){ try{ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); }catch(e){
+  // Quota penuh - cuba pindah PDF besar dalam localStorage ke IndexedDB, lepas tu try simpan balik
+  try{
+    invoices.forEach(x=>{
+      if(x.pdf && String(x.pdf).startsWith('data:') && x.pdf.length>500*1024){ const k='inv_'+x.id; idbSavePdf(k, x.pdf); x.pdf='IDB:'+k; x.hasPdf=true; }
+      if(x.paymentPdf && String(x.paymentPdf).startsWith('data:') && x.paymentPdf.length>500*1024){ const k='pay_'+x.id; idbSavePdf(k, x.paymentPdf); x.paymentPdf='IDB:'+k; }
+    });
+    localStorage.setItem('ik_invoices',JSON.stringify(invoices));
+    showToast('Storage penuh, PDF besar dipindah ke IndexedDB');
+  }catch(e2){ alert('Storage iPhone penuh! Padam invoice lama / gambar lama dulu. PDF multi-muka besar tak dapat simpan dalam localStorage.'); throw e2; }
+} localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
 function fmt(n){ return 'RM'+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return ''; const parts=String(d).split('-'); if(parts.length!==3) return d; return parts[2]+'/'+parts[1]+'/'+parts[0].slice(2); }
 function isCN(o){ return String(o?.inv||'').trim().toUpperCase().startsWith('CN'); }
@@ -389,8 +410,21 @@ function showViewTab(which){
     if(bPdf) bPdf.style.cssText='flex:1';
   }
 }
-function openImgView(src,title,meta,pdfSrc){
-  const pdf = pdfSrc || (src && String(src).startsWith('data:application/pdf') ? src : '');
+async function openImgView(src,title,meta,pdfSrc){
+  // Kalau PDF simpan kat IndexedDB (marker IDB:), load dulu
+  let pdf = pdfSrc || (src && String(src).startsWith('data:application/pdf') ? src : '');
+  if(pdf && String(pdf).startsWith('IDB:')){ 
+    const _box=document.getElementById('imgViewPdfPages'); 
+    document.getElementById('imgViewTitle').textContent=title||'Gambar';
+    document.getElementById('imgViewMeta').textContent=meta||'';
+    document.getElementById('imgViewModal').classList.add('open');
+    if(_box) _box.innerHTML='<p style="padding:20px;color:#666">Loading PDF dari storage...</p>';
+    const _loaded=await resolvePdfData(pdf);
+    if(!_loaded){ if(_box) _box.innerHTML='<p style="padding:20px;color:#c00">PDF tak jumpa dalam storage. Cuba upload balik PDF tu.</p>'; return; }
+    pdf=_loaded;
+    // Teruskan ke flow biasa dengan pdf sebenar
+    openImgView(src,title,meta,pdf); return;
+  }
   const imgSrc = (src && !String(src).startsWith('data:application/pdf')) ? src : '';
   _viewImgSrc = imgSrc; _viewPdfSrc = pdf;
   const imgEl=document.getElementById('imgViewImg'), pdfEl=document.getElementById('imgViewPdf'), bar=document.getElementById('imgViewPdfBar'), tog=document.getElementById('imgViewToggle');
@@ -599,7 +633,15 @@ document.getElementById('fName').oninput=showSupSuggest;
 document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementById('fName').value; let name=normSupName(_raw); const _ex=getSuppliers().find(s=>s.toLowerCase()===name.toLowerCase()); if(_ex) name=_ex; inv=document.getElementById('fInv').value.trim(), date=document.getElementById('fDate').value, cat=document.getElementById('fCat').value, note=(document.getElementById('fNote')?document.getElementById('fNote').value.trim():''); if(!name) name='Tanpa Nama'; if(!inv) inv='INV-' + new Date().toISOString().slice(0,10) + '-' + String(Date.now()).slice(-4); let price=parseFloat(document.getElementById('fPrice').value); if(isNaN(price)) price=0; if(String(inv||'').trim().toUpperCase().startsWith('CN') && price>0) price=-Math.abs(price); // Elak redundant - supplier sama + no invoice sama = dah ada
   const _dup = invoices.find(y=> y.id!==editId && String(y.inv||'').trim().toUpperCase()===String(inv||'').trim().toUpperCase() && String(y.name||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());
   if(_dup){ alert('Dah ada invoice sama!\n\n'+_dup.name+' - '+_dup.inv+' - '+fmtDate(_dup.date)+' - '+fmt(signedPrice(_dup))+'\n\nTukar No Invoice lain dulu.'); return; }
-  if(!date) date=today(); if(editId){ const x=invoices.find(y=>y.id===editId); Object.assign(x,{name,inv,price,date,cat,note,img:pendingImg||x.img, pdf: pendingPdf!=='' ? pendingPdf : (pendingImg && pendingImg!==x.img ? '' : (x.pdf||''))}); } else { invoices.unshift({id:Date.now().toString(),name,inv,price,date,cat,note,img:pendingImg,pdf:pendingPdf||'',paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } save(); render(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; showToast('Invoice disimpan'); };
+  if(!date) date=today(); if(editId){ const x=invoices.find(y=>y.id===editId);
+    let _pdfField = pendingPdf!=='' ? pendingPdf : (pendingImg && pendingImg!==x.img ? '' : (x.pdf||''));
+    // Kalau PDF baru besar, pindah ke IndexedDB
+    if(_pdfField && String(_pdfField).startsWith('data:') && _pdfField.length>500*1024){ const _k='inv_'+x.id; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
+    Object.assign(x,{name,inv,price,date,cat,note,img:pendingImg||x.img, pdf:_pdfField, hasPdf:!!_pdfField});
+  } else { const _newId=Date.now().toString();
+  let _pdfField=pendingPdf||'';
+  if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
+  invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:pendingImg,pdf:_pdfField,hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } save(); render(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; showToast('Invoice disimpan'); };
 document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; document.getElementById('fImg').click(); }; // NATIVE iPhone - terus keluar Photo Library / Take Photo / Choose File
 document.getElementById('srcCancel').onclick=document.getElementById('srcBack').onclick=()=>document.getElementById('imgSourceModal').classList.remove('open');
 document.getElementById('srcCamera').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); document.getElementById('fImgCamera').click(); };
@@ -650,7 +692,7 @@ async function pdfToImageFile(file){
     const pdf = await window.pdfjsLib.getDocument({data: buf}).promise;
     if(pdf.numPages>1) showToast('PDF ada '+pdf.numPages+' muka, ambil muka 1 je');
     const page = await pdf.getPage(1);
-    const scale = 2.5;
+    const scale = 1.8; // Kurang sikit untuk multi-muka - jimat memory iPhone, masih tajam
     const vp = page.getViewport({scale});
     const cv = document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
     const ctx = cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
@@ -728,7 +770,7 @@ document.getElementById('payConfirm').onclick=()=>{
   if(checked.length===1){ payMethod=checked[0]; }
   else { payMethod='Split Payment'; split={}; let sum=0; for(const m of checked){ const v=parseFloat(document.querySelector(`[data-amt="${m}"]`)?.value||'0'); split[m]=v; sum+=v; } if(Math.abs(sum-total)>0.01){ alert(`Total split ${fmt(sum)} tak sama dengan total invoice ${fmt(total)}`); return; } }
   const pv=nextPV(); const pd=today();
-  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf) x.paymentPdf=pendingPayPdf; });
+  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } });
   selected.clear(); save(); document.getElementById('payModal').classList.remove('open'); showToast(`Bayar siap - ${pv} - ${items.length} invoice`); gotoTab('paid');
 };
 
