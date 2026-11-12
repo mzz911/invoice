@@ -21,8 +21,21 @@
 }
 </style><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Invoice Kedai - BASECODE</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  // Fallback kalau cdnjs block / lambat - cuba jsdelivr
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      if(!window.pdfjsLib){
+        var s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+        s.onload=function(){ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; }catch(e){} };
+        document.head.appendChild(s);
+      }
+    }, 800);
+  });
+</script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#eef2ee;color:#111;padding-bottom:110px}
 .wrap{max-width:720px;margin:0 auto;padding:14px}
@@ -58,7 +71,7 @@ label{font-weight:700;display:block;margin:12px 0 6px}
 input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;font-size:15px;background:#fff}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;z-index:99;display:none}
 textarea.csv{height:160px;font-size:12px;font-family:monospace}
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1></div></header>
@@ -68,6 +81,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
 <div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
+<div id="envBanner" style="display: block; background: rgb(254, 243, 199); border: 1px solid rgb(245, 158, 11); color: rgb(146, 64, 14); font-size: 12px; padding: 8px 10px; border-radius: 10px; margin: 8px 0px;">⚠️ Kau buka file ni dalam preview Meta AI — file picker &amp; PDF tak jalan kat sini. Kena <b>Save ke Files → Upload ke GitHub → Buka kat Safari</b> baru boleh test upload gambar / PDF.</div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
 <div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
 </div>
@@ -78,7 +92,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="closeRow"><button id="addBack">← Kembali</button><b id="addTitle">Tambah Invoice</b><button id="addClose">✕ Tutup</button></div>
 <div id="thumbBox" style="width:120px;height:120px;margin:0 auto 8px;border:2px dashed #cbd5e1;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#f8fafc;overflow:hidden"><span id="thumbIcon" style="font-size:36px">📷</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div>
 
-<input id="fImg" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" hidden=""><input id="fImgCamera" type="file" accept="image/*" capture="environment" hidden=""><input id="fImgFiles" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" hidden="">
+<input id="fImg" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgCamera" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgFiles" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
 <label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off">
 
 <div id="supSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden"></div>
@@ -130,7 +144,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <button class="btn btn-light" id="settingExport" style="padding:16px;text-align:left">⬇️ Export DB</button>
 </div>
 
-<input type="file" id="importFile" accept=".json" hidden="">
+<input type="file" id="importFile" accept=".json" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
 <button class="btn btn-light" id="settingDone" style="width:100%;margin-top:8px">Tutup</button></div></div>
 
 <!-- CATEGORY -->
@@ -161,6 +175,8 @@ let customCats = JSON.parse(localStorage.getItem('ik_cats')||'[]');
 let hiddenCats = JSON.parse(localStorage.getItem('ik_cats_hidden')||'[]');
 const DEFAULT_CATS = ['stock','kegunaan kedai','utilities','gaji','personal'];
 migrateCN();
+// Detect preview dalam Meta AI - tunjuk banner
+try{ if(window.self!==window.top || /MetaAI|FBAN|FBAV/i.test(navigator.userAgent||'')){ const b=document.getElementById('envBanner'); if(b) b.style.display='block'; } }catch(e){ const b=document.getElementById('envBanner'); if(b) b.style.display='block'; }
 let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
 function save(){ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
@@ -321,7 +337,16 @@ async function renderPdfPages(pdfDataUrl){
   const box=document.getElementById('imgViewPdfPages'); if(!box) return;
   box.innerHTML='<p style="padding:20px;color:#666">Loading PDF...</p>';
   try{
-    if(!window.pdfjsLib){ box.innerHTML='<p>PDF.js belum load, check internet</p>'; return; }
+    if(!window.pdfjsLib){ const ok=await ensurePdfJs(); if(!ok){
+      // Fallback native: Safari boleh render PDF dari blob URL
+      const bin=atob(pdfDataUrl.split(',')[1]||''); const bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+      const blob=new Blob([bytes],{type:'application/pdf'}); const url=URL.createObjectURL(blob);
+      box.innerHTML='';
+      const fr=document.createElement('iframe'); fr.src=url; fr.style.cssText='width:100%;height:65vh;border:0;background:#fff;border-radius:8px';
+      box.appendChild(fr);
+      const note=document.createElement('p'); note.style.cssText='font-size:12px;color:#666;text-align:center'; note.textContent='PDF dibuka dengan viewer Safari — scroll / pinch zoom macam biasa';
+      box.appendChild(note); return;
+    } }
     // dataURL -> ArrayBuffer
     const base64=pdfDataUrl.split(',')[1]||'';
     const bin=atob(base64); const len=bin.length; const bytes=new Uint8Array(len);
@@ -588,8 +613,38 @@ document.getElementById('fImgFiles').onchange=e=>{ processFile(e.target.files[0]
 // iPhone Files grey-out PDF sebab accept="image/*" je dulu. Sekarang accept dah include PDF.
 // PDF kena render ke gambar dulu pakai PDF.js, baru masuk flow gambar biasa (crop / thumb).
 if(window.pdfjsLib){ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }catch(e){} }
+async function ensurePdfJs(){
+  if(window.pdfjsLib) return true;
+  // Cuba load dari jsdelivr kalau cdnjs fail
+  try{
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+      s.onload=()=>{ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; }catch(e){} res(); };
+      s.onerror=()=>rej(new Error('cdn fail'));
+      document.head.appendChild(s);
+      setTimeout(()=>{ if(window.pdfjsLib) res(); }, 3000);
+    });
+  }catch(e){}
+  return !!window.pdfjsLib;
+}
+function pdfPlaceholderFile(name){
+  const cv=document.createElement('canvas'); cv.width=800; cv.height=1100;
+  const c=cv.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,800,1100);
+  c.fillStyle='#dc2626'; c.font='bold 120px system-ui'; c.textAlign='center'; c.fillText('PDF',400,450);
+  c.fillStyle='#333'; c.font='28px system-ui'; c.fillText((name||'Invoice').slice(0,30),400,550);
+  c.fillStyle='#666'; c.font='22px system-ui'; c.fillText('Tekan untuk view PDF',400,600);
+  return new Promise(res=>cv.toBlob(b=>res(new File([b], (name||'doc').replace(/\.pdf$/i,'')+'.jpg',{type:'image/jpeg'})),'image/jpeg',0.85));
+}
 async function pdfToImageFile(file){
-  if(!window.pdfjsLib){ alert('PDF.js belum load, check internet lepas tu try lagi'); return null; }
+  if(!window.pdfjsLib){
+    const ok = await ensurePdfJs();
+    if(!ok){
+      // Fallback: jangan block user - simpan PDF, thumb jadi placeholder PDF, view nanti pakai native Safari PDF viewer
+      showToast('PDF.js tak load, simpan PDF je');
+      return await pdfPlaceholderFile(file.name);
+    }
+  }
   try{
     const buf = await file.arrayBuffer();
     const pdf = await window.pdfjsLib.getDocument({data: buf}).promise;
