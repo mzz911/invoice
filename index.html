@@ -253,7 +253,9 @@ function save(){
 } localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
 function fmt(n){ return 'RM'+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return ''; const parts=String(d).split('-'); if(parts.length!==3) return d; return parts[2]+'/'+parts[1]+'/'+parts[0].slice(2); }
-function isCN(o){ return String(o?.inv||'').trim().toUpperCase().startsWith('CN'); }
+function isCN(o){ const _inv=String(o?.inv||'').trim().toUpperCase(); if(_inv.startsWith('CN')) return true; if(Number(o?.price||0)<0) return true; return false; }
+function cnCount(items){ return (items||[]).filter(isCN).length; }
+function pvCountLabel(items){ const _all=items||[]; const _cn=cnCount(_all); const _inv=_all.length-_cn; if(_cn===0) return _all.length+' invoice'; if(_inv===0) return _cn+' CN'; return _inv+' invoice '+_cn+' CN'; }
 function signedPrice(o){ const v=Number(o?.price||0); return isCN(o) ? -Math.abs(v) : v; }
 function migrateCN(){ let changed=false; invoices.forEach(x=>{ if(isCN(x) && Number(x.price||0)>0){ x.price=-Math.abs(Number(x.price||0)); changed=true; } }); if(changed) save(); }
 function today(){ return new Date().toISOString().slice(0,10); }
@@ -266,7 +268,7 @@ function render(){
   const list=filtered();
   const _tabLabel = tab==='paid' ? ' Dah Bayar' : tab==='unpaid' ? ' Belum Bayar' : '';
   const _total=list.reduce((s,x)=>s+signedPrice(x),0);
-  document.getElementById('infoBar').textContent = list.length+' invoice'+_tabLabel+' • '+fmt(_total);
+  document.getElementById('infoBar').textContent = pvCountLabel(list)+_tabLabel+' • '+fmt(_total);
   const box=document.getElementById('list'); box.innerHTML='';
   if(tab==='batal'){
     const _batalTotal=cancelledPVs.reduce((s,c)=>s+Number(c.price||0),0);
@@ -285,7 +287,7 @@ function render(){
     const _glist=Object.values(_groups).sort((a,b)=>(b.payDate||'').localeCompare(a.payDate||'')||(b.pv||'').localeCompare(a.pv||''));
     if(!_glist.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada invoice Dah Bayar</p>';
     let _paidLastDay=''; _glist.forEach(g=>{
-      if(g.payDate!==_paidLastDay){ _paidLastDay=g.payDate; const _dayGroups=_glist.filter(x=>x.payDate===g.payDate); const _dayTotal=_dayGroups.reduce((s,gg)=>s+gg.items.reduce((s2,x)=>s2+signedPrice(x),0),0); const _dayCount=_dayGroups.reduce((s,gg)=>s+gg.items.length,0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(g.payDate)+' • '+_dayGroups.length+' PV • '+_dayCount+' invoice • '+fmt(_dayTotal); box.appendChild(_hd); }
+      if(g.payDate!==_paidLastDay){ _paidLastDay=g.payDate; const _dayGroups=_glist.filter(x=>x.payDate===g.payDate); const _dayTotal=_dayGroups.reduce((s,gg)=>s+gg.items.reduce((s2,x)=>s2+signedPrice(x),0),0); const _dayAll=_dayGroups.flatMap(gg=>gg.items); const _dayCount=_dayAll.length; const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(g.payDate)+' • '+_dayGroups.length+' PV • '+pvCountLabel(_dayAll)+' • '+fmt(_dayTotal); box.appendChild(_hd); }
       const gtotal=g.items.reduce((s,x)=>s+signedPrice(x),0);
       const invs=g.items.map(x=>x.inv||'').filter(Boolean).join(' • ');
       const hasResit=g.items.some(x=>x.paymentImg);
@@ -294,10 +296,10 @@ function render(){
       const _swW = g.pv ? 200 : 100;
       let delBtn=null, removeBtn=null;
       if(g.pv){
-        // 2 action: Remove All (padam terus) + Delete PV (macam Cancel PV dulu)
+        // 2 action: Remove All (padam terus) + Cancel PV (cancel payment, PV masuk PV Batal, invoice jadi Belum Bayar)
         const _acts=document.createElement('div'); _acts.style.cssText='position:absolute;top:0;right:0;bottom:0;width:200px;display:flex;z-index:1';
         removeBtn=document.createElement('button'); removeBtn.type='button'; removeBtn.style.cssText='flex:1;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; removeBtn.textContent='Remove All';
-        delBtn=document.createElement('button'); delBtn.type='button'; delBtn.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; delBtn.textContent='Delete PV';
+        delBtn=document.createElement('button'); delBtn.type='button'; delBtn.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; delBtn.textContent='Cancel PV';
         _acts.appendChild(removeBtn); _acts.appendChild(delBtn); wrap.appendChild(_acts);
       } else {
         delBtn=document.createElement('button'); delBtn.type='button'; delBtn.className='swipeDel'; delBtn.style.width='100px'; delBtn.style.background='#dc2626'; delBtn.style.fontSize='13px'; delBtn.textContent='Batal Bayar';
@@ -311,7 +313,7 @@ function render(){
         const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
         const _firstImg=g.items.find(x=>x.img)?.img||'';
         const _firstItem=g.items.find(x=>x.img)||g.items[0];
-        d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?`<img src="${_firstImg}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+        d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?`<img src="${_firstImg}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${pvCountLabel(g.items)} • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${hasResit?`<div>🧾</div>`:''}</div>`;
         // Thumb - tekan gambar view gambar invoice macam Belum Bayar, bukan buka PV
         const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem && _firstItem.img) openImgView(_firstItem.img,'Gambar Invoice - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.pdf||'',{kind:'invoice',id:_firstItem.id}); else if(_firstItem && _firstItem.pdf) openImgViewOnlyPdf(_firstItem.pdf,'PDF - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.img,{kind:'invoice',id:_firstItem.id}); else { _viewCtx={kind:'invoice',id:_firstItem.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       } else {
@@ -321,28 +323,28 @@ function render(){
       // Click - buka detail, kalau swipe tengah buka, tutup dulu
       let suppressClick=false; const cc=inner;
       cc.onclick=e=>{ if(suppressClick){ suppressClick=false; return; } if(cc.dataset.open==='1'){ closeSwipe(); return; } if(g.pv) openPVDetail(g.pv,g.payDate); else openDetail(g.items[0].id); };
-      // Swipe kiri - 2 action: Remove All (padam terus) + Delete PV (jadi Belum Bayar)
+      // Swipe kiri - 2 action: Remove All (padam terus) + Cancel PV (cancel payment, PV masuk PV Batal, invoice jadi Belum Bayar)
       let delDone=false, remDone=false;
       function doCancelPV(){
         if(delDone) return;
         if(g.pv){
-          if(!confirm('Delete PV '+g.pv+'?\n\n'+g.items.length+' invoice akan jadi Belum Bayar.')) return;
+          if(!confirm('Cancel PV '+g.pv+'?\n\nPayment dibatalkan. No PV ni akan masuk PV Batal, '+pvCountLabel(g.items)+' akan jadi Belum Bayar.')) return;
           delDone=true; const _pv=g.pv, _pd=g.payDate, _n=g.items.length;
           const ok=cancelPV(_pv,_pd);
-          if(ok) showToast('PV dibatalkan - '+_pv+' - '+_n+' invoice jadi Belum Bayar');
+          if(ok) showToast('PV dibatalkan - '+_pv+' - '+pvCountLabel(g.items)+' jadi Belum Bayar');
         } else {
           const x=g.items[0];
           if(!confirm('Batal bayar '+x.name+' - '+x.inv+'?\n\nInvoice ni akan jadi Belum Bayar.')) return;
-          delDone=true; x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.split=null; save(); render(); showToast('Bayar dibatalkan - '+x.inv+' jadi Belum Bayar');
+          delDone=true; try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.split=null; save(); render(); showToast('Bayar dibatalkan - '+x.inv+' jadi Belum Bayar');
         }
       }
       function doRemoveAll(){
         if(remDone) return;
         if(!g.pv) return;
-        if(!confirm('Remove All '+g.pv+'?\n\n'+g.items.length+' invoice dalam PV ni akan DIPADAM TERUS dan tak boleh undo.')) return;
+        if(!confirm('Remove All '+g.pv+'?\n\n'+pvCountLabel(g.items)+' dalam PV ni akan DIPADAM TERUS dan tak boleh undo.')) return;
         remDone=true; const _pv=g.pv, _n=g.items.length;
         const ok=removePVAll(_pv, g.payDate);
-        if(ok) showToast('Remove All - '+_pv+' - '+_n+' invoice dipadam terus');
+        if(ok) showToast('Remove All - '+_pv+' - '+pvCountLabel(g.items)+' dipadam terus');
       }
       if(delBtn){ delBtn.addEventListener('click', e=>{ e.stopPropagation(); doCancelPV(); }); delBtn.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); doCancelPV(); }, {passive:false}); }
       if(removeBtn){ removeBtn.addEventListener('click', e=>{ e.stopPropagation(); doRemoveAll(); }); removeBtn.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); doRemoveAll(); }, {passive:false}); }
@@ -379,26 +381,26 @@ function render(){
   if(!_cards.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada invoice</p>';
   let _lastDay=''; _cards.forEach(_card=>{
     const _cardDay=_card.sortKey||'';
-    if(_cardDay!==_lastDay){ _lastDay=_cardDay; const _dayCards=_cards.filter(c=>c.sortKey===_cardDay); const _dayTotal=_dayCards.reduce((s,c)=>s+(c.type==='group'?c.group.items.reduce((s2,x)=>s2+signedPrice(x),0):signedPrice(c.item)),0); const _dayCount=_dayCards.reduce((s,c)=>s+(c.type==='group'?c.group.items.length:1),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(_cardDay)+' • '+_dayCount+' invoice • '+fmt(_dayTotal); box.appendChild(_hd); }
+    if(_cardDay!==_lastDay){ _lastDay=_cardDay; const _dayCards=_cards.filter(c=>c.sortKey===_cardDay); const _dayTotal=_dayCards.reduce((s,c)=>s+(c.type==='group'?c.group.items.reduce((s2,x)=>s2+signedPrice(x),0):signedPrice(c.item)),0); const _dayAllSemua=_dayCards.flatMap(c=>c.type==='group'?c.group.items:[c.item]); const _dayCount=_dayAllSemua.length; const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(_cardDay)+' • '+pvCountLabel(_dayAllSemua)+' • '+fmt(_dayTotal); box.appendChild(_hd); }
     if(_card.type==='group'){
       const g=_card.group; const gtotal=g.items.reduce((s,x)=>s+signedPrice(x),0); const invs=g.items.map(x=>x.inv||'').filter(Boolean).join(' • '); const hasResit=g.items.some(x=>x.paymentImg);
       const _names=[...new Set(g.items.map(x=>x.name).filter(Boolean))]; const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
-      // SwipeWrap macam tab Dah Bayar - swipe kiri keluar 2 action: Remove All + Delete PV
+      // SwipeWrap macam tab Dah Bayar - swipe kiri keluar 2 action: Remove All + Cancel PV
       const _wrapAll=document.createElement('div'); _wrapAll.className='swipeWrap';
       const _actsAll=document.createElement('div'); _actsAll.style.cssText='position:absolute;top:0;right:0;bottom:0;width:200px;display:flex;z-index:1';
       const _remAll=document.createElement('button'); _remAll.type='button'; _remAll.style.cssText='flex:1;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _remAll.textContent='Remove All';
-      const _delAll=document.createElement('button'); _delAll.type='button'; _delAll.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _delAll.textContent='Delete PV';
+      const _delAll=document.createElement('button'); _delAll.type='button'; _delAll.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _delAll.textContent='Cancel PV';
       _actsAll.appendChild(_remAll); _actsAll.appendChild(_delAll); _wrapAll.appendChild(_actsAll);
       const d=document.createElement('div'); d.className='card swipeInner';
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
-      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${pvCountLabel(g.items)} • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${hasResit?`<div>🧾</div>`:''}</div>`;
       const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); else { _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       // Click + swipe Cancel PV - sama macam tab Dah Bayar
       let _supAll=false; const _ccAll=d;
       _ccAll.onclick=e=>{ if(_supAll){ _supAll=false; return; } if(_ccAll.dataset.open==='1'){ _closeAll(); return; } openPVDetail(g.pv,g.payDate); };
-      let _delDoneAll=false, _remDoneAll=false; function _doCancelAll(){ if(_delDoneAll) return; if(!confirm('Delete PV '+g.pv+'?\n\n'+g.items.length+' invoice akan jadi Belum Bayar.')) return; _delDoneAll=true; const _pv=g.pv, _pd=g.payDate, _n=g.items.length; const _ok=cancelPV(_pv,_pd); if(_ok) showToast('PV dibatalkan - '+_pv+' - '+_n+' invoice jadi Belum Bayar'); }
-      function _doRemoveAll(){ if(_remDoneAll) return; if(!confirm('Remove All '+g.pv+'?\n\n'+g.items.length+' invoice dalam PV ni akan DIPADAM TERUS dan tak boleh undo.')) return; _remDoneAll=true; const _pv=g.pv, _n=g.items.length; const _ok=removePVAll(_pv, g.payDate); if(_ok) showToast('Remove All - '+_pv+' - '+_n+' invoice dipadam terus'); }
+      let _delDoneAll=false, _remDoneAll=false; function _doCancelAll(){ if(_delDoneAll) return; if(!confirm('Cancel PV '+g.pv+'?\n\nPayment dibatalkan. No PV ni akan masuk PV Batal, '+pvCountLabel(g.items)+' akan jadi Belum Bayar.')) return; _delDoneAll=true; const _pv=g.pv, _pd=g.payDate, _n=g.items.length; const _ok=cancelPV(_pv,_pd); if(_ok) showToast('PV dibatalkan - '+_pv+' - '+pvCountLabel(g.items)+' jadi Belum Bayar'); }
+      function _doRemoveAll(){ if(_remDoneAll) return; if(!confirm('Remove All '+g.pv+'?\n\n'+pvCountLabel(g.items)+' dalam PV ni akan DIPADAM TERUS dan tak boleh undo.')) return; _remDoneAll=true; const _pv=g.pv, _n=g.items.length; const _ok=removePVAll(_pv, g.payDate); if(_ok) showToast('Remove All - '+_pv+' - '+pvCountLabel(g.items)+' dipadam terus'); }
       _delAll.addEventListener('click', e=>{ e.stopPropagation(); _doCancelAll(); });
       _delAll.addEventListener('touchend', e=>{ e.preventDefault(); e.stopPropagation(); _doCancelAll(); }, {passive:false});
       _remAll.addEventListener('click', e=>{ e.stopPropagation(); _doRemoveAll(); });
@@ -660,7 +662,7 @@ function renderPayInvList(){
 function openPay(mode, singleId){
   payMode=mode; editPVInfo=null; payTarget = mode==='single'? [singleId] : [...selected];
   const items=payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
-  document.getElementById('payTitle').textContent='Bayar - '+items.length+' invoice • '+fmt(items.reduce((s,x)=>s+signedPrice(x),0));
+  document.getElementById('payTitle').textContent='Bayar - '+pvCountLabel(items)+' • '+fmt(items.reduce((s,x)=>s+signedPrice(x),0));
   document.getElementById('payList').innerHTML=items.map(x=>`<div>• ${x.name} - ${fmt(signedPrice(x))} - ${x.inv}${isCN(x)?' (CN - Credit Note)':''}</div>`).join('');
   const _pd=document.getElementById('payDateInput'); if(_pd) _pd.value=today();
   const _pc=document.getElementById('payConfirm'); if(_pc) _pc.textContent='Confirm Bayar';
@@ -752,8 +754,9 @@ function cancelPV(pv, payDate){
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate);
   if(!items.length){ alert('PV '+pv+' tak jumpa / dah batal'); return false; }
   const total=items.reduce((s,x)=>s+_sp(x),0);
-  cancelledPVs.unshift({pv,date:payDate,inv:items.map(x=>x.inv||'').join(' • '),name:items.length>1?items.length+' invoice':items[0].name,price:total});
-  items.forEach(x=>{ x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.split=null; });
+  cancelledPVs.unshift({pv,date:payDate,inv:items.map(x=>x.inv||'').join(' • '),name:items.length>1?pvCountLabel(items):items[0].name,price:total});
+  // Cancel payment: invoice jadi Belum Bayar balik, resit payment dibuang (termasuk dalam IDB)
+  items.forEach(x=>{ try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.split=null; });
   save(); render();
   return true;
   }catch(err){ alert('Batal PV gagal: '+err.message); console.error(err); return false; }
@@ -782,7 +785,7 @@ function openPVDetail(pv, payDate){
   const total=items.reduce((s,x)=>s+signedPrice(x),0);
   const resits=[...new Set(items.map(x=>x.paymentImg).filter(Boolean))];
   const b=document.getElementById('pvBody');
-  b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${items.length} invoice</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
+  b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
     + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
     + (resits.length?`<div><p style="font-weight:700">Resit Payment</p>`+resits.map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
     + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
