@@ -37,69 +37,44 @@
   });
 </script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#EEF0F5;color:#111827;padding-bottom:110px}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#eef2ee;color:#111;padding-bottom:110px}
 .wrap{max-width:720px;margin:0 auto;padding:14px}
-header{margin:-14px -14px 12px;padding:22px 14px 18px;background:linear-gradient(135deg,#4C1D95,#6D28D9 55%,#7C3AED);border-radius:0 0 22px 22px;color:#fff;box-shadow:0 4px 16px rgba(76,29,149,.25)}
-h1{margin:4px 0 2px;font-size:26px;color:#fff}.sub{color:rgba(255,255,255,.85);font-size:13px}
-.info{background:#fff;border-radius:16px;padding:12px 14px;font-weight:800;color:#4C1D95;margin:14px 0 10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+h1{margin:4px 0 2px;font-size:28px}.sub{color:#666;font-size:13px}
+.info{background:#d6f5dd;border-radius:14px;padding:12px 14px;font-weight:800;color:#14532d;margin:14px 0 10px}
 .row{display:flex;gap:8px;align-items:center;margin:6px 0}
-.search{flex:1;display:flex;align-items:center;background:#fff;border:0;border-radius:16px;padding:12px;gap:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.search input{border:0;outline:0;flex:1;font-size:14px;background:transparent}
-.btn{border:0;border-radius:14px;padding:11px 14px;font-weight:700;cursor:pointer}
-.btn-green{background:linear-gradient(135deg,#4C1D95,#6D28D9);color:#fff}.btn-dark{background:#111827;color:#fff}.btn-light{background:#fff;border:0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.search{flex:1;display:flex;align-items:center;background:#fff;border:1px solid #ddd;border-radius:12px;padding:10px 12px;gap:8px}
+.search input{border:0;outline:0;flex:1;font-size:14px}
+.btn{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer}
+.btn-green{background:#16a34a;color:#fff}.btn-dark{background:#111827;color:#fff}.btn-light{background:#fff;border:1px solid #ddd}
 .btn-small{padding:8px 11px;font-size:12px;border-radius:999px}
-.tabs{display:flex;background:#fff;border:0;border-radius:999px;padding:4px;gap:4px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.tab{flex:1;border:0;background:transparent;padding:9px 4px;border-radius:999px;font-weight:700;cursor:pointer;color:#6B7280;font-size:13px}.tab.active{background:#5B21B6;color:#fff}
-.group{background:#fff;border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;margin:14px 0 8px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.card{background:#fff;border-radius:16px;padding:12px;display:flex;gap:10px;margin:8px 0;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.swipeWrap{position:relative;overflow:hidden;border-radius:16px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tabs{display:flex;background:#fff;border:1px solid #ddd;border-radius:999px;padding:4px;gap:4px;margin:8px 0}
+.tab{flex:1;border:0;background:transparent;padding:8px 4px;border-radius:999px;font-weight:700;cursor:pointer;color:#666;font-size:13px}.tab.active{background:#16a34a;color:#fff}
+.group{background:#e8f5e9;border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;margin:14px 0 8px;cursor:pointer}
+.card{background:#fff;border-radius:12px;padding:8px 10px;display:flex;gap:8px;margin:6px 0;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.swipeWrap{position:relative;overflow:hidden;border-radius:12px;margin:6px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .swipeDel{position:absolute;top:0;right:0;bottom:0;width:84px;background:#ff3b30;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;cursor:pointer;z-index:1;border:0;padding:0;font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .swipeInner{position:relative;z-index:2;margin:0 !important;transition:transform .2s ease;touch-action:pan-y;background:#fff;will-change:transform}
-.thumb{width:48px;height:48px;border-radius:12px;background:#EEF0F5;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;font-size:18px}
+.thumb{width:46px;height:46px;border-radius:10px;background:#eef2ee;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;font-size:18px}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .meta{flex:1;min-width:0;font-size:12px;line-height:1.35}.meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;line-height:1.3}
-.right{text-align:right;flex-shrink:0;font-size:12px;line-height:1.35}.price{font-weight:800;font-size:15px;line-height:1.3}
-.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;margin:1px 0;line-height:1.3}.paid{background:#dcfce7;color:#14532d}.unpaid{background:#fee2e2;color:#991b1b}.pv{background:#ede9fe;color:#4C1D95}.cash{background:#fef9c3;color:#854d0e}
-.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E5E7EB;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:40}
-.bottom .btn{width:100%;padding:15px;font-size:16px;background:linear-gradient(135deg,#4C1D95,#6D28D9)}
+.right{text-align:right;flex-shrink:0;font-size:12px;line-height:1.35}.price{font-weight:800;font-size:14px;line-height:1.3}
+.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;margin:1px 0;line-height:1.3}.paid{background:#dcfce7;color:#14532d}.unpaid{background:#fee2e2;color:#991b1b}.pv{background:#dbeafe;color:#1e40af}.cash{background:#fef9c3;color:#854d0e}
+.bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ddd;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:40}
+.bottom .btn{width:100%;padding:15px;font-size:16px}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50;overflow:auto}
 .modal.open{display:block}
-.sheet{background:#EEF0F5;margin:20px auto;max-width:720px;border-radius:20px;padding:18px;padding-top:0;position:relative;overflow:hidden}
+.sheet{background:#fff;margin:20px auto;max-width:720px;border-radius:20px;padding:18px;padding-top:16px;position:relative}
 .sheet h2{margin:6px 0 12px}
-.sheet .closeRow{display:flex;justify-content:space-between;align-items:center;margin:0 -18px 14px;padding:16px 18px;background:linear-gradient(135deg,#4C1D95,#6D28D9 55%,#7C3AED);color:#fff}
-.sheet .closeRow b{color:#fff}
-.sheet .closeRow button{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
-.viewAct{display:flex;gap:8px;padding:12px;background:#fff;border-top:1px solid #F1F5F9;margin:10px -18px -8px}
-.viewActBtn{flex:1;border:0;background:#F5F3FF;border-radius:16px;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
-.viewActBtn:active{transform:scale(.97)}
-.viewActIcon{width:36px;height:36px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(76,29,149,.12)}
-.viewActIcon svg{width:20px;height:20px}
-.viewActLabel{font-size:12px;font-weight:700;color:#1E293B;line-height:1}
-.viewActBtn.danger{background:#FEF2F2}
-.viewActBtn.danger .viewActLabel{color:#DC2626}
+.sheet .closeRow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sheet .closeRow button{border:0;background:#f1f5f9;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
 label{font-weight:700;display:block;margin:12px 0 6px}
-input,select,textarea{width:100%;padding:12px;border:0;border-radius:12px;font-size:15px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;font-size:15px;background:#fff}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:999px;font-size:13px;z-index:99;display:none}
 textarea.csv{height:160px;font-size:12px;font-family:monospace}
-/* Smart Receipt - Tambah Invoice: label kiri, value kanan, kad putih */
-.sr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border-radius:16px;padding:14px 16px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.sr-row label{margin:0;font-weight:600;color:#6B7280;font-size:14px;flex-shrink:0}
-.sr-row input,.sr-row select{border:0;box-shadow:none;padding:0;text-align:right;font-weight:700;color:#4C1D95;background:transparent;width:auto;flex:1;min-width:0}
-.sr-row input::placeholder{color:#9CA3AF;font-weight:400}
-.sr-row input[type=date]{text-align:right}
-.sr-top{display:flex;gap:12px;background:#fff;border-radius:16px;padding:14px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06);align-items:center}
-.sr-price{flex:1;min-width:0}
-.sr-price label{margin:0 0 2px;font-weight:600;color:#6B7280;font-size:13px}
-.sr-price input{border:0;box-shadow:none;padding:0;font-size:26px;font-weight:800;color:#111827;text-align:left;background:transparent}
-.sr-price input::placeholder{color:#9CA3AF}
-.sr-row input[type=checkbox]{width:24px;height:24px;accent-color:#5B21B6;flex:none;padding:0;box-shadow:none;cursor:pointer}
-.sr-note{flex-direction:column;align-items:stretch;gap:6px}
-.sr-note label{align-self:flex-start}
-.sr-note input{text-align:left;color:#111827}
 </style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
-<header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
+<header><div><h1>Invoice Kedai</h1></div></header>
 
 <div class="info" id="infoBar">0 invoice • RM0.00</div>
 <div class="row"><div class="search">🔍 <input id="q" placeholder="Cari supplier / no invoice..." autocomplete="off"></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
@@ -114,16 +89,19 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <!-- ADD / EDIT -->
 <div class="modal" id="addModal"><div class="sheet">
 <div class="closeRow"><button id="addBack">← Kembali</button><b id="addTitle">Tambah Invoice</b><button id="addClose">✕ Tutup</button></div>
+<div id="thumbBox" style="width:120px;height:120px;margin:0 auto 8px;border:2px dashed #cbd5e1;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#f8fafc;overflow:hidden"><span id="thumbIcon" style="font-size:36px">📷</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div>
+
 <input id="fImg" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgCamera" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgFiles" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-<div class="sr-top"><div id="thumbBox" style="width:96px;height:96px;flex-shrink:0;border:2px dashed #C4B5FD;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F5F3FF;overflow:hidden"><span id="thumbIcon" style="font-size:32px">📷</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><div class="sr-price"><label>Harga (RM)</label><input id="fPrice" type="number" step="0.01" placeholder="0.00"></div></div>
-<div class="sr-row"><label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off"></div>
-<div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:-2px 0 8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div>
-<div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:-2px 0 8px;cursor:pointer"></div>
-<div class="sr-row"><label>No Invoice</label><input id="fInv" placeholder="No Invoice"></div>
-<div class="sr-row"><label>Tarikh Invoice</label><input id="fDate" type="date"></div>
-<div class="sr-row"><label>Kategori</label><select id="fCat"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div>
-<div class="sr-row"><label>💵 Cash - Terus Dah Bayar</label><input type="checkbox" id="fCash"></div>
-<div class="sr-row sr-note"><label>Nota / Remark</label><input id="fNote" placeholder=""></div>
+<label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off">
+
+<div id="supSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden"></div>
+<div id="supHint" style="font-size:12px;color:#b45309;font-weight:700;display:none;margin:-2px 0 8px;cursor:pointer"></div>
+<label>No Invoice</label><input id="fInv" placeholder="No Invoice">
+<label>Harga (RM)</label><input id="fPrice" type="number" step="0.01" placeholder="0.00">
+<label>Tarikh Invoice</label><input id="fDate" type="date">
+<label>Kategori</label><select id="fCat"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select>
+<label>Nota / Remark</label><input id="fNote" placeholder="Contoh: pisang nangka 20kg x 2.50">
+
 <div class="row" style="margin-top:16px"><button class="btn btn-light" id="addCancel" style="flex:1">Batal</button><button class="btn btn-green" id="addSave" style="flex:1">Simpan</button></div>
 </div></div>
 
@@ -132,7 +110,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-light" id="srcCamera" style="padding:16px;text-align:left">📷 Camera</button><button class="btn btn-light" id="srcGallery" style="padding:16px;text-align:left">🖼️ Gallery</button><button class="btn btn-light" id="srcFiles" style="padding:16px;text-align:left">📁 Files</button><button class="btn btn-light" id="srcScan" style="padding:16px;text-align:left">📄 Scan Document</button></div></div></div>
 
 <!-- IMG VIEW - style macam video: top ada trash, bottom ada Upload / Edit / Share / Delete -->
-<div class="modal" id="imgViewModal"><div class="sheet" style="text-align:center;padding-bottom:8px"><div class="closeRow"><button id="imgViewBack">← Kembali</button><b id="imgViewTitle" style="flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Gambar</b><button id="imgViewClose" style="border:0;background:rgba(255,255,255,.95);border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer;color:#4C1D95">Done</button></div><div id="imgViewGalleryBar" style="display:none;margin:0 0 8px"><div style="display:flex;align-items:center;gap:8px;justify-content:center"><button id="imgViewPrev" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">‹ Prev</button><span id="imgViewGalleryCount" style="font-size:13px;font-weight:700"></span><button id="imgViewNext" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">Next ›</button></div><div id="imgViewGalleryThumbs" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;justify-content:flex-start"></div></div><img id="imgViewImg" style="width:100%;border-radius:12px;max-height:62vh;object-fit:contain;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.08)"><div id="imgViewPdf" style="display:none;width:100%;height:62vh;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;background:#eee;border-radius:12px;padding:8px;box-sizing:border-box"><div id="imgViewPdfPages" style="display:flex;flex-direction:column;gap:10px"></div></div><div id="imgViewPdfBar" style="display:none;gap:8px;margin-top:10px"><button id="imgViewPdfOpen" class="btn btn-dark" style="flex:1">📄 Buka PDF Penuh</button><button id="imgViewPdfDl" class="btn btn-light" style="flex:1">⬇️ Download PDF</button></div><p id="imgViewMeta" style="font-size:13px;color:#666;margin:8px 0 4px"></p><div id="imgViewActionBar" class="viewAct"><button id="imgViewUploadBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v11H3z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span><span class="viewActLabel">Upload</span></button><button id="imgViewEditBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L17 4l3 3L8 19z"></path><path d="M13.5 6.5l3 3"></path></svg></span><span class="viewActLabel">Edit</span></button><button id="imgViewShareBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"></circle><circle cx="17" cy="5" r="2.5"></circle><circle cx="17" cy="19" r="2.5"></circle><path d="M8.3 10.8l6.4-4.6M8.3 13.2l6.4 4.6"></path></svg></span><span class="viewActLabel">Share</span></button><button id="imgViewDeleteBtn" class="viewActBtn danger"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v5M14 11v5"></path></svg></span><span class="viewActLabel">Delete</span></button></div></div></div>
+<div class="modal" id="imgViewModal"><div class="sheet" style="text-align:center;padding-bottom:8px"><div class="closeRow"><button id="imgViewBack">← Kembali</button><b id="imgViewTitle" style="flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Gambar</b><button id="imgViewClose" style="border:0;background:#eef2ff;border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer;color:#2563eb">Done</button></div><div id="imgViewGalleryBar" style="display:none;margin:0 0 8px"><div style="display:flex;align-items:center;gap:8px;justify-content:center"><button id="imgViewPrev" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">‹ Prev</button><span id="imgViewGalleryCount" style="font-size:13px;font-weight:700"></span><button id="imgViewNext" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">Next ›</button></div><div id="imgViewGalleryThumbs" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;justify-content:flex-start"></div></div><img id="imgViewImg" style="width:100%;border-radius:12px;max-height:62vh;object-fit:contain;background:#000"><div id="imgViewPdf" style="display:none;width:100%;height:62vh;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;background:#eee;border-radius:12px;padding:8px;box-sizing:border-box"><div id="imgViewPdfPages" style="display:flex;flex-direction:column;gap:10px"></div></div><div id="imgViewPdfBar" style="display:none;gap:8px;margin-top:10px"><button id="imgViewPdfOpen" class="btn btn-dark" style="flex:1">📄 Buka PDF Penuh</button><button id="imgViewPdfDl" class="btn btn-light" style="flex:1">⬇️ Download PDF</button></div><p id="imgViewMeta" style="font-size:13px;color:#666;margin:8px 0 4px"></p><div id="imgViewActionBar" style="display:flex;justify-content:space-around;align-items:flex-start;border-top:1px solid #eee;padding:14px 0 8px;margin-top:8px"><button id="imgViewUploadBtn" style="border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:28px;line-height:1">📷<span style="font-size:13px;color:#111;font-weight:700">Upload</span></button><button id="imgViewEditBtn" style="border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:28px;line-height:1">✂️<span style="font-size:13px;color:#111;font-weight:700">Edit</span></button><button id="imgViewShareBtn" style="border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:28px;line-height:1">↗️<span style="font-size:13px;color:#111;font-weight:700">Share</span></button><button id="imgViewDeleteBtn" style="border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;font-size:28px;line-height:1;color:#dc2626">🗑️<span style="font-size:13px;color:#dc2626;font-weight:700">Delete</span></button></div></div></div>
 
 <!-- DETAIL -->
 <div class="modal" id="detailModal"><div class="sheet"><div class="closeRow"><button id="detailBack">← Kembali</button><b>Detail Invoice</b><button id="detailClose">✕ Tutup</button></div><div id="detailBody"></div></div></div>
@@ -151,7 +129,6 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="reportModal"><div class="sheet"><div class="closeRow"><button id="reportBack">← Kembali</button><b>Report</b><button id="reportClose">✕ Tutup</button></div>
 <div id="reportSummary" style="font-weight:700;margin:8px 0"></div><div id="reportPreview" style="overflow:auto;max-height:220px"></div>
 <div class="row" style="margin-top:12px"><button class="btn btn-green" id="dlCsv" style="flex:1">⬇️ Download CSV</button><button class="btn btn-light" id="copyCsv" style="flex:1">📋 Copy CSV</button></div>
-<button class="btn btn-dark" id="dlCsvAcc" style="width:100%;margin-top:8px">📊 Download CSV Accounting</button>
 <button class="btn btn-dark" id="dlPdf" style="width:100%;margin-top:8px">⬇️ Download PDF</button>
 <label>CSV</label><textarea class="csv" id="csvText" readonly=""></textarea>
 <button class="btn btn-light" id="reportDone" style="width:100%;margin-top:10px">Tutup</button></div></div>
@@ -159,10 +136,21 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <!-- SETTING -->
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
-<button class="btn btn-green" id="icloudBackupBtn" style="padding:16px;text-align:left">⬆️ Export DB</button>
-<div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button>
 <button class="btn btn-light" id="settingImport" style="padding:16px;text-align:left">⬇️ Import DB</button>
+<button class="btn btn-light" id="settingExport" style="padding:16px;text-align:left">⬆️ Export DB</button>
+<div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
+<div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:12px;margin-top:4px">
+<div style="font-weight:800;font-size:14px">☁️ Supabase - Auto Sync</div>
+<div id="supabaseStatus" style="font-size:12px;color:#555;margin:4px 0 8px">Belum sambung - masukkan anon key</div>
+<label style="font-size:12px;color:#555">Project URL (dah siap)</label>
+<input id="supabaseUrlInput" readonly="" value="https://alxyvfraxbvpgjxwryzr.supabase.co" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:12px;background:#f8fafc">
+<label style="font-size:12px;color:#555">Anon Key (paste dari Supabase &gt; Settings &gt; API)</label>
+<input id="supabaseKeyInput" placeholder="eyJ..." type="password" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:12px">
+<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-green" id="supabaseSaveKey" style="flex:1;padding:10px;font-size:13px">Simpan Key</button><button class="btn btn-light" id="supabaseSyncNow" style="flex:1;padding:10px;font-size:13px">Sync Sekarang</button></div>
+<button class="btn btn-light" id="supabasePullNow" style="width:100%;margin-top:8px;padding:10px;font-size:13px">⬇️ Tarik dari Cloud</button>
+<div style="font-size:11px;color:#777;margin-top:6px">Table: app_data (id=1). Jangan share service_role key, anon key je.</div>
+</div>
 </div>
 
 <input type="file" id="importFile" accept=".json" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
@@ -272,7 +260,7 @@ function save(){
       showToast('Storage penuh - gambar besar lama dikosongkan, invoice text selamat');
     }catch(e3){ alert('Storage iPhone penuh! Padam invoice lama dulu.'); throw e3; }
   }
-} localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
+} localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); try{ supabasePushDebounced(); }catch(e){} }
 function fmt(n){ return 'RM'+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return ''; const parts=String(d).split('-'); if(parts.length!==3) return d; return parts[2]+'/'+parts[1]+'/'+parts[0].slice(2); }
 function isCN(o){ const _inv=String(o?.inv||'').trim().toUpperCase(); if(_inv.startsWith('CN')) return true; if(Number(o?.price||0)<0) return true; return false; }
@@ -281,6 +269,17 @@ function pvCountLabel(items){ const _all=items||[]; const _cn=cnCount(_all); con
 function signedPrice(o){ const v=Number(o?.price||0); return isCN(o) ? -Math.abs(v) : v; }
 function migrateCN(){ let changed=false; invoices.forEach(x=>{ if(isCN(x) && Number(x.price||0)>0){ x.price=-Math.abs(Number(x.price||0)); changed=true; } }); if(changed) save(); }
 function today(){ return new Date().toISOString().slice(0,10); }
+const SUPABASE_URL='https://alxyvfraxbvpgjxwryzr.supabase.co';
+function supabaseKey(){ try{ return (localStorage.getItem('ik_supabase_key')||'').trim(); }catch(e){ return ''; } }
+function supabaseEnabled(){ return !!supabaseKey(); }
+function fmtLastExport(){ try{ const v=localStorage.getItem('ik_lastExport'); if(!v) return 'Belum pernah Export DB'; const d=new Date(v); const s=d.toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); const n=localStorage.getItem('ik_lastExportCount')||''; return 'Last Export: '+s+(n?' • '+n+' invoice':''); }catch(e){ return 'Belum pernah Export DB'; } }
+function updateLastExportLabel(){ const el=document.getElementById('lastExportLabel'); if(el) el.textContent=fmtLastExport(); }
+function updateSupabaseStatus(msg){ const el=document.getElementById('supabaseStatus'); if(!el) return; if(msg){ el.textContent=msg; return; } if(!supabaseEnabled()){ el.textContent='Belum sambung - masukkan anon key'; return; } const ls=localStorage.getItem('ik_lastSync'); el.textContent='Sambung ke Supabase • '+(ls ? 'Last sync: '+new Date(ls).toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Belum pernah sync'); const inp=document.getElementById('supabaseKeyInput'); if(inp && !inp.value) inp.value=supabaseKey(); }
+let _supabaseTimer=null;
+function supabasePushDebounced(){ if(!supabaseEnabled()) return; clearTimeout(_supabaseTimer); _supabaseTimer=setTimeout(supabasePush, 800); }
+async function supabasePush(){ if(!supabaseEnabled()) return; try{ const payload={invoices,cancelledPVs,customCats,hiddenCats}; const res=await fetch(SUPABASE_URL+'/rest/v1/app_data',{method:'POST',headers:{apikey:supabaseKey(),Authorization:'Bearer '+supabaseKey(),'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({id:1,data:payload,updated_at:new Date().toISOString()})}); if(res.ok){ try{ localStorage.setItem('ik_lastSync', new Date().toISOString()); }catch(e){} updateSupabaseStatus(); } }catch(e){} }
+async function supabasePull(manual){ if(!supabaseEnabled()){ if(manual) alert('Masukkan anon key dulu dalam Setting > Supabase'); return; } try{ const res=await fetch(SUPABASE_URL+'/rest/v1/app_data?id=eq.1&select=data,updated_at',{headers:{apikey:supabaseKey(),Authorization:'Bearer '+supabaseKey()}}); if(!res.ok){ if(manual) alert('Tak dapat tarik dari Supabase. Check key & table app_data dah buat ke belum (SQL Editor).'); return; } const arr=await res.json(); const row=arr && arr[0]; if(!row || !row.data){ if(manual) alert('Cloud kosong. Tekan Sync Sekarang untuk hantar data phone ni ke cloud.'); return; } const cloud=row.data; const existingIds=new Set(invoices.map(x=>String(x.id||''))); const existingKeys=new Set(invoices.map(x=>String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase())); let added=0; (cloud.invoices||[]).forEach(x=>{ const idKey=String(x.id||''); const key=String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase(); if((idKey && existingIds.has(idKey)) || existingKeys.has(key)) return; invoices.push(x); added++; }); const existingPV=new Set(cancelledPVs.map(x=>(x.pv||'')+'|'+(x.date||''))); (cloud.cancelledPVs||[]).forEach(x=>{ const k=(x.pv||'')+'|'+(x.date||''); if(!existingPV.has(k)){ cancelledPVs.push(x); existingPV.add(k); } }); if(cloud.customCats) customCats=[...new Set([...customCats,...cloud.customCats])]; if(cloud.hiddenCats) hiddenCats=[...new Set([...hiddenCats,...cloud.hiddenCats])]; if(added>0 || manual){ save(); render(); } try{ localStorage.setItem('ik_lastSync', new Date().toISOString()); }catch(e){} updateSupabaseStatus('Sync ok • '+added+' baru dari cloud'); if(manual) showToast('Tarik dari cloud siap: '+added+' baru'); }catch(e){ if(manual) alert('Sync gagal. Check internet & key.'); } }
+
 function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2200); }
 function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ const cur=sel.value; sel.innerHTML=allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur&&allCats().includes(cur))sel.value=cur; } const f=document.getElementById('fltCat'); if(f){ const cur=f.value; f.innerHTML='<option value="">Semua kategori</option>'+allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur)f.value=cur; } }
 function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='batal'){ return []; } return list; }
@@ -646,7 +645,7 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
  // For add/change pay, we need a handler: when image chosen for pay in detail, save to this invoice
  window._payDetailId = x.id;
  b.querySelector('#delBtn').onclick=()=>{ if(confirm('Padam invoice ni?')){ invoices=invoices.filter(y=>y.id!==id); selected.delete(id); save(); render(); document.getElementById('detailModal').classList.remove('open'); } };
- b.querySelector('#editBtn').onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; rebuildCatList(); document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash');  document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=x.img||''; pendingPdf=x.pdf||''; setThumb(pendingImg); document.getElementById('addModal').classList.add('open'); };
+ b.querySelector('#editBtn').onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; rebuildCatList(); document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||'';  document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=x.img||''; pendingPdf=x.pdf||''; setThumb(pendingImg); document.getElementById('addModal').classList.add('open'); };
  const dp1=b.querySelector('#dlPdfOne'); if(dp1) dp1.onclick=()=>downloadPdfOne(x);
  const payB=b.querySelector('#detailPayBtn'); if(payB) payB.onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); openPay('single',x.id); };
 
@@ -744,85 +743,29 @@ function csvFor(list){
   });
   return head+'\n'+rows.join('\n');
 }
-function csvForAccounting(list){
-  // CSV untuk accountant - terus import Excel / Xero / AutoCount / SQL, tak payah edit
-  // Jenis: Invoice = Debit (belanja naik), CN = Kredit (belanja turun)
-  const akaunMap = {'stock':'Belian - Cost of Sales','kegunaan kedai':'Perbelanjaan Kedai','utilities':'Utiliti','gaji':'Gaji','personal':'Perbelanjaan Peribadi'};
-  const head='Tarikh Invoice,Bulan,Tahun,No Invoice,Supplier,Kategori,Akaun,Jenis,Cara Bayar,Split,Status,Tarikh Bayar,PV,Debit,Kredit,Jumlah,Nota';
-  const rows=list.map(x=>{
-    const split = x.payMethod==='Split Payment' && x.split ? Object.entries(x.split).filter(([k,v])=>v>0).map(([k,v])=>`${k} ${v}`).join(' • ') : '';
-    const esc=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
-    const amt = Math.abs(Number(signedPrice(x))||0);
-    const jenis = isCN(x) ? 'CN' : 'Invoice';
-    const debit = jenis==='Invoice' ? amt.toFixed(2) : '0.00';
-    const kredit = jenis==='CN' ? amt.toFixed(2) : '0.00';
-    const bulan = String(x.date||'').slice(0,7);
-    const tahun = String(x.date||'').slice(0,4);
-    const akaun = akaunMap[String(x.cat||'').trim().toLowerCase()] || (x.cat||'');
-    return [x.date,bulan,tahun,x.inv,x.name,x.cat,akaun,jenis,x.payMethod,split,x.paid?'Dah Bayar':'Belum Bayar',x.payDate,x.pv,debit,kredit,Number(signedPrice(x)).toFixed(2),x.note].map(esc).join(',');
-  });
-  return head+'\n'+rows.join('\n');
-}
-// ===== PDF: gambar dalam IDBIMG tak boleh terus masuk jsPDF, kena resolve + kecikkan dulu =====
-async function pdfImgForField(imgField){
-  if(!imgField) return null;
-  try{
-    let src = await resolveImgData(imgField);
-    if(!src || !String(src).startsWith('data:image')) return null;
-    return await new Promise((res)=>{
-      const im = new Image();
-      im.onload = ()=>{
-        try{
-          const maxW = 1000;
-          const sc = Math.min(1, maxW / im.width);
-          const w = Math.max(1, Math.round(im.width*sc)), h = Math.max(1, Math.round(im.height*sc));
-          const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
-          const cx = cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,w,h); cx.drawImage(im,0,0,w,h);
-          res({url: cv.toDataURL('image/jpeg',0.70), w: w, h: h});
-        }catch(e){ res({url: src, w: im.width||1000, h: im.height||700}); }
-      };
-      im.onerror = ()=>res({url: src, w: 1000, h: 700});
-      im.src = src;
-    });
-  }catch(e){ return null; }
-}
-async function addPdfImgFit(doc, imgField, x, y, maxW, maxH){
-  const o = await pdfImgForField(imgField);
-  if(!o) return 0;
-  try{
-    let w = maxW, h = Math.round(maxW * o.h / o.w);
-    if(h > maxH){ h = maxH; w = Math.round(maxH * o.w / o.h); }
-    const cx = x + Math.round((maxW - w)/2);
-    doc.addImage(o.url, 'JPEG', cx, y, w, h);
-    return h;
-  }catch(e){
-    try{ doc.setFontSize(9); doc.text('Gambar tak dapat load', x, y+6); }catch(_){}
-    return 12;
-  }
-}
 async function downloadPdfOne(x){
   if(!window.jspdf){ alert('jsPDF belum load, check internet'); return; }
   const { jsPDF } = window.jspdf; const doc=new jsPDF(); let y=12;
   doc.setFontSize(16); doc.text('Invoice Kedai - Payment Voucher',10,y); y+=10;
   doc.setFontSize(11); doc.text(`Supplier: ${x.name}`,10,y); y+=7; doc.text(`No Invoice: ${x.inv}`,10,y); y+=7; doc.text(`Invoice Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}${isCN(x)?' (CN - Credit Note)':''}`,10,y); y+=7; doc.text(`PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}`,10,y); y+=7; doc.text(`Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10;
+  // Jimat pages: gambar invoice + resit sebelah-sebelah, 1 page je, tak payah page baru sorang-sorang
   const _hasImg=!!x.img; const _hasResit=!!x.paymentImg;
   if(_hasImg && _hasResit){
     if(y>200){ doc.addPage(); y=12; }
     doc.setFontSize(10); doc.text('Gambar Invoice:',10,y); doc.text('Resit Payment:',105,y); y+=4;
-    const _h1 = await addPdfImgFit(doc, x.img, 10, y, 85, 110);
-    const _h2 = await addPdfImgFit(doc, x.paymentImg, 105, y, 85, 110);
-    y += Math.max(_h1, _h2) + 6;
+    try{ doc.addImage(x.img,'JPEG',10,y,85,55); }catch(e){}
+    try{ doc.addImage(x.paymentImg,'JPEG',105,y,85,55); }catch(e){}
+    y+=60;
   } else if(_hasImg){
     if(y>200){ doc.addPage(); y=12; }
     doc.setFontSize(10); doc.text('Gambar Invoice:',10,y); y+=4;
-    const _h = await addPdfImgFit(doc, x.img, 10, y, 170, 180);
-    y += _h + 6;
-    if(!_h) doc.text('Gambar tak dapat load / tiada gambar',10,y);
+    try{ doc.addImage(x.img,'JPEG',10,y,90,60); }catch(e){}
+    y+=66;
   } else if(_hasResit){
     if(y>200){ doc.addPage(); y=12; }
     doc.setFontSize(10); doc.text('Resit Payment:',10,y); y+=4;
-    const _h = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180);
-    y += _h + 6;
+    try{ doc.addImage(x.paymentImg,'JPEG',10,y,90,60); }catch(e){}
+    y+=66;
   } else if(x.paid){ doc.text('Resit Payment: Tiada',10,y); }
   doc.save((x.pv||'')+'-'+x.inv+'.pdf');
 }
@@ -899,26 +842,22 @@ async function downloadPdfPV(pv, payDate){
   if(!_allImgs.length){ y+=8; doc.setFontSize(11); doc.text('Resit Payment: Tiada',10,y); }
   else {
     doc.addPage();
-    for(let idx=0; idx<_allImgs.length; idx++){
-      const im=_allImgs[idx];
+    let _pageY=12;
+    _allImgs.forEach((im,idx)=>{
       const _perPage=8; const _pos=idx%_perPage;
-      if(idx>0 && _pos===0){ doc.addPage(); }
+      if(idx>0 && _pos===0){ doc.addPage(); _pageY=12; }
       const _col=_pos%2; const _row=Math.floor(_pos/2);
       const _x=10+_col*95; const _y=12+_row*66;
       doc.setFontSize(9); doc.text(im.kind+' - '+im.label,_x,_y);
-      await addPdfImgFit(doc, im.src, _x, _y+2, 85, 55);
-    }
+      try{ doc.addImage(im.src,'JPEG',_x,_y+2,85,55); }catch(e){}
+    });
   }
   doc.save(pv+'.pdf');
 }
 async function downloadPdfBulk(list){
   if(!window.jspdf){ alert('jsPDF belum load'); return; }
   const { jsPDF } = window.jspdf; const doc=new jsPDF();
-  for(let i=0;i<list.length;i++){ const x=list[i]; if(i>0) doc.addPage(); let y=12; doc.setFontSize(14); doc.text(`${x.name}`,10,y); y+=8; doc.setFontSize(11); doc.text(`No Invoice: ${x.inv}  Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}  PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}  Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10;
-    if(x.img){ doc.text('Gambar Invoice:',10,y); y+=4; const _h = await addPdfImgFit(doc, x.img, 10, y, 170, 180); if(_h) y += _h + 6; else { doc.setFontSize(9); doc.text('Gambar tak dapat load',10,y); y+=8; } if(y>240){ doc.addPage(); y=12; } }
-    if(x.paymentImg){ doc.text('Resit Payment:',10,y); y+=4; const _h2 = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180); if(_h2) y += _h2 + 6; else { doc.setFontSize(9); doc.text('Resit tak dapat load',10,y); y+=8; } }
-    if(!x.img && !x.paymentImg){ doc.setFontSize(9); doc.text('Tiada gambar',10,y); }
-    showToast(`Generating PDF ${i+1}/${list.length}`); }
+  for(let i=0;i<list.length;i++){ const x=list[i]; if(i>0) doc.addPage(); let y=12; doc.setFontSize(14); doc.text(`${x.name}`,10,y); y+=8; doc.setFontSize(11); doc.text(`No Invoice: ${x.inv}  Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}  PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}  Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10; if(x.img){ doc.text('Gambar Invoice:',10,y); y+=4; try{ doc.addImage(x.img,'JPEG',10,y,90,60); y+=66; }catch(e){} } if(x.paymentImg){ if(y>200){ doc.addPage(); y=12; } doc.text('Resit Payment:',10,y); y+=4; try{ doc.addImage(x.paymentImg,'JPEG',10,y,90,60); }catch(e){} } showToast(`Generating PDF ${i+1}/${list.length}`); }
   doc.save('invoice-kedai-gambar-'+today()+'.pdf');
 }
 // Wiring
@@ -932,25 +871,27 @@ document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getEle
 document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
 document.getElementById('reportBtn').onclick=()=>{ const list=filtered(); const total=list.reduce((s,x)=>s+signedPrice(x),0); document.getElementById('reportSummary').textContent=list.length+' invoice • '+fmt(total)+' • '; const csv=csvFor(list); document.getElementById('csvText').value=csv; document.getElementById('reportPreview').innerHTML=`<table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th>Tarikh</th><th>Supplier</th><th>PV</th><th>Harga</th></tr>${list.slice(0,20).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.pv||'-'}</td><td>${fmt(signedPrice(x))}</td></tr>`).join('')}</table>`; document.getElementById('reportModal').classList.add('open'); };
 document.getElementById('reportClose').onclick=document.getElementById('reportBack').onclick=document.getElementById('reportDone').onclick=()=>document.getElementById('reportModal').classList.remove('open');
-document.getElementById('dlCsvAcc').onclick=()=>{ const csv=csvForAccounting(filtered()); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-accounting-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV Accounting download'); };
 document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV download'); };
 document.getElementById('copyCsv').onclick=async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('csvText').value); showToast('CSV dah copy'); }catch(e){ document.getElementById('csvText').select(); document.execCommand('copy'); showToast('CSV dah copy'); } };
 document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(filtered());
-document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); document.getElementById('settingModal').classList.add('open'); };
+document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); updateSupabaseStatus(); document.getElementById('settingModal').classList.add('open'); };
 document.getElementById('settingClose').onclick=document.getElementById('settingBack').onclick=document.getElementById('settingDone').onclick=()=>document.getElementById('settingModal').classList.remove('open');
-function fmtLastExport(){ try{ const v=localStorage.getItem('ik_lastExport'); if(!v) return 'Belum pernah Export DB'; const d=new Date(v); const s=d.toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); const n=localStorage.getItem('ik_lastExportCount')||''; return 'Last Export: '+s+(n?' • '+n+' invoice':''); }catch(e){ return 'Belum pernah Export DB'; } }
-function updateLastExportLabel(){ const el=document.getElementById('lastExportLabel'); if(el) el.textContent=fmtLastExport(); }
-document.getElementById('icloudBackupBtn').onclick=()=>{ const now=new Date(); const data={invoices,cancelledPVs,customCats,exportedAt:now.toISOString()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); showToast('Export DB download - simpan dalam Files / iCloud'); document.getElementById('settingModal').classList.remove('open'); };
 
 document.getElementById('driveClose').onclick=document.getElementById('driveBack').onclick=document.getElementById('driveDone').onclick=()=>document.getElementById('driveModal').classList.remove('open');
 document.getElementById('openDrive').onclick=()=>window.open('https://drive.google.com','_blank');
+document.getElementById('settingExport').onclick=()=>{ const now=new Date(); const data={invoices,cancelledPVs,customCats,exportedAt:now.toISOString()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); showToast('Export DB download - simpan dalam Files / iCloud'); };
 document.getElementById('settingImport').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); const incoming=d.invoices||[]; const existingIds=new Set(invoices.map(x=>String(x.id||''))); const existingKeys=new Set(invoices.map(x=>String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase())); const seenIds=new Set(); const seenKeys=new Set(); const baru=[]; let skip=0; incoming.forEach(x=>{ const idKey=String(x.id||''); const key=String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase(); if((idKey && (existingIds.has(idKey)||seenIds.has(idKey))) || existingKeys.has(key) || seenKeys.has(key)){ skip++; return; } if(idKey) seenIds.add(idKey); seenKeys.add(key); baru.push(x); }); const existingPV=new Set(cancelledPVs.map(x=>(x.pv||'')+'|'+(x.date||''))); const baruPV=(d.cancelledPVs||[]).filter(x=>{ const k=(x.pv||'')+'|'+(x.date||''); if(existingPV.has(k)) return false; existingPV.add(k); return true; }); const skipPV=(d.cancelledPVs||[]).length-baruPV.length; if(!baru.length && !baruPV.length){ alert('Semua data dalam file ni dah ada. Takde yang baru, jadi takde double.'); return; } if(!confirm('Import '+baru.length+' invoice baru?\n('+skip+' dah ada - akan skip, tak double)\n'+baruPV.length+' PV batal baru, '+skipPV+' dah ada.'))return; invoices=[...baru,...invoices]; cancelledPVs=[...baruPV,...cancelledPVs]; if(d.customCats) customCats=[...new Set([...customCats,...d.customCats])]; save(); render(); showToast('Import siap: '+baru.length+' baru, '+skip+' dah ada - skip'); }catch(err){ alert('File tak valid'); } }; r.readAsText(f); e.target.value=''; };
 document.getElementById('settingCatBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); renderCatManager(); document.getElementById('catModal').classList.add('open'); };
+
+document.getElementById('supabaseSaveKey').onclick=()=>{ const v=document.getElementById('supabaseKeyInput').value.trim(); if(!v){ alert('Paste anon key dulu'); return; } try{ localStorage.setItem('ik_supabase_key', v); }catch(e){} updateSupabaseStatus('Key disimpan - cuba sync...'); supabasePush(); showToast('Supabase key disimpan'); };
+document.getElementById('supabaseSyncNow').onclick=()=>{ if(!supabaseEnabled()){ alert('Masukkan anon key dulu'); return; } supabasePush(); showToast('Sync ke cloud...'); };
+document.getElementById('supabasePullNow').onclick=()=>supabasePull(true);
+setTimeout(()=>{ if(supabaseEnabled()) supabasePull(false); }, 1200);
 document.getElementById('catCloseBtn').onclick=document.getElementById('catBack').onclick=()=>document.getElementById('catModal').classList.remove('open');
 document.getElementById('addCatBtn').onclick=()=>{ const v=document.getElementById('newCatInput').value.trim(); if(!v){alert('Isi nama kategori dulu');return;} if(allCats().includes(v)){alert('Dah ada');return;} customCats.push(v); save(); rebuildCatList(); render(); renderCatManager(); document.getElementById('newCatInput').value=''; showToast('Kategori baru ditambah'); };
 function renderCatManager(){ const box=document.getElementById('catListBox'); box.innerHTML=''; allCats().forEach(c=>{ const row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;align-items:center;background:#f8fafc;border:1px solid #eee;border-radius:10px;padding:8px 10px'; row.innerHTML=`<span style="flex:1;font-weight:600">${c}</span>`; const eb=document.createElement('button'); eb.textContent='Edit'; eb.className='btn btn-light'; eb.style.cssText='padding:6px 10px;font-size:12px'; eb.onclick=()=>{ const baru=prompt('Edit kategori "'+c+'" jadi:',c); if(!baru||!baru.trim()||baru.trim()===c)return; const nc=baru.trim(); if(DEFAULT_CATS.includes(c)){ if(!hiddenCats.includes(c)) hiddenCats.push(c); } else { customCats=customCats.map(x=>x===c?nc:x); } if(!customCats.includes(nc)&&!DEFAULT_CATS.includes(nc)) customCats.push(nc); invoices.forEach(inv=>{if(inv.cat===c)inv.cat=nc}); save(); render(); renderCatManager(); showToast('Kategori ditukar'); }; const db=document.createElement('button'); db.textContent='Padam'; db.className='btn btn-light'; db.style.cssText='padding:6px 10px;font-size:12px;color:#dc2626'; db.onclick=()=>{ if(!confirm('Padam kategori "'+c+'"?'))return; if(DEFAULT_CATS.includes(c)){ if(!hiddenCats.includes(c)) hiddenCats.push(c); } else { customCats=customCats.filter(x=>x!==c); } invoices.forEach(inv=>{if(inv.cat===c)inv.cat='';}); save(); render(); renderCatManager(); }; row.appendChild(eb); row.appendChild(db); box.appendChild(row); }); }
-document.getElementById('addBtnTop').onclick=()=>{ editId=null; pendingImg=''; pendingPdf=''; setThumb(''); rebuildCatList(); document.getElementById('addTitle').textContent='Tambah Invoice'; document.getElementById('fName').value=''; document.getElementById('fInv').value=''; document.getElementById('fPrice').value=''; document.getElementById('fNote').value=''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=false; document.getElementById('fDate').value=today(); const _sb=document.getElementById('supSuggest'); if(_sb) _sb.style.display='none'; const _sh=document.getElementById('supHint'); if(_sh) _sh.style.display='none'; document.getElementById('addModal').classList.add('open'); };
+document.getElementById('addBtnTop').onclick=()=>{ editId=null; pendingImg=''; pendingPdf=''; setThumb(''); rebuildCatList(); document.getElementById('addTitle').textContent='Tambah Invoice'; document.getElementById('fName').value=''; document.getElementById('fInv').value=''; document.getElementById('fPrice').value=''; document.getElementById('fNote').value=''; document.getElementById('fDate').value=today(); const _sb=document.getElementById('supSuggest'); if(_sb) _sb.style.display='none'; const _sh=document.getElementById('supHint'); if(_sh) _sh.style.display='none'; document.getElementById('addModal').classList.add('open'); };
 document.getElementById('addClose').onclick=document.getElementById('addBack').onclick=document.getElementById('addCancel').onclick=()=>{ document.getElementById('addModal').classList.remove('open'); const _sb=document.getElementById('supSuggest'); if(_sb) _sb.style.display='none'; const _sh=document.getElementById('supHint'); if(_sh) _sh.style.display='none'; };
 function getSuppliers(){ return [...new Set(invoices.map(x=>x.name).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 function normSupName(s){ return String(s||'').trim().replace(/\s+/g,' '); }
@@ -959,15 +900,15 @@ document.getElementById('fName').oninput=showSupSuggest;
 document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementById('fName').value; let name=normSupName(_raw); const _ex=getSuppliers().find(s=>s.toLowerCase()===name.toLowerCase()); if(_ex) name=_ex; inv=document.getElementById('fInv').value.trim(), date=document.getElementById('fDate').value, cat=document.getElementById('fCat').value, note=(document.getElementById('fNote')?document.getElementById('fNote').value.trim():''); if(!name) name='Tanpa Nama'; if(!inv) inv='INV-' + new Date().toISOString().slice(0,10) + '-' + String(Date.now()).slice(-4); let price=parseFloat(document.getElementById('fPrice').value); if(isNaN(price)) price=0; if(String(inv||'').trim().toUpperCase().startsWith('CN') && price>0) price=-Math.abs(price); // Elak redundant - supplier sama + no invoice sama = dah ada
   const _dup = invoices.find(y=> y.id!==editId && String(y.inv||'').trim().toUpperCase()===String(inv||'').trim().toUpperCase() && String(y.name||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());
   if(_dup){ alert('Dah ada invoice sama!\n\n'+_dup.name+' - '+_dup.inv+' - '+fmtDate(_dup.date)+' - '+fmt(signedPrice(_dup))+'\n\nTukar No Invoice lain dulu.'); return; }
-  if(!date) date=today(); const isCash=!!document.getElementById('fCash')?.checked; let becamePaid=false; if(editId){ const x=invoices.find(y=>y.id===editId);
+  if(!date) date=today(); if(editId){ const x=invoices.find(y=>y.id===editId);
     let _pdfField = pendingPdf!=='' ? pendingPdf : (pendingImg && pendingImg!==x.img ? '' : (x.pdf||''));
     // Kalau PDF baru besar, pindah ke IndexedDB
     if(_pdfField && String(_pdfField).startsWith('data:') && _pdfField.length>500*1024){ const _k='inv_'+x.id; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-    Object.assign(x,{name,inv,price,date,cat,note,img:pendingImg||x.img, pdf:_pdfField, hasPdf:!!_pdfField}); if(!x.paid && isCash){ const _pv=nextPV(); Object.assign(x,{paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; }
+    Object.assign(x,{name,inv,price,date,cat,note,img:pendingImg||x.img, pdf:_pdfField, hasPdf:!!_pdfField});
   } else { const _newId=Date.now().toString();
   let _pdfField=pendingPdf||'';
   if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-  if(isCash){ const _pv=nextPV(); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:pendingImg,pdf:_pdfField,hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:pendingImg,pdf:_pdfField,hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar (Cash)'); } else { render(); showToast('Invoice disimpan'); } };
+  invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:pendingImg,pdf:_pdfField,hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } save(); render(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; showToast('Invoice disimpan'); };
 document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; document.getElementById('fImg').click(); }; // NATIVE iPhone - terus keluar Photo Library / Take Photo / Choose File
 document.getElementById('srcCancel').onclick=document.getElementById('srcBack').onclick=()=>document.getElementById('imgSourceModal').classList.remove('open');
 document.getElementById('srcCamera').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); document.getElementById('fImgCamera').click(); };
