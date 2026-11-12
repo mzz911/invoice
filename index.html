@@ -1141,9 +1141,10 @@ function warpPerspective(dataUrl, quadPct, cb){
 function showCropEditor(dataUrl, target, isScan){
   const existing=document.getElementById('cropModal'); if(existing) existing.remove();
   const m=document.createElement('div'); m.id='cropModal'; m.className='modal open';
-  m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><b id="cropTitle" style="color:#fff;font-size:18px">Edit Scan</b><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div>
-  <div id="editStage" style="flex:1;display:flex;flex-direction:column">
-  <div id="cropViewport" style="position:relative;width:100%;flex:1;overflow:hidden;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:12px 12px 28px;box-sizing:border-box">
+  m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><b id="cropTitle" style="color:#fff;font-size:18px">Edit Scan</b><div style="display:flex;gap:8px"><button id="cropFitBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px">↔ Muatkan</button><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
+  <div style="background:#000;color:#aaa;font-size:11px;text-align:center;padding:2px 12px 6px">Drag bulat putih di 4 bucu — kalau bulat bawah tak nampak, tekan ↔ Muatkan</div>
+  <div id="editStage" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
+  <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:hidden;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:8px;box-sizing:border-box">
   <div id="zoomSpacer" style="position:relative;margin:auto;display:flex;justify-content:center;align-items:flex-start">
   <div id="cropWrap" style="position:relative;flex:0 0 auto;background:#000;border-radius:0;overflow:hidden;touch-action:none;transform-origin:0 0">
     <img id="cropImg" src="${dataUrl}" style="width:100%;height:auto;display:block;border-radius:0">
@@ -1173,7 +1174,7 @@ function showCropEditor(dataUrl, target, isScan){
   </div>`;
   document.body.appendChild(m);
   let cur=dataUrl; let orig=dataUrl; let reviewOrig=dataUrl;
-  let quad=[{x:8,y:8},{x:92,y:8},{x:92,y:82},{x:8,y:82}];
+  let quad=[{x:6,y:6},{x:94,y:6},{x:94,y:94},{x:6,y:94}];
   let fitW=0, fitH=0; let zoom=1;
   const imgEl=m.querySelector('#cropImg'); const wrap=m.querySelector('#cropWrap'); const poly=m.querySelector('#quadPoly'); const handles=Array.from(m.querySelectorAll('[data-quad]'));
   function renderQuad(){
@@ -1185,12 +1186,13 @@ function showCropEditor(dataUrl, target, isScan){
   }
   function fitImage(){
     const vp=m.querySelector('#cropViewport'); const w=m.querySelector('#cropWrap'); const im=m.querySelector('#cropImg'); if(!vp||!w||!im) return;
-    // Fit 92% - macam sebelum auto-detect
-    const vw=vp.clientWidth*0.86; const vh=vp.clientHeight*0.82;
-    const iw=im.naturalWidth||im.width||800; const ih=im.naturalHeight||im.height||1000; if(!iw||!ih) return;
+    // MESTI muat dalam viewport + ruang untuk bulat handle (16px radius + margin) - kalau tak, bulat bawah terkeluar bawah screen macam screenshot
+    const vw=Math.max(100, vp.clientWidth-44); const vh=Math.max(100, vp.clientHeight-44);
+    const iw=im.naturalWidth||0; const ih=im.naturalHeight||0;
+    if(!iw||!ih){ setTimeout(fitImage, 120); return; }
     const sc=Math.min(vw/iw, vh/ih, 1); fitW=Math.round(iw*sc); fitH=Math.round(ih*sc);
-    w.style.width=fitW+'px'; w.style.height=fitH+'px'; im.style.width=fitW+'px'; im.style.height=fitH+'px';
-    const sp=m.querySelector('#zoomSpacer'); if(sp){ sp.style.width=fitW+'px'; sp.style.height=fitH+'px'; }
+    w.style.width=fitW+'px'; w.style.height=fitH+'px'; w.style.maxWidth='100%'; w.style.maxHeight='100%'; im.style.width=fitW+'px'; im.style.height=fitH+'px'; im.style.maxWidth='100%'; im.style.maxHeight='100%';
+    const sp=m.querySelector('#zoomSpacer'); if(sp){ sp.style.width=fitW+'px'; sp.style.height=fitH+'px'; sp.style.maxWidth='100%'; sp.style.maxHeight='100%'; }
     renderQuad();
   }
   function showEdit(){ m.querySelector('#editStage').style.display='flex'; m.querySelector('#reviewStage').style.display='none'; m.querySelector('#cropTitle').textContent='Edit Scan'; const cu=m.querySelector('#cropUse'); if(cu) cu.style.display='block'; const hd=m.querySelector('#cropHeader'); if(hd) hd.style.display='flex'; }
@@ -1271,8 +1273,12 @@ function showCropEditor(dataUrl, target, isScan){
   // POINTER je - jangan campur touch, nanti double event buat bulat lompat
   handles.forEach((h,i)=>{ h.addEventListener('pointerdown', (e)=> quadPointerDown(e,i)); });
   window.addEventListener('pointermove', quadPointerMove, {passive:false}); window.addEventListener('pointerup', quadPointerUp); window.addEventListener('pointercancel', quadPointerUp);
-  const _fitImg=m.querySelector('#cropImg'); if(_fitImg){ _fitImg.onload=()=>{ fitImage(); }; if(_fitImg.complete) setTimeout(fitImage, 50); }
+  const _fitImg=m.querySelector('#cropImg'); if(_fitImg){ _fitImg.onload=()=>{ fitImage(); setTimeout(fitImage, 120); }; if(_fitImg.complete) setTimeout(fitImage, 50); }
+  // Layout iPhone lambat settle (URL bar naik/turun) - fit berkali-kali awal-awal supaya gambar tak overflow
+  requestAnimationFrame(()=>fitImage()); setTimeout(fitImage, 100); setTimeout(fitImage, 350); setTimeout(fitImage, 800);
   window.addEventListener('resize', fitImage);
+  try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', fitImage); }catch(e){}
+  const _fitBtn=m.querySelector('#cropFitBtn'); if(_fitBtn) _fitBtn.onclick=()=>{ fitImage(); setTimeout(fitImage, 60); };
   // Next - warp ikut quad sekarang
   m.querySelector('#cropUse').onclick=()=>{ warpPerspective(cur, quad, (warped)=>{ reviewOrig=cur; cur=warped; showReview(warped); }); };
   m.querySelector('#cropCancel').onclick=()=>{ m.remove(); if(target==='viewer') document.getElementById('imgViewModal').classList.add('open'); };
