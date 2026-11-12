@@ -250,7 +250,7 @@ function render(){
         const _firstItem=g.items.find(x=>x.img)||g.items[0];
         d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?`<img src="${_firstImg}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
         // Thumb - tekan gambar view gambar invoice macam Belum Bayar, bukan buka PV
-        const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(_firstItem && _firstItem.img) openImgView(_firstItem.img,'Gambar Invoice - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.pdf||'',{kind:'invoice',id:_firstItem.id}); else if(_firstItem && _firstItem.pdf) openImgViewOnlyPdf(_firstItem.pdf,'PDF - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.img,{kind:'invoice',id:_firstItem.id}); };
+        const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); _viewCtx={kind:'invoice',id:_firstItem.id}; imgTarget='viewer'; document.getElementById('fImg').click(); }; // NATIVE - klik thumbnail terus keluar iPhone upload / camera
       } else {
         const x=g.items[0];
         d.innerHTML=`<div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div></div><div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill paid">Dah Bayar</span></div>`;
@@ -315,7 +315,7 @@ function render(){
       const d=document.createElement('div'); d.className='card';
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
       d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${g.items.length} invoice • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${g.items.length} invoice</span>${hasResit?`<div>🧾</div>`:''}</div>`;
-      const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); };
+      const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); }; // NATIVE - klik thumbnail terus keluar iPhone upload / camera
       d.onclick=()=>openPVDetail(g.pv,g.payDate); box.appendChild(d); return;
     }
     const x=_card.item;
@@ -330,7 +330,7 @@ function render(){
     <div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||'INV-'} • ${x.cat||''}</div>${x.note?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📝 ${x.note}</div>`:''}${splitTxt?`<div style="font-weight:600">${splitTxt}</div>`:''}${x.payMethod&&x.payMethod!=='Split Payment'?`<span class="pill cash">${x.payMethod}</span>`:''}</div>
     <div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill ${x.paid?'paid':'unpaid'}">${x.paid?'Dah Bayar':'Belum Bayar'}</span>${x.paid&&x.pv?`<div><span class="pill pv">${x.pv}</span></div><div style="font-size:11px;color:#666">Bayar: ${fmtDate(x.payDate)}</div>`:''}${x.paymentImg?`<div>🧾</div>`:''}</div>`;
     cc.querySelector('input').onchange=e=>{ if(e.target.checked)selected.add(x.id); else selected.delete(x.id); render(); };
-    const th=cc.querySelector('[data-thumb]'); th.onclick=e=>{ e.stopPropagation(); if(x.img) openImgView(x.img,'Gambar Invoice - '+x.name,(x.inv||'')+' • '+x.date,x.pdf||'',{kind:'invoice',id:x.id}); else showToast('Tiada Gambar Invoice'); };
+    const th=cc.querySelector('[data-thumb]'); th.onclick=e=>{ e.stopPropagation(); _viewCtx={kind:'invoice',id:x.id}; imgTarget='viewer'; document.getElementById('fImg').click(); }; // NATIVE - klik thumbnail terus keluar iPhone upload / camera
     let suppressClick=false; cc.onclick=e=>{ if(e.target.tagName==='INPUT')return; if(suppressClick){ suppressClick=false; return; } if(cc.dataset.open==='1'){ closeSwipe(); return; } openDetail(x.id); };
     // Swipe kiri - macam iPhone, keluar Delete
     let delDone=false; function doDel(){ if(delDone) return; delDone=true; invoices=invoices.filter(y=>y.id!==x.id); selected.delete(x.id); save(); render(); showToast('Invoice dipadam'); }
@@ -867,7 +867,7 @@ async function _viewerShare(){
 document.getElementById('imgViewDeleteTop').onclick=()=>_viewerDelete();
 document.getElementById('imgViewDeleteBtn').onclick=()=>_viewerDelete();
 document.getElementById('imgViewShareBtn').onclick=()=>_viewerShare();
-document.getElementById('imgViewUploadBtn').onclick=()=>{ if(!_viewCtx){ showToast('Tak dapat kenal invoice ni'); return; } imgTarget='viewer'; document.getElementById('imgSourceModal').classList.add('open'); };
+document.getElementById('imgViewUploadBtn').onclick=()=>{ if(!_viewCtx){ showToast('Tak dapat kenal invoice ni'); return; } imgTarget='viewer'; document.getElementById('fImg').click(); }; // NATIVE iPhone - terus keluar Photo Library / Take Photo / Choose File
 document.getElementById('imgViewEditBtn').onclick=()=>{ if(!_viewImgSrc){ showToast('Tiada gambar untuk edit - PDF tak boleh crop'); return; } document.getElementById('imgViewModal').classList.remove('open'); showCropEditor(_viewImgSrc,'viewer',false); };
 document.getElementById('detailClose').onclick=document.getElementById('detailBack').onclick=()=>document.getElementById('detailModal').classList.remove('open');
 document.getElementById('pvClose').onclick=document.getElementById('pvBack').onclick=()=>document.getElementById('pvModal').classList.remove('open');
