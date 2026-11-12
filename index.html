@@ -154,6 +154,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <!-- PAY -->
 <div class="modal" id="payModal"><div class="sheet"><div class="closeRow"><button id="payBack">← Kembali</button><b id="payTitle">Bayar</b><button id="payClose">✕ Tutup</button></div>
 <div id="payList" style="font-size:14px"></div>
+<label>Tarikh Bayar</label><input id="payDateInput" type="date">
 <label>Cara Bayar</label>
 <div id="payMethods" style="display:flex;flex-direction:column;gap:8px"></div>
 <div id="payAmounts"></div>
@@ -452,7 +453,7 @@ function openImgViewOnlyPdf(pdf,title,meta,imgSrc){ _viewImgSrc=imgSrc||''; open
 function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
 ${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}</p><img src="${x.img}" style="width:100%;border-radius:12px;cursor:pointer" id="dInvImg">${x.pdf?`<button class="btn btn-dark" id="dPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Asal</button>`:''}</div>`:''}
 ${x.paid?`<p>Status: Dah Bayar • ${x.payMethod||''}<br>PV: ${x.pv||'-'} • Bayar: ${fmtDate(x.payDate)||'-'}</p>`:''}
-${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar</p>${x.paymentImg?`<img src="${x.paymentImg}" style="width:100%;border-radius:12px;cursor:pointer" id="dPayImg">${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">🔄 Tukar Resit Payment</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
+${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar</p>${x.paymentImg?`<img src="${x.paymentImg}" style="width:100%;border-radius:12px;cursor:pointer" id="dPayImg">${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">✏️ Edit</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
 <div class="row" style="margin-top:12px"><button class="btn btn-light" id="delBtn" style="flex:1">Padam Invoice</button><button class="btn btn-light" id="editBtn" style="flex:1">Edit</button></div>
 <button class="btn btn-dark" id="dlPdfOne" style="width:100%;margin-top:8px">⬇️ Download PDF - Invoice + Resit Payment</button>
 ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;margin-top:8px">Bayar Invoice Ni</button>`: `<p style="font-size:12px;color:#666;text-align:center;margin-top:10px">Untuk batal PV, swipe kiri kad PV kat tab Dah Bayar</p>`}
@@ -461,7 +462,7 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
  const dp=b.querySelector('#dPayImg'); if(dp) dp.onclick=()=>openImgViewOnlyImg(x.paymentImg,'Resit Payment - '+x.name,x.pv||'');
  const vp=b.querySelector('#viewPayBtn'); if(vp) vp.onclick=()=>openImgView(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',x.paymentPdf||''); const dppb=b.querySelector('#dPayPdfBtn'); if(dppb) dppb.onclick=()=>openImgViewOnlyPdf(x.paymentPdf,'PDF Resit - '+x.name,x.pv||'',x.paymentImg);
  const ap=b.querySelector('#addPayBtn'); if(ap) ap.onclick=()=>{ imgTarget='pay'; document.getElementById('fImg').click(); }; // NATIVE
- const cp=b.querySelector('#changePayBtn'); if(cp) cp.onclick=()=>{ imgTarget='pay'; document.getElementById('fImg').click(); }; // NATIVE
+ const cp=b.querySelector('#changePayBtn'); if(cp) cp.onclick=()=>{ if(x.paid && x.pv) openEditPay(x.pv, x.payDate); else { imgTarget='pay'; document.getElementById('fImg').click(); } };
  // For add/change pay, we need a handler: when image chosen for pay in detail, save to this invoice
  window._payDetailId = x.id;
  b.querySelector('#delBtn').onclick=()=>{ if(confirm('Padam invoice ni?')){ invoices=invoices.filter(y=>y.id!==id); selected.delete(id); save(); render(); document.getElementById('detailModal').classList.remove('open'); } };
@@ -472,17 +473,55 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
  document.getElementById('detailModal').classList.add('open');
 }
 function nextPV(){ const nums=invoices.filter(x=>x.pv).map(x=>parseInt((x.pv||'').split('-')[2]||'0')); const maxv=Math.max(0,...nums, ...cancelledPVs.map(c=>parseInt((c.pv||'').split('-')[2]||'0'))); const d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); return `PV-${yy}${mm}-${String(maxv+1).padStart(3,'0')}`; }
+let editPVInfo=null;
 function openPay(mode, singleId){
-  payMode=mode; payTarget = mode==='single'? [singleId] : [...selected];
+  payMode=mode; editPVInfo=null; payTarget = mode==='single'? [singleId] : [...selected];
   const items=payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
   document.getElementById('payTitle').textContent='Bayar - '+items.length+' invoice • '+fmt(items.reduce((s,x)=>s+signedPrice(x),0));
   document.getElementById('payList').innerHTML=items.map(x=>`<div>• ${x.name} - ${fmt(signedPrice(x))} - ${x.inv}${isCN(x)?' (CN - Credit Note)':''}</div>`).join('');
+  const _pd=document.getElementById('payDateInput'); if(_pd) _pd.value=today();
+  const _pc=document.getElementById('payConfirm'); if(_pc) _pc.textContent='Confirm Bayar';
   pendingPayImg=''; pendingPayPdf='';
   const pp=document.getElementById('payThumbPreview'); pp.style.display='none'; document.getElementById('payThumbIcon').style.display='block';
   const methods=['Cash','Bank Transfer','QR / E-Wallet'];
   document.getElementById('payMethods').innerHTML=methods.map(m=>`<label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" value="${m}" class="pm" style="width:20px"> ${m}</label>`).join('');
   document.getElementById('payAmounts').innerHTML='';
   document.querySelectorAll('.pm').forEach(cb=>cb.onchange=renderPayAmounts);
+  document.getElementById('payModal').classList.add('open');
+}
+function openEditPay(pv, payDate){
+  // Edit Bayar macam modal Bayar - tapi PV kekal, isi data lama
+  const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate);
+  if(!items.length) return;
+  document.getElementById('pvModal').classList.remove('open');
+  // Kalau dari Detail invoice, tutup detail jugak
+  const _dm=document.getElementById('detailModal'); if(_dm) _dm.classList.remove('open');
+  payMode='editPV'; editPVInfo={pv, payDate}; payTarget=items.map(x=>x.id);
+  const total=items.reduce((s,x)=>s+signedPrice(x),0);
+  document.getElementById('payTitle').textContent='Edit Bayar - '+pv+' • '+fmt(total);
+  document.getElementById('payList').innerHTML=items.map(x=>`<div>• ${x.name} - ${fmt(signedPrice(x))} - ${x.inv}${isCN(x)?' (CN - Credit Note)':''}</div>`).join('');
+  const _pd=document.getElementById('payDateInput'); if(_pd) _pd.value=payDate||today();
+  const _pc=document.getElementById('payConfirm'); if(_pc) _pc.textContent='Simpan Edit';
+  pendingPayImg=''; pendingPayPdf='';
+  // Cara Bayar lama - tick ikut payMethod / split lama
+  const methods=['Cash','Bank Transfer','QR / E-Wallet'];
+  const oldMethod=items[0].payMethod||'Cash';
+  const oldSplit=items[0].split||null;
+  let checkedMethods=[];
+  if(oldMethod==='Split Payment' && oldSplit) checkedMethods=Object.keys(oldSplit).filter(k=>oldSplit[k]>0);
+  else if(methods.includes(oldMethod)) checkedMethods=[oldMethod];
+  else checkedMethods=['Cash'];
+  document.getElementById('payMethods').innerHTML=methods.map(m=>`<label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" value="${m}" class="pm" style="width:20px" ${checkedMethods.includes(m)?'checked':''}> ${m}</label>`).join('');
+  document.querySelectorAll('.pm').forEach(cb=>cb.onchange=renderPayAmounts);
+  // Isi Amounts - kalau Split, ikut split lama, kalau single, total
+  renderPayAmounts();
+  if(oldMethod==='Split Payment' && oldSplit){
+    setTimeout(()=>{ document.querySelectorAll('[data-amt]').forEach(inp=>{ if(oldSplit[inp.dataset.amt]!=null) inp.value=Number(oldSplit[inp.dataset.amt]).toFixed(2); }); }, 50);
+  }
+  // Resit lama - tunjuk thumb lama
+  const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon');
+  const oldResit=items.find(x=>x.paymentImg)?.paymentImg||'';
+  if(oldResit && pp){ pp.src=oldResit; pp.style.display='block'; if(pi) pi.style.display='none'; } else { if(pp) pp.style.display='none'; if(pi) pi.style.display='block'; }
   document.getElementById('payModal').classList.add('open');
 }
 function renderPayAmounts(){ const checked=[...document.querySelectorAll('.pm:checked')].map(c=>c.value); const box=document.getElementById('payAmounts'); if(!checked.length){ box.innerHTML=''; return; } const total=payTarget.map(id=>invoices.find(x=>x.id===id)).reduce((s,x)=>s+signedPrice(x),0); const _old={}; document.querySelectorAll('[data-amt]').forEach(inp=>{ _old[inp.dataset.amt]=inp.value; }); box.innerHTML='<label>Amount</label>'+checked.map((m,i)=>{ let v=_old[m]; if(v===undefined||v===''){ v = (checked.length===1||i===0) ? Number(total).toFixed(2) : '0.00'; } return `<label>${m}</label><input data-amt="${m}" type="number" step="0.01" value="${v}">`; }).join(''); }
@@ -541,13 +580,12 @@ function openPVDetail(pv, payDate){
   const b=document.getElementById('pvBody');
   b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${items.length} invoice</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
     + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
-    + (resits.length?`<div><p style="font-weight:700">Resit Payment</p>`+resits.map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="changePVPayBtn" style="width:100%">🔄 Tukar Resit Payment</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="addPVPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`)
+    + (resits.length?`<div><p style="font-weight:700">Resit Payment</p>`+resits.map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
     + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
   b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ document.getElementById('pvModal').classList.remove('open'); openDetail(el.dataset.pvInv); });
   b.querySelectorAll('[data-resit]').forEach((el,i)=>el.onclick=()=>openImgView(resits[i],'Resit Payment - '+pv,pv));
-  const apPV=b.querySelector('#addPVPayBtn'); if(apPV) apPV.onclick=()=>{ window._payPV={pv,payDate}; imgTarget='payPV'; document.getElementById('fImg').click(); };
-  const cpPV=b.querySelector('#changePVPayBtn'); if(cpPV) cpPV.onclick=()=>{ window._payPV={pv,payDate}; imgTarget='payPV'; document.getElementById('fImg').click(); };
+  const epPV=b.querySelector('#editPVPayBtn'); if(epPV) epPV.onclick=()=>{ openEditPay(pv, payDate); };
   const dp=b.querySelector('#dlPdfPV'); if(dp) dp.onclick=()=>downloadPdfPV(pv,payDate);
 
 
@@ -766,9 +804,14 @@ document.getElementById('payConfirm').onclick=()=>{
   let payMethod='', split=null;
   if(checked.length===1){ payMethod=checked[0]; }
   else { payMethod='Split Payment'; split={}; let sum=0; for(const m of checked){ const v=parseFloat(document.querySelector(`[data-amt="${m}"]`)?.value||'0'); split[m]=v; sum+=v; } if(Math.abs(sum-total)>0.01){ alert(`Total split ${fmt(sum)} tak sama dengan total invoice ${fmt(total)}`); return; } }
-  const pv=nextPV(); const pd=today();
-  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } });
-  selected.clear(); save(); document.getElementById('payModal').classList.remove('open'); showToast(`Bayar siap - ${pv} - ${items.length} invoice`); gotoTab('paid');
+  // Kalau Edit, kekalkan PV lama, jangan buat PV baru
+  let pv, pd;
+  if(payMode==='editPV' && editPVInfo){ pv=editPVInfo.pv; pd=document.getElementById('payDateInput')?.value||editPVInfo.payDate; }
+  else { pv=nextPV(); pd=document.getElementById('payDateInput')?.value||today(); }
+  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null; if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } });
+  selected.clear(); save(); document.getElementById('payModal').classList.remove('open');
+  if(payMode==='editPV'){ showToast(`Edit Bayar siap - ${pv}`); gotoTab('paid'); if(editPVInfo) setTimeout(()=>openPVDetail(pv, pd), 300); }
+  else { showToast(`Bayar siap - ${pv} - ${items.length} invoice`); gotoTab('paid'); }
 };
 
 // ===== EDIT SCAN =====
