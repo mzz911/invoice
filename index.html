@@ -158,8 +158,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <label>Cara Bayar</label>
 <div id="payMethods" style="display:flex;flex-direction:column;gap:8px"></div>
 <div id="payAmounts"></div>
-<div style="margin-top:12px"><b>Resit Payment</b><div style="position:relative;width:100px;margin-top:6px"><div id="payThumbBox" style="width:100px;height:100px;border:2px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden"><span id="payThumbIcon">📷</span><img id="payThumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><button id="payThumbDelete" style="display:none;position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)">✕</button></div><p id="payThumbHint" style="font-size:11px;color:#666;margin:4px 0 0">Tekan gambar untuk tukar • Tekan ✕ untuk padam</p></div>
-<div style="margin-top:14px"><b>Gambar Invoice</b><div id="payInvList" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"></div><p style="font-size:11px;color:#666;margin:4px 0 0">Tekan gambar untuk view / tukar • Upload / Edit / Share / Delete kat viewer</p></div>
+<div style="display:flex;gap:16px;align-items:flex-start;margin-top:12px;overflow-x:auto"><div style="flex-shrink:0"><b>Resit Payment</b><div style="position:relative;width:100px;margin-top:6px"><div id="payThumbBox" style="width:100px;height:100px;border:2px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden"><span id="payThumbIcon">📷</span><img id="payThumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><button id="payThumbDelete" style="display:none;position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)">✕</button></div><p id="payThumbHint" style="font-size:11px;color:#666;margin:4px 0 0">Tekan gambar untuk tukar • Tekan ✕ untuk padam</p></div><div style="flex:1;min-width:120px"><b>Gambar Invoice</b><div id="payInvList" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"></div><p style="font-size:11px;color:#666;margin:4px 0 0">Tekan gambar untuk tukar • Tekan ✕ untuk padam</p></div></div>
 <div class="row" style="margin-top:14px"><button class="btn btn-light" id="payCancel" style="flex:1">Batal</button><button class="btn btn-green" id="payConfirm" style="flex:1">Confirm Bayar</button></div></div></div>
 
 <!-- DRIVE INFO -->
@@ -177,6 +176,7 @@ let hiddenCats = JSON.parse(localStorage.getItem('ik_cats_hidden')||'[]');
 const DEFAULT_CATS = ['stock','kegunaan kedai','utilities','gaji','personal'];
 migrateCN();
 let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
+let pendingInvImgs={}, pendingInvPdfs={}, deleteInvImgs={}, _payInvTargetId=null;
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
 // ===== IndexedDB untuk PDF besar (multi-muka) - localStorage cuma ~5MB, PDF 2MB+ tak muat =====
 const IDB_DB='invoiceKedaiDB', IDB_STORE='pdfs';
@@ -490,17 +490,21 @@ function renderPayInvList(){
   if(!items.length){ box.innerHTML='<p style="font-size:12px;color:#666">Tiada invoice</p>'; return; }
   box.innerHTML='';
   items.forEach(x=>{
-    const wrap=document.createElement('div'); wrap.style.cssText='width:100px;text-align:center';
+    const wrap=document.createElement('div'); wrap.style.cssText='width:100px;text-align:center;position:relative';
+    const thumbBox=document.createElement('div'); thumbBox.style.cssText='position:relative;width:100px;height:100px';
     const thumb=document.createElement('div'); thumb.style.cssText='width:100px;height:100px;border:2px dashed #cbd5e1;border-radius:12px;overflow:hidden;cursor:pointer;background:#f8fafc;display:flex;align-items:center;justify-content:center';
-    thumb.innerHTML=x.img?`<img src="${x.img}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
-    thumb.onclick=()=>{
-      if(x.img||x.pdf){ openImgView(x.img||'', 'Gambar Invoice - '+x.name, (x.inv||'')+' • '+x.date, x.pdf||'', {kind:'invoice',id:x.id}); }
-      else { _viewCtx={kind:'invoice',id:x.id}; imgTarget='viewer'; document.getElementById('fImg').click(); }
-    };
+    // Kalau ada pending / delete, tunjuk pending; kalau delete, tunjuk kosong
+    const _dispImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || '');
+    thumb.innerHTML=_dispImg?`<img src="${_dispImg}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
+    thumb.onclick=()=>{ _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); }; // NATIVE macam Resit Payment - terus Photo Library / Take Photo / Choose File
+    const delBtn=document.createElement('button'); delBtn.textContent='✕'; delBtn.style.cssText='display:'+(_dispImg?'block':'none')+';position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)';
+    delBtn.onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam gambar invoice '+x.name+' ni?')) return; pendingInvImgs[x.id]=''; pendingInvPdfs[x.id]=''; deleteInvImgs[x.id]=true; renderPayInvList(); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); };
+    thumbBox.appendChild(thumb); thumbBox.appendChild(delBtn);
     const nm=document.createElement('div'); nm.style.cssText='font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'; nm.textContent=x.name||'';
     const inv=document.createElement('div'); inv.style.cssText='font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'; inv.textContent=x.inv||'';
-    wrap.appendChild(thumb); wrap.appendChild(nm); wrap.appendChild(inv);
-    if(x.pdf){ const pdfTag=document.createElement('div'); pdfTag.style.cssText='font-size:10px;color:#666'; pdfTag.textContent='📄 PDF'; wrap.appendChild(pdfTag); }
+    wrap.appendChild(thumbBox); wrap.appendChild(nm); wrap.appendChild(inv);
+    const _hasPdf = deleteInvImgs[x.id] ? false : (pendingInvPdfs[x.id] || x.pdf);
+    if(_hasPdf){ const pdfTag=document.createElement('div'); pdfTag.style.cssText='font-size:10px;color:#666'; pdfTag.textContent='📄 PDF'; wrap.appendChild(pdfTag); }
     box.appendChild(wrap);
   });
 }
@@ -511,7 +515,7 @@ function openPay(mode, singleId){
   document.getElementById('payList').innerHTML=items.map(x=>`<div>• ${x.name} - ${fmt(signedPrice(x))} - ${x.inv}${isCN(x)?' (CN - Credit Note)':''}</div>`).join('');
   const _pd=document.getElementById('payDateInput'); if(_pd) _pd.value=today();
   const _pc=document.getElementById('payConfirm'); if(_pc) _pc.textContent='Confirm Bayar';
-  pendingPayImg=''; pendingPayPdf=''; deletePayResit=false; updatePayThumbDelete(false);
+  pendingPayImg=''; pendingPayPdf=''; pendingInvImgs={}; pendingInvPdfs={}; deleteInvImgs={}; _payInvTargetId=null; deletePayResit=false; pendingInvImgs={}; pendingInvPdfs={}; deleteInvImgs={}; _payInvTargetId=null; updatePayThumbDelete(false);
   const pp=document.getElementById('payThumbPreview'); pp.style.display='none'; document.getElementById('payThumbIcon').style.display='block';
   const methods=['Cash','Bank Transfer','QR / E-Wallet'];
   document.getElementById('payMethods').innerHTML=methods.map(m=>`<label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" value="${m}" class="pm" style="width:20px"> ${m}</label>`).join('');
@@ -822,6 +826,17 @@ processFile = function(file,isScan,target){
     _r.readAsDataURL(file);
     return;
   }
+  // payInv - Gambar Invoice dalam Bayar/Edit Bayar: macam Resit, NO crop, terus pending, simpan bila tekan Simpan
+  if(target==='payInv'){
+    const _id = window._payInvTargetId || _payInvTargetId;
+    if(!_id){ showToast('Pilih invoice dulu'); return; }
+    if(file && (/\.pdf$/i.test(file.name||'') || file.type==='application/pdf')){
+      showToast('Baca PDF...');
+      const _r=new FileReader(); _r.onload=()=>{ const pdfUrl=_r.result; pendingInvPdfs[_id]=pdfUrl; pdfToImageFile(file).then(imgFile=>{ if(!imgFile) return; const _r2=new FileReader(); _r2.onload=()=>{ const thumb=_r2.result; const _im=new Image(); _im.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/_im.width); const cv=document.createElement('canvas'); cv.width=Math.round(_im.width*sc); cv.height=Math.round(_im.height*sc); const cx=cv.getContext('2d'); cx.drawImage(_im,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.88); pendingInvImgs[_id]=out; deleteInvImgs[_id]=false; renderPayInvList(); showToast('Gambar invoice dimasukkan'); }; _im.src=thumb; }; _r2.readAsDataURL(imgFile); }); }; _r.readAsDataURL(file); return;
+    }
+    // Gambar biasa - resize, terus pending, tak masuk Crop
+    const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); pendingInvImgs[_id]=out; pendingInvPdfs[_id]=''; deleteInvImgs[_id]=false; renderPayInvList(); showToast('Gambar invoice dimasukkan'); }; img.src=r.result; }; r.readAsDataURL(file); return;
+  }
   // Kalau pilih gambar biasa, clear PDF lama supaya tak tertinggal PDF lama
   if(target==='pay' || target==='payDetail' || target==='payPV'){ pendingPayPdf=''; } else if(target==='invoice' || !target || target===''){ pendingPdf=''; }
   if(target==='payDetail'){
@@ -910,7 +925,11 @@ document.getElementById('payConfirm').onclick=()=>{
   let pv, pd;
   if(payMode==='editPV' && editPVInfo){ pv=editPVInfo.pv; pd=document.getElementById('payDateInput')?.value||editPVInfo.payDate; }
   else { pv=nextPV(); pd=document.getElementById('payDateInput')?.value||today(); }
-  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null; if(deletePayResit){ // User tekan ✕ kat Edit Bayar - padam resit lama
+  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null;
+    // Gambar Invoice dalam Bayar/Edit Bayar - pending macam Resit
+    if(deleteInvImgs[x.id]){ if(x.pdf && String(x.pdf).startsWith('IDB:')) idbDeletePdf(String(x.pdf).slice(4)); x.img=''; x.pdf=''; }
+    else { if(pendingInvImgs[x.id]) x.img=pendingInvImgs[x.id]; if(pendingInvPdfs[x.id]){ let _pp2=pendingInvPdfs[x.id]; if(_pp2.length>500*1024){ const _k2='inv_'+x.id; idbSavePdf(_k2,_pp2); _pp2='IDB:'+_k2; } x.pdf=_pp2; } else if(pendingInvImgs[x.id] && pendingInvPdfs[x.id]===''){ x.pdf=''; } }
+    if(deletePayResit){ // User tekan ✕ kat Edit Bayar - padam resit lama
       if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4));
       x.paymentImg=''; x.paymentPdf='';
     } else { if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } } });
