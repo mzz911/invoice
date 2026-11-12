@@ -159,6 +159,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div id="payMethods" style="display:flex;flex-direction:column;gap:8px"></div>
 <div id="payAmounts"></div>
 <div style="margin-top:12px"><b>Resit Payment</b><div style="position:relative;width:100px;margin-top:6px"><div id="payThumbBox" style="width:100px;height:100px;border:2px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden"><span id="payThumbIcon">📷</span><img id="payThumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><button id="payThumbDelete" style="display:none;position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)">✕</button></div><p id="payThumbHint" style="font-size:11px;color:#666;margin:4px 0 0">Tekan gambar untuk tukar • Tekan ✕ untuk padam</p></div>
+<div style="margin-top:14px"><b>Gambar Invoice</b><div id="payInvList" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"></div><p style="font-size:11px;color:#666;margin:4px 0 0">Tekan gambar untuk view / tukar • Upload / Edit / Share / Delete kat viewer</p></div>
 <div class="row" style="margin-top:14px"><button class="btn btn-light" id="payCancel" style="flex:1">Batal</button><button class="btn btn-green" id="payConfirm" style="flex:1">Confirm Bayar</button></div></div></div>
 
 <!-- DRIVE INFO -->
@@ -483,6 +484,26 @@ let editPVInfo=null, deletePayResit=false;
 function updatePayThumbDelete(show){
   const d=document.getElementById('payThumbDelete'); if(d) d.style.display=show?'block':'none';
 }
+function renderPayInvList(){
+  const box=document.getElementById('payInvList'); if(!box) return;
+  const items=(typeof payTarget!=='undefined'?payTarget:[]).map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
+  if(!items.length){ box.innerHTML='<p style="font-size:12px;color:#666">Tiada invoice</p>'; return; }
+  box.innerHTML='';
+  items.forEach(x=>{
+    const wrap=document.createElement('div'); wrap.style.cssText='width:100px;text-align:center';
+    const thumb=document.createElement('div'); thumb.style.cssText='width:100px;height:100px;border:2px dashed #cbd5e1;border-radius:12px;overflow:hidden;cursor:pointer;background:#f8fafc;display:flex;align-items:center;justify-content:center';
+    thumb.innerHTML=x.img?`<img src="${x.img}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
+    thumb.onclick=()=>{
+      if(x.img||x.pdf){ openImgView(x.img||'', 'Gambar Invoice - '+x.name, (x.inv||'')+' • '+x.date, x.pdf||'', {kind:'invoice',id:x.id}); }
+      else { _viewCtx={kind:'invoice',id:x.id}; imgTarget='viewer'; document.getElementById('fImg').click(); }
+    };
+    const nm=document.createElement('div'); nm.style.cssText='font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'; nm.textContent=x.name||'';
+    const inv=document.createElement('div'); inv.style.cssText='font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'; inv.textContent=x.inv||'';
+    wrap.appendChild(thumb); wrap.appendChild(nm); wrap.appendChild(inv);
+    if(x.pdf){ const pdfTag=document.createElement('div'); pdfTag.style.cssText='font-size:10px;color:#666'; pdfTag.textContent='📄 PDF'; wrap.appendChild(pdfTag); }
+    box.appendChild(wrap);
+  });
+}
 function openPay(mode, singleId){
   payMode=mode; editPVInfo=null; payTarget = mode==='single'? [singleId] : [...selected];
   const items=payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
@@ -496,6 +517,7 @@ function openPay(mode, singleId){
   document.getElementById('payMethods').innerHTML=methods.map(m=>`<label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" value="${m}" class="pm" style="width:20px"> ${m}</label>`).join('');
   document.getElementById('payAmounts').innerHTML='';
   document.querySelectorAll('.pm').forEach(cb=>cb.onchange=renderPayAmounts);
+  renderPayInvList();
   document.getElementById('payModal').classList.add('open');
 }
 function openEditPay(pv, payDate){
@@ -532,6 +554,7 @@ function openEditPay(pv, payDate){
   const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon');
   const oldResit=items.find(x=>x.paymentImg)?.paymentImg||'';
   if(oldResit && pp){ pp.src=oldResit; pp.style.display='block'; if(pi) pi.style.display='none'; updatePayThumbDelete(true); } else { if(pp) pp.style.display='none'; if(pi) pi.style.display='block'; updatePayThumbDelete(false); }
+  renderPayInvList();
   document.getElementById('payModal').classList.add('open');
 }
 function renderPayAmounts(){ const checked=[...document.querySelectorAll('.pm:checked')].map(c=>c.value); const box=document.getElementById('payAmounts'); if(!checked.length){ box.innerHTML=''; return; } const total=payTarget.map(id=>invoices.find(x=>x.id===id)).reduce((s,x)=>s+signedPrice(x),0); const _old={}; document.querySelectorAll('[data-amt]').forEach(inp=>{ _old[inp.dataset.amt]=inp.value; }); box.innerHTML='<label>Amount</label>'+checked.map((m,i)=>{ let v=_old[m]; if(v===undefined||v===''){ v = (checked.length===1||i===0) ? Number(total).toFixed(2) : '0.00'; } return `<label>${m}</label><input data-amt="${m}" type="number" step="0.01" value="${v}">`; }).join(''); }
@@ -827,6 +850,7 @@ function _viewerApplyNewImage(out, pdfUrl){
     _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
   }
   save(); render();
+  if(document.getElementById('payModal')?.classList.contains('open')){ try{ renderPayInvList(); }catch(e){} }
   const _imgEl=document.getElementById('imgViewImg'); if(_imgEl && _viewImgSrc){ _imgEl.src=_viewImgSrc; }
   document.getElementById('imgViewModal').classList.add('open');
   showViewTab(_viewPdfSrc?'pdf':'img');
@@ -844,7 +868,7 @@ function _viewerDelete(){
     const items=invoices.filter(x=>x.paid&&x.pv===_viewCtx.pv&&x.payDate===_viewCtx.payDate);
     items.forEach(x=>{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); x.paymentImg=''; x.paymentPdf=''; });
   }
-  save(); render(); document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar dipadam');
+  save(); render(); if(document.getElementById('payModal')?.classList.contains('open')){ try{ renderPayInvList(); }catch(e){} } document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar dipadam');
 }
 async function _viewerShare(){
   try{
