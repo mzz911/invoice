@@ -174,7 +174,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-light" id="srcCamera" style="padding:16px;text-align:left">📷 Camera</button><button class="btn btn-light" id="srcGallery" style="padding:16px;text-align:left">🖼️ Gallery</button><button class="btn btn-light" id="srcFiles" style="padding:16px;text-align:left">📁 Files</button><button class="btn btn-light" id="srcScan" style="padding:16px;text-align:left">📄 Scan Document</button></div></div></div>
 
 <!-- IMG VIEW - style macam video: top ada trash, bottom ada Upload / Edit / Share / Delete -->
-<div class="modal" id="imgViewModal"><div class="sheet" style="text-align:center;padding-bottom:8px"><div class="closeRow"><button id="imgViewBack">← Kembali</button><b id="imgViewTitle" style="flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Gambar</b><button id="imgViewClose" style="border:0;background:rgba(255,255,255,.95);border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer;color:#4C1D95">Done</button></div><div id="imgViewGalleryBar" style="display:none;margin:0 0 8px"><div style="display:flex;align-items:center;gap:8px;justify-content:center"><button id="imgViewPrev" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">‹ Prev</button><span id="imgViewGalleryCount" style="font-size:13px;font-weight:700"></span><button id="imgViewNext" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">Next ›</button></div><div id="imgViewGalleryThumbs" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;justify-content:flex-start"></div></div><img id="imgViewImg" style="width:100%;border-radius:12px;max-height:62vh;object-fit:contain;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.08)"><div id="imgViewPdf" style="display:none;width:100%;height:62vh;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;background:#eee;border-radius:12px;padding:8px;box-sizing:border-box"><div id="imgViewPdfPages" style="display:flex;flex-direction:column;gap:10px"></div></div><div id="imgViewPdfBar" style="display:none;gap:8px;margin-top:10px"><button id="imgViewPdfOpen" class="btn btn-dark" style="flex:1">📄 Buka PDF Penuh</button><button id="imgViewPdfDl" class="btn btn-light" style="flex:1">⬇️ ⬇️ Download PDF</button></div><p id="imgViewMeta" style="font-size:13px;color:#666;margin:8px 0 4px"></p><div id="imgViewActionBar" class="viewAct"><button id="imgViewUploadBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v11H3z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span><span class="viewActLabel">Upload</span></button><button id="imgViewEditBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L17 4l3 3L8 19z"></path><path d="M13.5 6.5l3 3"></path></svg></span><span class="viewActLabel">Edit</span></button><button id="imgViewShareBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"></circle><circle cx="17" cy="5" r="2.5"></circle><circle cx="17" cy="19" r="2.5"></circle><path d="M8.3 10.8l6.4-4.6M8.3 13.2l6.4 4.6"></path></svg></span><span class="viewActLabel">Share</span></button><button id="imgViewDeleteBtn" class="viewActBtn danger"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v5M14 11v5"></path></svg></span><span class="viewActLabel">Delete</span></button></div></div></div>
+<div class="modal" id="imgViewModal"><div class="sheet" style="text-align:center;padding-bottom:8px"><div class="closeRow"><button id="imgViewBack">← Kembali</button><b id="imgViewTitle" style="flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Gambar</b><button id="imgViewClose" style="border:0;background:rgba(255,255,255,.95);border-radius:999px;padding:8px 16px;font-weight:700;cursor:pointer;color:#4C1D95">Done</button></div><div id="imgViewGalleryBar" style="display:none;margin:0 0 8px"><div style="display:flex;align-items:center;gap:8px;justify-content:center"><button id="imgViewPrev" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">‹ Prev</button><span id="imgViewGalleryCount" style="font-size:13px;font-weight:700"></span><button id="imgViewNext" style="border:1px solid #ddd;background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer">Next ›</button></div><div id="imgViewGalleryThumbs" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;justify-content:flex-start"></div></div><img id="imgViewImg" style="width:100%;border-radius:12px;max-height:62vh;object-fit:contain;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.08)"><div id="imgViewPdf" style="display:none;width:100%;height:62vh;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;background:#eee;border-radius:12px;padding:8px;box-sizing:border-box"><div id="imgViewPdfPages" style="display:flex;flex-direction:column;gap:10px"></div></div><div id="imgViewPdfBar" style="display:none;gap:8px;margin-top:10px"><button id="imgViewPdfOpen" class="btn btn-dark" style="flex:1">📄 Buka PDF Penuh</button><button id="imgViewPdfDl" class="btn btn-light" style="flex:1">⬇️ Download PDF</button></div><p id="imgViewMeta" style="font-size:13px;color:#666;margin:8px 0 4px"></p><div id="imgViewActionBar" class="viewAct"><button id="imgViewUploadBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v11H3z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></span><span class="viewActLabel">Upload</span></button><button id="imgViewEditBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L17 4l3 3L8 19z"></path><path d="M13.5 6.5l3 3"></path></svg></span><span class="viewActLabel">Edit</span></button><button id="imgViewShareBtn" class="viewActBtn"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"></circle><circle cx="17" cy="5" r="2.5"></circle><circle cx="17" cy="19" r="2.5"></circle><path d="M8.3 10.8l6.4-4.6M8.3 13.2l6.4 4.6"></path></svg></span><span class="viewActLabel">Share</span></button><button id="imgViewDeleteBtn" class="viewActBtn danger"><span class="viewActIcon"><svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v5M14 11v5"></path></svg></span><span class="viewActLabel">Delete</span></button></div></div></div>
 
 <!-- DETAIL -->
 <div class="modal" id="detailModal"><div class="sheet"><div class="closeRow"><button id="detailBack">← Kembali</button><b>Detail Invoice</b><button id="detailClose">✕ Tutup</button></div><div id="detailBody"></div></div></div>
@@ -192,9 +192,9 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <!-- REPORT -->
 <div class="modal" id="reportModal"><div class="sheet"><div class="closeRow"><button id="reportBack">← Kembali</button><b>Report</b><button id="reportClose">✕ Tutup</button></div>
 <div id="reportSummary" style="font-weight:700;margin:8px 0"></div><div id="reportPreview" style="overflow:auto;max-height:220px"></div>
-<div class="row" style="margin-top:12px"><button class="btn btn-green" id="dlCsv" style="flex:1">⬇️ ⬇️ Download CSV</button><button class="btn btn-light" id="copyCsv" style="flex:1">📋 Copy CSV</button></div>
-<button class="btn btn-dark" id="dlCsvAcc" style="width:100%;margin-top:8px">📊 ⬇️ Download CSV Accounting</button>
-<button class="btn btn-dark" id="dlPdf" style="width:100%;margin-top:8px">⬇️ ⬇️ Download PDF</button>
+<div class="row" style="margin-top:12px"><button class="btn btn-green" id="dlCsv" style="flex:1">⬇️ Download CSV</button><button class="btn btn-light" id="copyCsv" style="flex:1">📋 Copy CSV</button></div>
+<button class="btn btn-dark" id="dlCsvAcc" style="width:100%;margin-top:8px">📊 Download CSV Accounting</button>
+<button class="btn btn-dark" id="dlPdf" style="width:100%;margin-top:8px">⬇️ Download PDF</button>
 <label>CSV</label><textarea class="csv" id="csvText" readonly=""></textarea>
 <button class="btn btn-light" id="reportDone" style="width:100%;margin-top:10px">Tutup</button></div></div>
 
@@ -202,7 +202,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <button class="btn btn-green" id="icloudBackupBtn" style="padding:16px;text-align:left">⬆️ Export DB - Backup PENUH (dengan gambar)</button>
-<div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:8px;text-align:center">⚠️ JANGAN tekan Clear History dalam Safari. Nanti semua invoice hilang. Lepas tekan Download, pilih Download dalam popup Safari tu.</div>
+<div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:8px;text-align:center">⚠️ JANGAN tekan Clear History dalam Safari. Nanti semua invoice hilang.</div>
 <div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
 <div id="storageLabel" style="font-size:12px;color:#666;text-align:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px">Storage: kira...</div>
 <button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button>
@@ -237,16 +237,6 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <button class="btn btn-green" id="openDrive" style="width:100%">Buka Google Drive</button><button class="btn btn-light" id="driveDone" style="width:100%;margin-top:8px">Tutup</button></div></div>
 
-<div id="saveSheet" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:flex-end;justify-content:center">
-<div style="background:#fff;width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:16px 16px 22px;box-shadow:0 -4px 20px rgba(0,0,0,0.3)">
-<div style="width:40px;height:5px;background:#ddd;border-radius:99px;margin:0 auto 12px"></div>
-<div style="text-align:center"><div style="font-size:44px">📄</div><b id="saveSheetName" style="display:block;word-break:break-all;font-size:14px;margin-top:6px">file</b><div id="saveSheetSize" style="font-size:12px;color:#666;margin-top:4px"></div></div>
-<p style="font-size:13px;color:#444;text-align:center;line-height:1.5;margin:10px 0">Pilih cara simpan:<br><b>Share</b> = keluar Share Sheet iPhone → Save to Files<br><b>View</b> = buka dalam Safari → tekan Download / Share kat sana<br><b>Copy</b> = copy isi file, paste dalam Notes / WhatsApp</p>
-<button class="btn btn-green" id="saveSheetShare" style="width:100%;padding:16px" data-wired="1">📤 Share / Save to Files</button>
-<button class="btn btn-light" id="saveSheetView" style="width:100%;margin-top:8px;padding:14px" data-wired="1">👁️ View - Buka Dalam Safari</button>
-<button class="btn btn-light" id="saveSheetCopy" style="width:100%;margin-top:8px;padding:14px" data-wired="1">📋 Copy Isi File</button>
-<button class="btn btn-light" onclick="closeSaveSheet(false)" style="width:100%;margin-top:8px">Tutup</button>
-</div></div>
 <div class="toast" id="toast"></div>
 <script>
 let invoices = JSON.parse(localStorage.getItem('ik_invoices')||'[]');
@@ -367,60 +357,6 @@ function render(){
     _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
     return;
   }
-// ===== Tekan Download -> MESTI keluar popup sendiri, tak boleh senyap =====
-// Masalah: iPhone Home Screen / preview chat block <a download> & Share Sheet senyap-senyap.
-// Fix: Buka sheet sendiri dulu (confirm nampak), dalam sheet tu baru ada 3 cara: Share / View / Copy.
-// Sheet ni z-index 9999, atas semua modal, jadi tak boleh tersorok belakang Report modal.
-let _saveBlob=null, _saveName='', _saveResolve=null;
-function openSaveSheet(blob, filename){
-  return new Promise((res)=>{
-    _saveBlob=blob; _saveName=filename; _saveResolve=res;
-    const el=document.getElementById('saveSheet'); if(!el){ res(false); return; }
-    const n=document.getElementById('saveSheetName'); if(n) n.textContent=filename;
-    const s=document.getElementById('saveSheetSize'); if(s) s.textContent='Saiz: '+(blob.size/1024).toFixed(0)+' KB';
-    const isText = blob.type.includes('text') || blob.type.includes('json') || filename.endsWith('.csv') || filename.endsWith('.json');
-    const copyBtn=document.getElementById('saveSheetCopy'); if(copyBtn) copyBtn.style.display=isText?'block':'none';
-    el.style.display='flex';
-  });
-}
-function closeSaveSheet(result){ const el=document.getElementById('saveSheet'); if(el) el.style.display='none'; if(_saveResolve){ const r=_saveResolve; _saveResolve=null; r(result); } }
-async function saveFileToPhone(blob, filename){
-  // Buka sheet sendiri dulu - ni yang confirm keluar, tak boleh senyap
-  const ok = await openSaveSheet(blob, filename);
-  return ok;
-}
-// Wire sheet buttons sekali je
-setTimeout(()=>{
-  const shareBtn=document.getElementById('saveSheetShare');
-  if(shareBtn && !shareBtn.dataset.wired){ shareBtn.dataset.wired='1'; shareBtn.onclick=async()=>{
-    try{
-      const file=new File([_saveBlob], _saveName, {type: _saveBlob.type||'application/octet-stream'});
-      if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
-        await navigator.share({files:[file], title: _saveName});
-        showToast('Dah Share - pilih Save to Files dalam sheet iPhone tu');
-        closeSaveSheet(true); return;
-      }
-      // Kalau Share tak support, terus View
-      const u=URL.createObjectURL(_saveBlob); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u),60000);
-      showToast('Share tak support - dah buka View, tekan Share / Download kat sana');
-      closeSaveSheet(true);
-    }catch(e){ if(String(e && e.message || e).includes('Abort')){ showToast('Share batal'); closeSaveSheet(false); } else { alert('Share gagal: '+(e.message||e)); } }
-  }; }
-  const viewBtn=document.getElementById('saveSheetView');
-  if(viewBtn && !viewBtn.dataset.wired){ viewBtn.dataset.wired='1'; viewBtn.onclick=()=>{
-    try{
-      const u=URL.createObjectURL(_saveBlob); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u),60000);
-      showToast('Dah buka View - tekan Share / Download dalam Safari tu');
-      closeSaveSheet(true);
-    }catch(e){ alert('View gagal: '+(e.message||e)); }
-  }; }
-  const copyBtn=document.getElementById('saveSheetCopy');
-  if(copyBtn && !copyBtn.dataset.wired){ copyBtn.dataset.wired='1'; copyBtn.onclick=async()=>{
-    try{ const t=await _saveBlob.text(); await navigator.clipboard.writeText(t); showToast('Dah Copy - paste dalam Notes / WhatsApp diri sendiri'); closeSaveSheet(true); }catch(e){ try{ const t=await _saveBlob.text(); const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('Dah Copy'); closeSaveSheet(true); }catch(e2){ alert('Copy gagal: '+(e2.message||e2)); } }
-  }; }
-}, 500);
-
-
   // Dah Bayar - GROUP ikut PV, tajuk = supplier name - SWIPE KIRI UNTUK CANCEL PV (Dah Bayar je)
   if(tab==='paid'){
     const _bb2=document.getElementById('bulkBar'); if(_bb2) _bb2.remove();
@@ -745,7 +681,7 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
   if(pdf){
     const ob=document.getElementById('imgViewPdfOpen'), dl=document.getElementById('imgViewPdfDl');
     if(ob) ob.onclick=()=>{ const b=new Blob([new Uint8Array(atob(pdf.split(',')[1]).split('').map(c=>c.charCodeAt(0)))],{type:'application/pdf'}); const u=URL.createObjectURL(b); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u), 60000); };
-    if(dl) dl.onclick=async()=>{ try{ const _b=await (await fetch(pdf)).blob(); await saveFileToPhone(_b,(title||'invoice')+'.pdf'); }catch(e){ const a=document.createElement('a'); a.href=pdf; a.download=(title||'invoice')+'.pdf'; a.click(); } };
+    if(dl) dl.onclick=()=>{ const a=document.createElement('a'); a.href=pdf; a.download=(title||'invoice')+'.pdf'; a.click(); };
     // Kalau ada dua-dua, default tunjuk PDF (macam Smart Receipt). Kalau tekan gambar kat Detail, Detail akan pass pdf='' jadi tunjuk gambar je.
     showViewTab('pdf');
   } else {
@@ -765,7 +701,7 @@ ${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':'
 ${x.paid?`<p>Status: Dah Bayar • ${x.payMethod||''}<br>PV: ${x.pv||'-'} • Bayar: ${fmtDate(x.payDate)||'-'}</p>`:''}
 ${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar</p>${x.paymentImg?`<img src="${x.paymentImg}" style="width:100%;border-radius:12px;cursor:pointer" id="dPayImg">${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">✏️ Edit</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
 <div class="row" style="margin-top:12px"><button class="btn btn-light" id="delBtn" style="flex:1">Padam Invoice</button><button class="btn btn-light" id="editBtn" style="flex:1">Edit</button></div>
-<button class="btn btn-dark" id="dlPdfOne" style="width:100%;margin-top:8px">⬇️ ⬇️ Download PDF - Invoice + Resit Payment</button>
+<button class="btn btn-dark" id="dlPdfOne" style="width:100%;margin-top:8px">⬇️ Download PDF - Invoice + Resit Payment</button>
 ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;margin-top:8px">Bayar Invoice Ni</button>`: `<p style="font-size:12px;color:#666;text-align:center;margin-top:10px">Untuk batal PV, swipe kiri kad PV kat tab Dah Bayar</p>`}
 `;
  const di=b.querySelector('#dInvImg'); if(di) di.onclick=()=>openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id}); const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
@@ -962,7 +898,7 @@ async function downloadPdfOne(x){
     const _h = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180);
     y += _h + 6;
   } else if(x.paid){ doc.text('Resit Payment: Tiada',10,y); }
-  await saveFileToPhone(doc.output('blob'), (x.pv||'')+'-'+x.inv+'.pdf');
+  doc.save((x.pv||'')+'-'+x.inv+'.pdf');
 }
 function cancelPV(pv, payDate){
   try{
@@ -1004,7 +940,7 @@ function openPVDetail(pv, payDate){
   b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
     + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
     + (resits.length?`<div><p style="font-weight:700">Resit Payment</p>`+resits.map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
-    + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ ⬇️ Download PDF - ${pv}</button>`
+    + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
   b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ document.getElementById('pvModal').classList.remove('open'); openDetail(el.dataset.pvInv); });
   b.querySelectorAll('[data-resit]').forEach((el,i)=>el.onclick=()=>openImgView(resits[i],'Resit Payment - '+pv,pv,'',{kind:'paymentPV',pv,payDate}));
@@ -1047,7 +983,7 @@ async function downloadPdfPV(pv, payDate){
       await addPdfImgFit(doc, im.src, _x, _y+2, 85, 55);
     }
   }
-  await saveFileToPhone(doc.output('blob'), pv+'.pdf');
+  doc.save(pv+'.pdf');
 }
 async function downloadPdfBulk(list){
   if(!window.jspdf){ alert('jsPDF belum load'); return; }
@@ -1057,7 +993,7 @@ async function downloadPdfBulk(list){
     if(x.paymentImg){ doc.text('Resit Payment:',10,y); y+=4; const _h2 = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180); if(_h2) y += _h2 + 6; else { doc.setFontSize(9); doc.text('Resit tak dapat load',10,y); y+=8; } }
     if(!x.img && !x.paymentImg){ doc.setFontSize(9); doc.text('Tiada gambar',10,y); }
     showToast(`Generating PDF ${i+1}/${list.length}`); }
-  await saveFileToPhone(doc.output('blob'), 'invoice-kedai-gambar-'+today()+'.pdf');
+  doc.save('invoice-kedai-gambar-'+today()+'.pdf');
 }
 // Wiring
 function showSearchSuggest(){ const inp=document.getElementById('q'); const box=document.getElementById('searchSuggest'); if(!inp||!box) return; const q=String(inp.value||'').trim().toLowerCase(); if(q.length<2){ box.style.display='none'; return; } const all=getSuppliers(); let list=all.filter(s=>s.toLowerCase().includes(q) && s.toLowerCase()!==q); if(!list.length){ const close=all.find(s=>{ const a=s.toLowerCase(); return a!==q && a.slice(0,4)===q.slice(0,4) && Math.abs(a.length-q.length)<=2; }); if(close) list=[close]; } if(!list.length){ box.style.display='none'; return; } box.innerHTML=list.slice(0,5).map(s=>{ const n=invoices.filter(x=>x.name===s).length; return `<div data-search-sup="${s.replace(/"/g,'&quot;')}" style="padding:11px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;gap:8px"><span>👤 ${s}</span><span style="font-size:11px;color:#666;flex-shrink:0">${n} invoice</span></div>`; }).join(''); box.style.display='block'; box.querySelectorAll('[data-search-sup]').forEach(d=>d.onclick=()=>{ inp.value=d.dataset.searchSup; query=inp.value; box.style.display='none'; render(); inp.focus(); }); }
@@ -1070,17 +1006,17 @@ document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getEle
 document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
 document.getElementById('reportBtn').onclick=()=>{ const list=filtered(); const total=list.reduce((s,x)=>s+signedPrice(x),0); document.getElementById('reportSummary').textContent=list.length+' invoice • '+fmt(total)+' • '; const csv=csvFor(list); document.getElementById('csvText').value=csv; document.getElementById('reportPreview').innerHTML=`<table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th>Tarikh</th><th>Supplier</th><th>PV</th><th>Harga</th></tr>${list.slice(0,20).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.pv||'-'}</td><td>${fmt(signedPrice(x))}</td></tr>`).join('')}</table>`; document.getElementById('reportModal').classList.add('open'); };
 document.getElementById('reportClose').onclick=document.getElementById('reportBack').onclick=document.getElementById('reportDone').onclick=()=>document.getElementById('reportModal').classList.remove('open');
-document.getElementById('dlCsvAcc').onclick=async()=>{ const csv=csvForAccounting(filtered()); const blob=new Blob([csv],{type:'text/csv'}); await saveFileToPhone(blob,'invoice-kedai-accounting-'+today()+'.csv'); };
-document.getElementById('dlCsv').onclick=async()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); await saveFileToPhone(blob,'invoice-kedai-'+today()+'.csv'); };
+document.getElementById('dlCsvAcc').onclick=()=>{ const csv=csvForAccounting(filtered()); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-accounting-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV Accounting download'); };
+document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV download'); };
 document.getElementById('copyCsv').onclick=async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('csvText').value); showToast('CSV dah copy'); }catch(e){ document.getElementById('csvText').select(); document.execCommand('copy'); showToast('CSV dah copy'); } };
 document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(filtered());
 document.getElementById('backupReminder').onclick=()=>{ try{ updateLastExportLabel(); updateStorageLabel(); }catch(e){} document.getElementById('settingModal').classList.add('open'); };
 document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); try{ updateStorageLabel(); const _fb=document.getElementById('freeSpaceBtn'); if(_fb && !_fb.dataset.wired){ _fb.dataset.wired='1'; _fb.onclick=()=>{ try{ offloadMedia(true); save(); updateStorageLabel(); showToast('Free Space siap - gambar dipindah ke IndexedDB, invoice text selamat'); }catch(e){ alert('Free Space gagal: '+e.message); } }; }
-const _ab=document.getElementById('archiveOldBtn'); if(_ab && !_ab.dataset.wired){ _ab.dataset.wired='1'; _ab.onclick=async()=>{ try{ const cutoff=new Date(); cutoff.setFullYear(cutoff.getFullYear()-1); const cutoffStr=cutoff.toISOString().slice(0,10); const old= invoices.filter(x=>x.date && x.date<cutoffStr); if(!old.length){ alert('Takde invoice lebih 1 tahun. Semua masih baru, tak perlu Archive.'); return; } const total=old.reduce((s,x)=>s+signedPrice(x),0); if(!confirm('Archive '+old.length+' invoice lama (sebelum '+cutoffStr+')?\nTotal: '+fmt(total)+'\n\n1. File Archive PENUH (dengan gambar) akan download dulu\n2. Lepas download, invoice tu akan dipadam dari phone\n3. Kalau nak tengok balik, Import file Archive tu.')) return; showToast('Sediakan Archive...'); const full=[]; for(const x of old){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); full.push(y); } const data={invoices:full,cancelledPVs,customCats,exportedAt:new Date().toISOString(),backupFull:true,archive:true,archiveCutoff:cutoffStr}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); await saveFileToPhone(blob,'invoice-kedai-ARCHIVE-sebelum-'+cutoffStr+'.json'); const ids=new Set(old.map(x=>x.id)); invoices=invoices.filter(x=>!ids.has(x.id)); save(); render(); updateStorageLabel(); showToast('Archive siap - '+old.length+' invoice lama dah dipadam dari phone, file Archive dah download'); }catch(e){ alert('Archive gagal: '+e.message); } }; } }catch(e){} document.getElementById('settingModal').classList.add('open'); };
+const _ab=document.getElementById('archiveOldBtn'); if(_ab && !_ab.dataset.wired){ _ab.dataset.wired='1'; _ab.onclick=async()=>{ try{ const cutoff=new Date(); cutoff.setFullYear(cutoff.getFullYear()-1); const cutoffStr=cutoff.toISOString().slice(0,10); const old= invoices.filter(x=>x.date && x.date<cutoffStr); if(!old.length){ alert('Takde invoice lebih 1 tahun. Semua masih baru, tak perlu Archive.'); return; } const total=old.reduce((s,x)=>s+signedPrice(x),0); if(!confirm('Archive '+old.length+' invoice lama (sebelum '+cutoffStr+')?\nTotal: '+fmt(total)+'\n\n1. File Archive PENUH (dengan gambar) akan download dulu\n2. Lepas download, invoice tu akan dipadam dari phone\n3. Kalau nak tengok balik, Import file Archive tu.')) return; showToast('Sediakan Archive...'); const full=[]; for(const x of old){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); full.push(y); } const data={invoices:full,cancelledPVs,customCats,exportedAt:new Date().toISOString(),backupFull:true,archive:true,archiveCutoff:cutoffStr}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-ARCHIVE-sebelum-'+cutoffStr+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); const ids=new Set(old.map(x=>x.id)); invoices=invoices.filter(x=>!ids.has(x.id)); save(); render(); updateStorageLabel(); showToast('Archive siap - '+old.length+' invoice lama dah dipadam dari phone, file Archive dah download'); }catch(e){ alert('Archive gagal: '+e.message); } }; } }catch(e){} document.getElementById('settingModal').classList.add('open'); };
 document.getElementById('settingClose').onclick=document.getElementById('settingBack').onclick=document.getElementById('settingDone').onclick=()=>document.getElementById('settingModal').classList.remove('open');
 function fmtLastExport(){ try{ const v=localStorage.getItem('ik_lastExport'); if(!v) return 'Belum pernah Export DB'; const d=new Date(v); const s=d.toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); const n=localStorage.getItem('ik_lastExportCount')||''; return 'Last Export: '+s+(n?' • '+n+' invoice':''); }catch(e){ return 'Belum pernah Export DB'; } }
 function updateLastExportLabel(){ const el=document.getElementById('lastExportLabel'); if(el) el.textContent=fmtLastExport(); }
-document.getElementById('icloudBackupBtn').onclick=async()=>{ showToast('Sediakan backup PENUH (dengan gambar)...'); try{ const fullInvoices=[]; for(const x of invoices){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); fullInvoices.push(y); } const now=new Date(); const data={invoices:fullInvoices,cancelledPVs,customCats,exportedAt:now.toISOString(),backupFull:true}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; await saveFileToPhone(blob,fname); try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); try{ updateBackupReminder(); }catch(e){} showToast('Export DB PENUH download - ada gambar sekali, simpan dalam Files / iCloud'); document.getElementById('settingModal').classList.remove('open'); }catch(e){ alert('Export gagal: '+e.message); } };
+document.getElementById('icloudBackupBtn').onclick=async()=>{ showToast('Sediakan backup PENUH (dengan gambar)...'); try{ const fullInvoices=[]; for(const x of invoices){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); fullInvoices.push(y); } const now=new Date(); const data={invoices:fullInvoices,cancelledPVs,customCats,exportedAt:now.toISOString(),backupFull:true}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); try{ updateBackupReminder(); }catch(e){} showToast('Export DB PENUH download - ada gambar sekali, simpan dalam Files / iCloud'); document.getElementById('settingModal').classList.remove('open'); }catch(e){ alert('Export gagal: '+e.message); } };
 
 document.getElementById('driveClose').onclick=document.getElementById('driveBack').onclick=document.getElementById('driveDone').onclick=()=>document.getElementById('driveModal').classList.remove('open');
 document.getElementById('openDrive').onclick=()=>window.open('https://drive.google.com','_blank');
