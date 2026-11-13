@@ -147,14 +147,14 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
 
-<div class="info" id="infoBar">0 invoice Dah Bayar • RM0.00</div>
+<div class="info" id="infoBar">0 invoice • RM0.00</div>
 <div class="row"><div class="search">🔍 <input id="q" placeholder="Cari supplier / no invoice..." autocomplete="off"></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
-<div class="tabs"><button class="tab" data-tab="all">Semua</button><button class="tab active" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
+<div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
 <div id="backupReminder" style="display:block;background:rgb(255, 251, 235);border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;cursor:pointer">⚠️ Belum backup hari ni (0 invoice dalam phone) - tekan sini untuk Export</div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
-<div id="list"><p style="text-align:center;color:#666">Tiada invoice Dah Bayar</p></div>
+<div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
 </div>
 
 
@@ -746,7 +746,7 @@ function renderPayInvList(){
     // Kalau ada pending / delete, tunjuk pending; kalau delete, tunjuk kosong
     const _dispImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || '');
     thumb.innerHTML=_dispImg?`<img src="${_dispImg}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
-    thumb.onclick=()=>{ const _disp = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || ''); if(_disp){ const _pdf = deleteInvImgs[x.id] ? '' : (pendingInvPdfs[x.id] || x.pdf || ''); openImgView(_disp, 'Gambar Invoice - '+x.name, (x.inv||'')+' • '+x.date, _pdf, {kind:'payInv', id:x.id}); } else { _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); } }; // Ada gambar -> VIEW dulu (Edit/Upload dalam viewer), kosong baru UPLOAD
+    thumb.onclick=()=>{ _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); }; // NATIVE macam Resit Payment - terus Photo Library / Take Photo / Choose File
     const delBtn=document.createElement('button'); delBtn.textContent='✕'; delBtn.style.cssText='display:'+(_dispImg?'block':'none')+';position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)';
     delBtn.onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam gambar invoice '+x.name+' ni?')) return; pendingInvImgs[x.id]=''; pendingInvPdfs[x.id]=''; deleteInvImgs[x.id]=true; renderPayInvList(); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); };
     thumbBox.appendChild(thumb); thumbBox.appendChild(delBtn);
@@ -1145,7 +1145,7 @@ processFile = function(file,isScan,target){
               const _pdfUrl=pendingPdf||'';
               // Kalau viewer tengah tunjuk invoice, pendingPdf tu PDF baru; kalau resit, kena simpan ke paymentPdf
               if(_viewCtx && _viewCtx.kind==='invoice'){ _viewerApplyNewImage(out,_pdfUrl); }
-              else if(_viewCtx && (_viewCtx.kind==='payment'||_viewCtx.kind==='paymentPV'||_viewCtx.kind==='payInv'||_viewCtx.kind==='payResit')){ _viewerApplyNewImage(out,_pdfUrl); }
+              else if(_viewCtx && (_viewCtx.kind==='payment'||_viewCtx.kind==='paymentPV')){ _viewerApplyNewImage(out,_pdfUrl); }
               else { pendingImg=out; setThumb(out); }
               showToast('PDF dikemaskini');
             } else if(target==='pay'){
@@ -1201,27 +1201,6 @@ document.getElementById('imgViewClose').onclick=document.getElementById('imgView
 // ===== Viewer macam video: Upload / Edit / Share / Delete =====
 function _viewerApplyNewImage(out, pdfUrl){
   if(!_viewCtx) return;
-  // PENDING dalam Bayar/Edit Bayar - jangan save() terus, biar Simpan Edit yang simpan
-  if(_viewCtx.kind==='payInv'){
-    pendingInvImgs[_viewCtx.id]=out; pendingInvPdfs[_viewCtx.id]=pdfUrl||''; deleteInvImgs[_viewCtx.id]=false;
-    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
-    try{ renderPayInvList(); }catch(e){}
-    const _imgEl=document.getElementById('imgViewImg'); if(_imgEl && _viewImgSrc){ _imgEl.src=_viewImgSrc; }
-    document.getElementById('imgViewModal').classList.add('open');
-    showViewTab(_viewPdfSrc?'pdf':'img');
-    showToast('Gambar invoice dikemaskini - tekan Simpan untuk simpan');
-    return;
-  }
-  if(_viewCtx.kind==='payResit'){
-    pendingPayImg=out; pendingPayPages=[out]; pendingPayPdf=pdfUrl||''; deletePayResit=false;
-    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
-    try{ setPayThumb(out); updatePayPagesUI(); updatePayPdfBadge(); }catch(e){}
-    const _imgEl2=document.getElementById('imgViewImg'); if(_imgEl2 && _viewImgSrc){ _imgEl2.src=_viewImgSrc; }
-    document.getElementById('imgViewModal').classList.add('open');
-    showViewTab(_viewPdfSrc?'pdf':'img');
-    showToast('Resit dikemaskini - tekan Simpan untuk simpan');
-    return;
-  }
   if(_viewCtx.kind==='invoice'){
     const inv=invoices.find(x=>x.id===_viewCtx.id); if(!inv) return;
     inv.img=out; if(pdfUrl){ inv.pdf=pdfUrl; } else { inv.pdf=''; }
@@ -1244,11 +1223,8 @@ function _viewerApplyNewImage(out, pdfUrl){
 }
 function _viewerDelete(){
   if(!_viewCtx){ showToast('Tak dapat kenal invoice ni'); return; }
-  const _isPay = _viewCtx.kind==='payment' || _viewCtx.kind==='paymentPV' || _viewCtx.kind==='payResit';
+  const _isPay = _viewCtx.kind==='payment' || _viewCtx.kind==='paymentPV';
   if(!confirm('Padam '+(_isPay?'resit payment':'gambar invoice')+' ni?')) return;
-  // PENDING dalam Bayar/Edit Bayar - clear pending je, jangan padam invoice terus
-  if(_viewCtx.kind==='payInv'){ pendingInvImgs[_viewCtx.id]=''; pendingInvPdfs[_viewCtx.id]=''; deleteInvImgs[_viewCtx.id]=true; try{ renderPayInvList(); }catch(e){} document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); return; }
-  if(_viewCtx.kind==='payResit'){ pendingPayImg=''; pendingPayPages=[]; pendingPayPdf=''; deletePayResit=true; try{ setPayThumb(''); updatePayPagesUI(); updatePayPdfBadge(); }catch(e){} document.getElementById('imgViewModal').classList.remove('open'); showToast('Resit dipadam - tekan Simpan untuk simpan'); return; }
   if(_viewCtx.kind==='invoice'){
     const inv=invoices.find(x=>x.id===_viewCtx.id); if(inv){ if(inv.pdf && String(inv.pdf).startsWith('IDB:')) idbDeletePdf(String(inv.pdf).slice(4)); inv.img=''; inv.pdf=''; }
   } else if(_viewCtx.kind==='payment'){
@@ -1285,7 +1261,7 @@ document.getElementById('imgViewEditBtn').onclick=()=>{ if(!_viewImgSrc){ showTo
 document.getElementById('detailClose').onclick=document.getElementById('detailBack').onclick=()=>document.getElementById('detailModal').classList.remove('open');
 document.getElementById('pvClose').onclick=document.getElementById('pvBack').onclick=()=>document.getElementById('pvModal').classList.remove('open');
 document.getElementById('payClose').onclick=document.getElementById('payBack').onclick=document.getElementById('payCancel').onclick=()=>{ document.getElementById('payModal').classList.remove('open'); render(); };
-document.getElementById('payThumbBox').onclick=()=>{ const _has = (typeof pendingPayPages!=='undefined' && pendingPayPages.length) ? pendingPayPages[0] : (pendingPayImg||''); if(_has){ const _title='Resit Payment'; const _meta=(typeof payTarget!=='undefined' && payTarget.length ? payTarget.map(id=>{ const _it=invoices.find(y=>y.id===id); return _it?(_it.name+' - '+_it.inv):''; }).join(' • ') : ''); openImgView(_has, _title, _meta, pendingPayPdf||'', {kind:'payResit', id:(payTarget&&payTarget[0])||''}); } else { imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); } }; /* Ada resit -> VIEW dulu, kosong baru UPLOAD */
+document.getElementById('payThumbBox').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - sama macam Invoice */
 document.getElementById('addPayPageBtn').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - Tambah Page Resit */
 document.getElementById('payThumbDelete').onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam resit payment ni?')) return; pendingPayImg=''; pendingPayPdf=''; pendingPayPages=[]; _pendingPayPageAction=null; deletePayResit=true; updatePayPagesUI(); const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); if(pp){ pp.src=''; pp.style.display='none'; } if(pi) pi.style.display='block'; updatePayThumbDelete(false); updatePayPdfBadge(); showToast('Resit dipadam - tekan Simpan untuk simpan'); };
 document.getElementById('payConfirm').onclick=()=>{
