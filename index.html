@@ -237,6 +237,16 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <button class="btn btn-green" id="openDrive" style="width:100%">Buka Google Drive</button><button class="btn btn-light" id="driveDone" style="width:100%;margin-top:8px">Tutup</button></div></div>
 
+<div id="saveSheet" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:flex-end;justify-content:center">
+<div style="background:#fff;width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:16px 16px 22px;box-shadow:0 -4px 20px rgba(0,0,0,0.3)">
+<div style="width:40px;height:5px;background:#ddd;border-radius:99px;margin:0 auto 12px"></div>
+<div style="text-align:center"><div style="font-size:44px">📄</div><b id="saveSheetName" style="display:block;word-break:break-all;font-size:14px;margin-top:6px">file</b><div id="saveSheetSize" style="font-size:12px;color:#666;margin-top:4px"></div></div>
+<p style="font-size:13px;color:#444;text-align:center;line-height:1.5;margin:10px 0">Pilih cara simpan:<br><b>Share</b> = keluar Share Sheet iPhone → Save to Files<br><b>View</b> = buka dalam Safari → tekan Download / Share kat sana<br><b>Copy</b> = copy isi file, paste dalam Notes / WhatsApp</p>
+<button class="btn btn-green" id="saveSheetShare" style="width:100%;padding:16px" data-wired="1">📤 Share / Save to Files</button>
+<button class="btn btn-light" id="saveSheetView" style="width:100%;margin-top:8px;padding:14px" data-wired="1">👁️ View - Buka Dalam Safari</button>
+<button class="btn btn-light" id="saveSheetCopy" style="width:100%;margin-top:8px;padding:14px" data-wired="1">📋 Copy Isi File</button>
+<button class="btn btn-light" onclick="closeSaveSheet(false)" style="width:100%;margin-top:8px">Tutup</button>
+</div></div>
 <div class="toast" id="toast"></div>
 <script>
 let invoices = JSON.parse(localStorage.getItem('ik_invoices')||'[]');
@@ -357,16 +367,58 @@ function render(){
     _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
     return;
   }
-// ===== Tekan Download -> keluar popup View / Download Safari (cara yang confirm bunyi) =====
-// Share Sheet senyap kat phone user, jadi pakai cara <a download> balik - Safari akan tanya View / Download.
-// View = tengok je, Download = simpan dalam Files > Downloads.
-async function saveFileToPhone(blob, filename){
-  try{
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-    showToast('Pilih Download dalam popup Safari tu');
-    return true;
-  }catch(e){ alert('Download gagal: '+(e.message||e)); return false; }
+// ===== Tekan Download -> MESTI keluar popup sendiri, tak boleh senyap =====
+// Masalah: iPhone Home Screen / preview chat block <a download> & Share Sheet senyap-senyap.
+// Fix: Buka sheet sendiri dulu (confirm nampak), dalam sheet tu baru ada 3 cara: Share / View / Copy.
+// Sheet ni z-index 9999, atas semua modal, jadi tak boleh tersorok belakang Report modal.
+let _saveBlob=null, _saveName='', _saveResolve=null;
+function openSaveSheet(blob, filename){
+  return new Promise((res)=>{
+    _saveBlob=blob; _saveName=filename; _saveResolve=res;
+    const el=document.getElementById('saveSheet'); if(!el){ res(false); return; }
+    const n=document.getElementById('saveSheetName'); if(n) n.textContent=filename;
+    const s=document.getElementById('saveSheetSize'); if(s) s.textContent='Saiz: '+(blob.size/1024).toFixed(0)+' KB';
+    const isText = blob.type.includes('text') || blob.type.includes('json') || filename.endsWith('.csv') || filename.endsWith('.json');
+    const copyBtn=document.getElementById('saveSheetCopy'); if(copyBtn) copyBtn.style.display=isText?'block':'none';
+    el.style.display='flex';
+  });
 }
+function closeSaveSheet(result){ const el=document.getElementById('saveSheet'); if(el) el.style.display='none'; if(_saveResolve){ const r=_saveResolve; _saveResolve=null; r(result); } }
+async function saveFileToPhone(blob, filename){
+  // Buka sheet sendiri dulu - ni yang confirm keluar, tak boleh senyap
+  const ok = await openSaveSheet(blob, filename);
+  return ok;
+}
+// Wire sheet buttons sekali je
+setTimeout(()=>{
+  const shareBtn=document.getElementById('saveSheetShare');
+  if(shareBtn && !shareBtn.dataset.wired){ shareBtn.dataset.wired='1'; shareBtn.onclick=async()=>{
+    try{
+      const file=new File([_saveBlob], _saveName, {type: _saveBlob.type||'application/octet-stream'});
+      if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+        await navigator.share({files:[file], title: _saveName});
+        showToast('Dah Share - pilih Save to Files dalam sheet iPhone tu');
+        closeSaveSheet(true); return;
+      }
+      // Kalau Share tak support, terus View
+      const u=URL.createObjectURL(_saveBlob); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u),60000);
+      showToast('Share tak support - dah buka View, tekan Share / Download kat sana');
+      closeSaveSheet(true);
+    }catch(e){ if(String(e && e.message || e).includes('Abort')){ showToast('Share batal'); closeSaveSheet(false); } else { alert('Share gagal: '+(e.message||e)); } }
+  }; }
+  const viewBtn=document.getElementById('saveSheetView');
+  if(viewBtn && !viewBtn.dataset.wired){ viewBtn.dataset.wired='1'; viewBtn.onclick=()=>{
+    try{
+      const u=URL.createObjectURL(_saveBlob); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u),60000);
+      showToast('Dah buka View - tekan Share / Download dalam Safari tu');
+      closeSaveSheet(true);
+    }catch(e){ alert('View gagal: '+(e.message||e)); }
+  }; }
+  const copyBtn=document.getElementById('saveSheetCopy');
+  if(copyBtn && !copyBtn.dataset.wired){ copyBtn.dataset.wired='1'; copyBtn.onclick=async()=>{
+    try{ const t=await _saveBlob.text(); await navigator.clipboard.writeText(t); showToast('Dah Copy - paste dalam Notes / WhatsApp diri sendiri'); closeSaveSheet(true); }catch(e){ try{ const t=await _saveBlob.text(); const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('Dah Copy'); closeSaveSheet(true); }catch(e2){ alert('Copy gagal: '+(e2.message||e2)); } }
+  }; }
+}, 500);
 
 
   // Dah Bayar - GROUP ikut PV, tajuk = supplier name - SWIPE KIRI UNTUK CANCEL PV (Dah Bayar je)
@@ -693,7 +745,7 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
   if(pdf){
     const ob=document.getElementById('imgViewPdfOpen'), dl=document.getElementById('imgViewPdfDl');
     if(ob) ob.onclick=()=>{ const b=new Blob([new Uint8Array(atob(pdf.split(',')[1]).split('').map(c=>c.charCodeAt(0)))],{type:'application/pdf'}); const u=URL.createObjectURL(b); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u), 60000); };
-    if(dl) dl.onclick=()=>{ const a=document.createElement('a'); a.href=pdf; a.download=(title||'invoice')+'.pdf'; a.click(); };
+    if(dl) dl.onclick=async()=>{ try{ const _b=await (await fetch(pdf)).blob(); await saveFileToPhone(_b,(title||'invoice')+'.pdf'); }catch(e){ const a=document.createElement('a'); a.href=pdf; a.download=(title||'invoice')+'.pdf'; a.click(); } };
     // Kalau ada dua-dua, default tunjuk PDF (macam Smart Receipt). Kalau tekan gambar kat Detail, Detail akan pass pdf='' jadi tunjuk gambar je.
     showViewTab('pdf');
   } else {
