@@ -142,7 +142,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
 
-</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</style></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -1324,16 +1324,16 @@ function showCropEditor(dataUrl, target, isScan){
   m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><b id="cropTitle" style="color:#fff;font-size:18px">Edit Scan</b><div style="display:flex;gap:8px"><button id="cropFitBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px">↔ Muatkan</button><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
   <div style="background:#000;color:#aaa;font-size:11px;text-align:center;padding:2px 12px 6px">Drag bulat putih di 4 bucu — kalau bulat bawah tak nampak, tekan ↔ Muatkan</div>
   <div id="editStage" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
-  <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:hidden;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:8px;box-sizing:border-box">
+  <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:auto;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:24px;box-sizing:border-box">
   <div id="zoomSpacer" style="position:relative;margin:auto;display:flex;justify-content:center;align-items:flex-start">
   <div id="cropWrap" style="position:relative;flex:0 0 auto;background:#000;border-radius:0;overflow:hidden;touch-action:none;transform-origin:0 0">
     <img id="cropImg" src="${dataUrl}" style="width:100%;height:auto;display:block;border-radius:0">
     <svg id="dimSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"><path id="dimPath" d="" fill="rgba(0,0,0,0.55)" fill-rule="evenodd"></path></svg>
     <svg id="quadSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2"><polygon id="quadPoly" points="" fill="rgba(168,85,247,0.02)" stroke="#c026d3" stroke-width="1" vector-effect="non-scaling-stroke" opacity="1"></polygon></svg>
-    <div data-quad="0" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
-    <div data-quad="1" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
-    <div data-quad="2" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
-    <div data-quad="3" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="0" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="1" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="2" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="3" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
   </div>
   </div>
   <div id="loupe" style="display:none;position:absolute;width:170px;height:170px;border-radius:50%;border:1.5px solid #fff;background:#000;overflow:hidden;z-index:20;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 1px rgba(168,85,247,0.6)">
@@ -1343,7 +1343,7 @@ function showCropEditor(dataUrl, target, isScan){
     <div style="position:absolute;top:50%;left:0;right:0;height:0.5px;background:rgba(168,85,247,0.6)"></div>
   </div>
   </div>
-  <p style="font-size:11px;color:#999;margin:8px 12px 12px"></p>
+  <div style="display:flex;gap:8px;justify-content:center;align-items:center;padding:8px 12px 4px;background:#000"><button id="cropZoomOut" style="background:#1a1a1a;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:9px 16px;border-radius:999px;font-weight:700;font-size:13px">− Kecilkan</button><span style="font-size:11px;color:#aaa">Gambar besar sangat? Tekan Kecilkan</span><button id="cropZoomIn" style="background:#1a1a1a;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:9px 16px;border-radius:999px;font-weight:700;font-size:13px">+ Besarkan</button></div><p style="font-size:11px;color:#999;margin:8px 12px 12px"></p>
   </div>
   <div id="reviewStage" style="display:none;text-align:center;background:#000;color:#fff;flex:1;flex-direction:column">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:#000;padding:4px 0"><button id="reviewBack" style="background:transparent;color:#fff;border:0;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer">←</button><b style="color:#fff">Review</b><button id="reviewDone" style="background:#fff;color:#000;border:0;padding:9px 18px;border-radius:999px;font-weight:700;cursor:pointer">✓</button></div>
@@ -1355,7 +1355,7 @@ function showCropEditor(dataUrl, target, isScan){
   document.body.appendChild(m);
   let cur=dataUrl; let orig=dataUrl; let reviewOrig=dataUrl;
   let quad=[{x:6,y:6},{x:94,y:6},{x:94,y:94},{x:6,y:94}];
-  let fitW=0, fitH=0; let zoom=1;
+  let fitW=0, fitH=0; let zoom=1; let zoomScale=0.78;
   const imgEl=m.querySelector('#cropImg'); const wrap=m.querySelector('#cropWrap'); const poly=m.querySelector('#quadPoly'); const handles=Array.from(m.querySelectorAll('[data-quad]'));
   function renderQuad(){
     handles.forEach((h,i)=>{ h.style.left=quad[i].x+'%'; h.style.top=quad[i].y+'%'; });
@@ -1366,11 +1366,11 @@ function showCropEditor(dataUrl, target, isScan){
   }
   function fitImage(){
     const vp=m.querySelector('#cropViewport'); const w=m.querySelector('#cropWrap'); const im=m.querySelector('#cropImg'); if(!vp||!w||!im) return;
-    // MESTI muat dalam viewport + ruang untuk bulat handle (16px radius + margin) - kalau tak, bulat bawah terkeluar bawah screen macam screenshot
-    const vw=Math.max(100, vp.clientWidth-44); const vh=Math.max(100, vp.clientHeight-44);
+    // Gallery gambar besar - jangan isi penuh viewport, bagi 78% je supaya bulat 4 bucu tak rapat ke tepi screen, senang drag
+    const vw=Math.max(100, vp.clientWidth-80); const vh=Math.max(100, vp.clientHeight-170);
     const iw=im.naturalWidth||0; const ih=im.naturalHeight||0;
     if(!iw||!ih){ setTimeout(fitImage, 120); return; }
-    const sc=Math.min(vw/iw, vh/ih, 1); fitW=Math.round(iw*sc); fitH=Math.round(ih*sc);
+    const baseSc=Math.min(vw/iw, vh/ih, 1); const sc=baseSc*zoomScale; fitW=Math.round(iw*sc); fitH=Math.round(ih*sc);
     w.style.width=fitW+'px'; w.style.height=fitH+'px'; w.style.maxWidth='100%'; w.style.maxHeight='100%'; im.style.width=fitW+'px'; im.style.height=fitH+'px'; im.style.maxWidth='100%'; im.style.maxHeight='100%';
     const sp=m.querySelector('#zoomSpacer'); if(sp){ sp.style.width=fitW+'px'; sp.style.height=fitH+'px'; sp.style.maxWidth='100%'; sp.style.maxHeight='100%'; }
     renderQuad();
@@ -1459,6 +1459,9 @@ function showCropEditor(dataUrl, target, isScan){
   window.addEventListener('resize', fitImage);
   try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', fitImage); }catch(e){}
   const _fitBtn=m.querySelector('#cropFitBtn'); if(_fitBtn) _fitBtn.onclick=()=>{ fitImage(); setTimeout(fitImage, 60); };
+  const _zOut=m.querySelector('#cropZoomOut'); if(_zOut) _zOut.onclick=()=>{ zoomScale=Math.max(0.45, zoomScale-0.15); fitImage(); };
+  const _zIn=m.querySelector('#cropZoomIn'); if(_zIn) _zIn.onclick=()=>{ zoomScale=Math.min(1.0, zoomScale+0.15); fitImage(); };
+  if(_fitBtn) _fitBtn.onclick=()=>{ zoomScale=0.78; fitImage(); setTimeout(fitImage, 60); };
   // Next - warp ikut quad sekarang
   m.querySelector('#cropUse').onclick=()=>{ warpPerspective(cur, quad, (warped)=>{ reviewOrig=cur; cur=warped; showReview(warped); }); };
   m.querySelector('#cropCancel').onclick=()=>{ m.remove(); if(target==='viewer') document.getElementById('imgViewModal').classList.add('open'); };
