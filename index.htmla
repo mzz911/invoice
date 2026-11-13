@@ -96,6 +96,52 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 .sr-note{flex-direction:column;align-items:stretch;gap:6px}
 .sr-note label{align-self:flex-start}
 .sr-note input{text-align:left;color:#111827}
+
+/* Tambah Invoice - Style Baru V2: Kad Bersih (hanya #addModal, lain tak usik) */
+#addModal.add-v2 .sheet{background:#fff;border-radius:24px;padding:0 18px 18px;overflow:hidden}
+#addModal.add-v2 .closeRow{padding:14px 0 6px}
+#addModal.add-v2 .add-hero{margin:6px 0 0}
+#addModal.add-v2 #thumbBox{width:100%!important;height:148px!important;border:2px dashed #C4B5FD!important;border-radius:18px!important;background:#F8F7FF!important;flex-direction:column;gap:4px}
+#addModal.add-v2 #thumbBox #thumbIcon{font-size:36px}
+#addModal.add-v2 .add-hero-hint{font-size:12px;color:#7C3AED;font-weight:700}
+#addModal.add-v2 .add-price{margin:18px 0 6px;text-align:center}
+#addModal.add-v2 .add-price label{display:block;margin:0 0 2px;font-size:11px;letter-spacing:.14em;color:#9CA3AF;font-weight:800}
+#addModal.add-v2 .add-price input{width:100%;border:0;border-bottom:2px solid #E9D5FF;box-shadow:none!important;border-radius:0;padding:4px 0 8px;font-size:38px;font-weight:900;color:#4C1D95;text-align:center;background:transparent}
+#addModal.add-v2 .add-price input:focus{outline:none;border-bottom-color:#7C3AED}
+#addModal.add-v2 .add-price input::placeholder{color:#D8B4FE}
+#addModal.add-v2 .add-card{background:#F9FAFB;border:1px solid #F1F5F9;border-radius:18px;padding:4px 16px;margin:14px 0}
+#addModal.add-v2 .add-field{padding:12px 0;border-bottom:1px solid #EEF2F7}
+#addModal.add-v2 .add-field:last-child{border-bottom:0}
+#addModal.add-v2 .add-field label{display:block;margin:0 0 4px;font-size:11px;letter-spacing:.08em;color:#9CA3AF;font-weight:800;text-transform:uppercase}
+#addModal.add-v2 .add-field input,#addModal.add-v2 .add-field select{width:100%;border:0;box-shadow:none!important;padding:0;font-size:16px;font-weight:700;color:#111827;text-align:left;background:transparent}
+#addModal.add-v2 .add-field input::placeholder{color:#C7C9D1;font-weight:500}
+#addModal.add-v2 .add-field input:focus,#addModal.add-v2 .add-field select:focus{outline:none}
+#addModal.add-v2 #supSuggest{margin:8px 0 0}
+#addModal.add-v2 .add-cash{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:16px;padding:14px 16px;margin:10px 0}
+#addModal.add-v2 .add-cash label{margin:0;font-size:14px;font-weight:800;color:#92400E}
+#addModal.add-v2 .add-cash small{display:block;font-weight:600;color:#B45309;font-size:11px}
+#addModal.add-v2 #fCash{appearance:none;-webkit-appearance:none;width:52px!important;height:30px!important;border-radius:999px;background:#E5E7EB;position:relative;cursor:pointer;flex:none;box-shadow:none!important;padding:0!important;transition:.2s}
+#addModal.add-v2 #fCash:checked{background:#16A34A}
+#addModal.add-v2 #fCash::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+#addModal.add-v2 #fCash:checked::after{left:25px}
+#addModal.add-v2 .add-bank{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:16px;padding:14px 16px;margin:10px 0}
+#addModal.add-v2 .add-bank label{margin:0;font-size:14px;font-weight:800;color:#1E40AF}
+#addModal.add-v2 .add-bank small{display:block;font-weight:600;color:#2563EB;font-size:11px}
+#addModal.add-v2 #fBank{appearance:none;-webkit-appearance:none;width:52px!important;height:30px!important;border-radius:999px;background:#E5E7EB;position:relative;cursor:pointer;flex:none;box-shadow:none!important;padding:0!important;transition:.2s}
+#addModal.add-v2 #fBank:checked{background:#2563EB}
+#addModal.add-v2 #fBank::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+#addModal.add-v2 #fBank:checked::after{left:25px}
+#addModal.add-v2 #bankPayDateWrap{background:#fff;border:1px solid #BFDBFE;border-radius:16px;padding:12px 16px;margin:10px 0}
+#addModal.add-v2 #bankPayDateWrap label{display:block;margin:0 0 6px;font-size:11px;letter-spacing:.08em;color:#2563EB;font-weight:800;text-transform:uppercase}
+#addModal.add-v2 #bankPayDateWrap input{width:100%;border:0;outline:none;font-size:15px;font-weight:700;color:#1E293B;background:transparent;padding:0}
+#addModal.add-v2 .add-note{background:#fff;border:1px solid #EDE9FE;border-radius:16px;padding:12px 16px;margin:10px 0}
+#addModal.add-v2 .add-note label{display:block;margin:0 0 4px;font-size:11px;letter-spacing:.08em;color:#9CA3AF;font-weight:800;text-transform:uppercase}
+#addModal.add-v2 .add-note input{width:100%;border:0;box-shadow:none!important;padding:0;font-size:15px;font-weight:600;color:#111827;background:transparent}
+#addModal.add-v2 .add-note input:focus{outline:none}
+#addModal.add-v2 .add-actions{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
+#addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
+#addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
+
 </style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
@@ -106,25 +152,31 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
 <div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
+<div id="backupReminder" style="display:block;background:rgb(255, 251, 235);border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;cursor:pointer">⚠️ Belum backup hari ni (0 invoice dalam phone) - tekan sini untuk Export</div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
-<div id="list"></div>
+<div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
 </div>
 
 
 <!-- ADD / EDIT -->
-<div class="modal" id="addModal"><div class="sheet">
+<div class="modal add-v2" id="addModal"><div class="sheet">
 <div class="closeRow"><button id="addBack">← Kembali</button><b id="addTitle">Tambah Invoice</b><button id="addClose">✕ Tutup</button></div>
 <input id="fImg" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgCamera" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgFiles" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-<div class="sr-top"><div id="thumbBox" style="width:96px;height:96px;flex-shrink:0;border:2px dashed #C4B5FD;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F5F3FF;overflow:hidden"><span id="thumbIcon" style="font-size:32px">📷</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><div class="sr-price"><label>Harga (RM)</label><input id="fPrice" type="number" step="0.01" placeholder="0.00"></div></div>
-<div class="sr-row"><label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off"></div>
-<div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:-2px 0 8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div>
-<div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:-2px 0 8px;cursor:pointer"></div>
-<div class="sr-row"><label>No Invoice</label><input id="fInv" placeholder="No Invoice"></div>
-<div class="sr-row"><label>Tarikh Invoice</label><input id="fDate" type="date"></div>
-<div class="sr-row"><label>Kategori</label><select id="fCat"></select></div>
-<div class="sr-row"><label>💵 Cash - Terus Dah Bayar</label><input type="checkbox" id="fCash"></div>
-<div class="sr-row sr-note"><label>Nota / Remark</label><input id="fNote" placeholder=""></div>
-<div class="row" style="margin-top:16px"><button class="btn btn-light" id="addCancel" style="flex:1">Batal</button><button class="btn btn-green" id="addSave" style="flex:1">Simpan</button></div>
+<div class="add-hero"><div id="thumbBox" style="width:100%;height:148px;flex-shrink:0;border:2px dashed #C4B5FD;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F8F7FF;overflow:hidden"><span id="thumbIcon" style="font-size:36px">📷</span><span class="add-hero-hint">Tekan untuk ambil gambar resit</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div></div>
+<div id="autoPdfBadge" style="display:none;font-size:11px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:7px 10px;text-align:center;margin:10px 0 2px">PDF Auto dah siap</div>
+<div id="pagesStrip" style="display:none;margin:8px 0 4px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b id="pagesCount" style="font-size:12px">1 page - auto jadi 1 PDF</b><button id="addPageBtn" style="background:#5B21B6;color:#fff;border:0;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px">+ Tambah Page</button></div><div id="pagesThumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px"></div><div style="font-size:11px;color:#666;margin-top:6px">1 invoice boleh banyak pages - semua jadi 1 PDF. Tekan ✕ untuk buang page tu. Gambar dari Camera / Gallery semua auto jadi PDF.</div></div>
+<div class="add-price"><label>JUMLAH - RM</label><input id="fPrice" type="number" step="0.01" placeholder="0.00"></div>
+<div class="add-card">
+<div class="add-field"><label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off"></div>
+<div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:8px 0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div>
+<div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:4px 0 8px;cursor:pointer"></div>
+<div class="add-field"><label>No Invoice</label><input id="fInv" placeholder="No Invoice"></div>
+<div class="add-field"><label>Tarikh Invoice</label><input id="fDate" type="date"></div>
+<div class="add-field"><label>Kategori</label><select id="fCat"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div>
+</div>
+<div class="add-cash"><div><label>Cash - Terus Dah Bayar</label><small>Terus tanda Dah Bayar + PV auto</small></div><input type="checkbox" id="fCash"></div><div class="add-bank"><div><label>Bank Transfer - Dah Bayar</label><small>Tanda Dah Bayar + PV auto, isi tarikh payment</small></div><input type="checkbox" id="fBank"></div><div id="bankPayDateWrap" style="display:none"><label>Tarikh Payment (Bank Transfer)</label><input id="fPayDate" type="date"></div>
+<div class="add-note"><label>Nota / Remark</label><input id="fNote" placeholder="Catatan (optional)"></div>
+<div class="add-actions"><button class="btn btn-light" id="addCancel">Batal</button><button class="btn btn-green" id="addSave">Simpan Invoice</button></div>
 </div></div>
 
 <!-- IMG SOURCE -->
@@ -142,7 +194,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- FILTER -->
 <div class="modal" id="filterModal"><div class="sheet"><div class="closeRow"><button id="filterBack">← Kembali</button><b>Filter</b><button id="filterClose">✕ Tutup</button></div>
-<label>Kategori</label><select id="fltCat"><option value="">Semua kategori</option></select>
+<label>Kategori</label><select id="fltCat"><option value="">Semua kategori</option><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select>
 <label>Status</label><select id="fltStatus"><option value="">Semua</option><option value="paid">Dah Bayar</option><option value="unpaid">Belum Bayar</option></select>
 <label>Cara Bayar</label><select id="fltPay"><option value="">Semua</option><option>Cash</option><option>Bank Transfer</option><option>QR / E-Wallet</option><option>Split Payment</option></select>
 <div class="row" style="margin-top:14px"><button class="btn btn-light" id="filterReset" style="flex:1">Reset</button><button class="btn btn-green" id="filterApply" style="flex:1">Tunjuk</button></div></div></div>
@@ -159,21 +211,15 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <!-- SETTING -->
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
-<button class="btn btn-green" id="icloudBackupBtn" style="padding:16px;text-align:left">⬆️ Export DB</button>
+<button class="btn btn-green" id="icloudBackupBtn" style="padding:16px;text-align:left">⬆️ Export DB - Backup PENUH (dengan gambar)</button>
+<div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:8px;text-align:center">⚠️ JANGAN tekan Clear History dalam Safari. Nanti semua invoice hilang.</div>
 <div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
+<div id="storageLabel" style="font-size:12px;color:#666;text-align:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px">Storage: kira...</div>
+<button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button>
+<button class="btn btn-light" id="archiveOldBtn" style="padding:16px;text-align:left">📦 Archive Lama - Export invoice &gt;1 tahun, lepas tu padam dari phone</button>
+<div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Archive = simpan invoice lama dalam file, lepas tu buang dari phone. File tu simpan dalam Files. Nak tengok balik, Import file tu.</div>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button>
 <button class="btn btn-light" id="settingImport" style="padding:16px;text-align:left">⬇️ Import DB</button>
-<div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:12px;margin-top:4px">
-<div style="font-weight:800;font-size:14px">☁️ Supabase - Auto Sync</div>
-<div id="supabaseStatus" style="font-size:12px;color:#555;margin:4px 0 8px">Belum sambung - masukkan anon key</div>
-<label style="font-size:12px;color:#555">Project URL (dah siap)</label>
-<input id="supabaseUrlInput" readonly="" value="https://alxyvfraxbvpgjxwryzr.supabase.co" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:12px;background:#f8fafc">
-<label style="font-size:12px;color:#555">Anon Key (paste dari Supabase &gt; Settings &gt; API)</label>
-<input id="supabaseKeyInput" placeholder="eyJ..." type="password" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:12px">
-<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-green" id="supabaseSaveKey" style="flex:1;padding:10px;font-size:13px">Simpan Key</button><button class="btn btn-light" id="supabaseSyncNow" style="flex:1;padding:10px;font-size:13px">Sync Sekarang</button></div>
-<button class="btn btn-light" id="supabasePullNow" style="width:100%;margin-top:8px;padding:10px;font-size:13px">⬇️ Tarik dari Cloud</button>
-<div style="font-size:11px;color:#777;margin-top:6px">Table: app_data (id=1). Jangan share service_role key, anon key je.</div>
-</div>
 </div>
 
 <input type="file" id="importFile" accept=".json" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
@@ -192,6 +238,8 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div id="payMethods" style="display:flex;flex-direction:column;gap:8px"></div>
 <div id="payAmounts"></div>
 <div style="display:flex;gap:16px;align-items:flex-start;margin-top:12px;overflow-x:auto"><div style="flex-shrink:0"><b>Resit Payment</b><div style="position:relative;width:100px;margin-top:6px"><div id="payThumbBox" style="width:100px;height:100px;border:2px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden"><span id="payThumbIcon">📷</span><img id="payThumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><button id="payThumbDelete" style="display:none;position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)">✕</button></div></div><div style="flex:1;min-width:120px"><b>Gambar Invoice</b><div id="payInvList" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px"></div></div></div>
+<div id="payPdfBadge" style="display:none;font-size:11px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:7px 10px;text-align:center;margin:10px 0 2px">PDF Auto dah siap</div>
+<div id="payPagesStrip" style="display:none;margin:8px 0 4px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b id="payPagesCount" style="font-size:12px">1 page - auto jadi 1 PDF</b><button id="addPayPageBtn" style="background:#5B21B6;color:#fff;border:0;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px">+ Tambah Page</button></div><div id="payPagesThumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px"></div><div style="font-size:11px;color:#666;margin-top:6px">Resit boleh banyak pages - semua jadi 1 PDF, sama macam Invoice. Tekan ✕ untuk buang page tu. Tekan gambar untuk tukar page tu.</div></div>
 <div class="row" style="margin-top:14px"><button class="btn btn-light" id="payCancel" style="flex:1">Batal</button><button class="btn btn-green" id="payConfirm" style="flex:1">Confirm Bayar</button></div></div></div>
 
 <!-- DRIVE INFO -->
@@ -210,7 +258,7 @@ const DEFAULT_CATS = ['stock','kegunaan kedai','utilities','gaji','personal'];
 migrateCN();
 try{ offloadMedia(false); setTimeout(()=>{ try{ localStorage.setItem('ik_invoices',JSON.stringify(invoices)); }catch(e){} }, 500); }catch(e){}
 let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
-let pendingInvImgs={}, pendingInvPdfs={}, deleteInvImgs={}, _payInvTargetId=null;
+let pendingInvImgs={}, pendingInvPdfs={}, deleteInvImgs={}, _payInvTargetId=null; let pendingPages=[], _pendingPageAction=null; let pendingPayPages=[], _pendingPayPageAction=null;
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
 // ===== IndexedDB untuk PDF besar (multi-muka) - localStorage cuma ~5MB, PDF 2MB+ tak muat =====
 const IDB_DB='invoiceKedaiDB', IDB_STORE='pdfs';
@@ -240,8 +288,12 @@ function offloadMedia(aggressive){
     if(x.paymentImg && String(x.paymentImg).startsWith('data:') && x.paymentImg.length>_th){ const k='payimg_'+x.id; _imgCache[k]=x.paymentImg; try{ idbSavePdf(k, x.paymentImg); }catch(e){} x.paymentImg='IDBIMG:'+k; }
     if(x.pdf && String(x.pdf).startsWith('data:') && x.pdf.length>_th){ const k='inv_'+x.id; try{ idbSavePdf(k, x.pdf); }catch(e){} x.pdf='IDB:'+k; x.hasPdf=true; }
     if(x.paymentPdf && String(x.paymentPdf).startsWith('data:') && x.paymentPdf.length>_th){ const k='pay_'+x.id; try{ idbSavePdf(k, x.paymentPdf); }catch(e){} x.paymentPdf='IDB:'+k; }
+    // FIX Storage penuh: pages[] + paymentPages[] dulu tak pernah offload - ni yang buat localStorage 5MB penuh. Offload setiap page sama macam img.
+    if(Array.isArray(x.pages)){ x.pages=x.pages.map((p,idx)=>{ if(p && String(p).startsWith('data:') && String(p).length>_th){ const k='pages_'+x.id+'_'+idx; _imgCache[k]=p; try{ idbSavePdf(k, p); }catch(e){} return 'IDBIMG:'+k; } return p; }); }
+    if(Array.isArray(x.paymentPages)){ x.paymentPages=x.paymentPages.map((p,idx)=>{ if(p && String(p).startsWith('data:') && String(p).length>_th){ const k='paypages_'+x.id+'_'+idx; _imgCache[k]=p; try{ idbSavePdf(k, p); }catch(e){} return 'IDBIMG:'+k; } return p; }); }
   });
 }
+async function resolvePagesArray(arr){ if(!Array.isArray(arr)) return []; const out=[]; for(const p of arr){ out.push(await resolveImgData(p)); } return out.filter(Boolean); }
 async function resolveImgData(imgField){
   if(!imgField) return '';
   if(String(imgField).startsWith('IDBIMG:')){ const k=String(imgField).slice(7); if(_imgCache[k]) return _imgCache[k]; const v=await idbLoadPdf(k); if(v) _imgCache[k]=v; return v||''; }
@@ -264,6 +316,8 @@ try{
   const _obs=new MutationObserver((muts)=>{ muts.forEach(mu=>{ mu.addedNodes.forEach(n=>{ if(n.nodeType===1){ if(n.tagName==='IMG') hydrateIdbImages(document); else if(n.querySelectorAll) hydrateIdbImages(n); } }); }); });
   _obs.observe(document.body, {childList:true, subtree:true});
 }catch(e){}
+async function updateStorageLabel(){ try{ const el=document.getElementById('storageLabel'); if(!el) return; let s=0; try{ s=JSON.stringify(invoices).length + JSON.stringify(cancelledPVs).length; }catch(e){} let est=''; try{ if(navigator.storage && navigator.storage.estimate){ const e=await navigator.storage.estimate(); const used=((e.usage||0)/1024/1024).toFixed(0); const quota=((e.quota||0)/1024/1024).toFixed(0); est=used+'MB / '+quota+'MB'; } }catch(e){} let _st='SELAMAT'; if((s/1024)>4000) _st='NAK PENUH - tekan Free Space'; let _st2='SELAMAT'; try{ if(navigator.storage && navigator.storage.estimate){ const e2=await navigator.storage.estimate(); if(e2.quota && e2.usage/e2.quota>0.8) _st2='NAK PENUH - tekan Archive Lama'; } }catch(e){} el.textContent='Laci (text): '+(s/1024).toFixed(0)+' KB / 5000 KB - '+_st+' • Stor gambar: '+est.replace(' • Phone storage untuk app ni: ','')+' - '+_st2; }catch(e){} }
+setTimeout(()=>{ const b=document.getElementById('freeSpaceBtn'); if(b && !b.dataset.wired){ b.dataset.wired='1'; b.onclick=()=>{ try{ offloadMedia(true); save(); updateStorageLabel(); showToast('Free Space siap - gambar dipindah ke IndexedDB, invoice text selamat'); }catch(e){ alert('Free Space gagal: '+e.message); } }; } }, 1000);
 function save(){
   // Proaktif: pindah gambar + PDF besar ke IndexedDB dulu, baru simpan localStorage yang ringan
   try{ offloadMedia(false); }catch(e){}
@@ -278,12 +332,12 @@ function save(){
     try{
       const _backup = JSON.stringify(invoices);
       // Kosongkan gambar yang paling besar dulu supaya invoice text boleh simpan
-      invoices.forEach(x=>{ if(x.img && String(x.img).startsWith('data:') && x.img.length>100*1024) x.img=''; if(x.paymentImg && String(x.paymentImg).startsWith('data:') && x.paymentImg.length>100*1024) x.paymentImg=''; });
+      invoices.forEach(x=>{ if(x.img && String(x.img).startsWith('data:') && x.img.length>100*1024) x.img=''; if(x.paymentImg && String(x.paymentImg).startsWith('data:') && x.paymentImg.length>100*1024) x.paymentImg=''; if(Array.isArray(x.pages)) x.pages=x.pages.filter(p=>!String(p).startsWith('data:') || String(p).length<=100*1024); if(Array.isArray(x.paymentPages)) x.paymentPages=x.paymentPages.filter(p=>!String(p).startsWith('data:') || String(p).length<=100*1024); });
       localStorage.setItem('ik_invoices',JSON.stringify(invoices));
       showToast('Storage penuh - gambar besar lama dikosongkan, invoice text selamat');
     }catch(e3){ alert('Storage iPhone penuh! Padam invoice lama dulu.'); throw e3; }
   }
-} localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); try{ supabasePushDebounced(); }catch(e){} }
+} localStorage.setItem('ik_cancelled',JSON.stringify(cancelledPVs)); localStorage.setItem('ik_cats',JSON.stringify(customCats)); localStorage.setItem('ik_cats_hidden',JSON.stringify(hiddenCats)); }
 function fmt(n){ return 'RM'+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return ''; const parts=String(d).split('-'); if(parts.length!==3) return d; return parts[2]+'/'+parts[1]+'/'+parts[0].slice(2); }
 function isCN(o){ const _inv=String(o?.inv||'').trim().toUpperCase(); if(_inv.startsWith('CN')) return true; if(Number(o?.price||0)<0) return true; return false; }
@@ -292,19 +346,13 @@ function pvCountLabel(items){ const _all=items||[]; const _cn=cnCount(_all); con
 function signedPrice(o){ const v=Number(o?.price||0); return isCN(o) ? -Math.abs(v) : v; }
 function migrateCN(){ let changed=false; invoices.forEach(x=>{ if(isCN(x) && Number(x.price||0)>0){ x.price=-Math.abs(Number(x.price||0)); changed=true; } }); if(changed) save(); }
 function today(){ return new Date().toISOString().slice(0,10); }
-const SUPABASE_URL='https://alxyvfraxbvpgjxwryzr.supabase.co';
-function supabaseKey(){ try{ return (localStorage.getItem('ik_supabase_key')||'').trim(); }catch(e){ return ''; } }
-function supabaseEnabled(){ return !!supabaseKey(); }
-function updateSupabaseStatus(msg){ const el=document.getElementById('supabaseStatus'); if(!el) return; if(msg){ el.textContent=msg; return; } if(!supabaseEnabled()){ el.textContent='Belum sambung - masukkan anon key'; return; } const ls=localStorage.getItem('ik_lastSync'); el.textContent='Sambung ke Supabase • '+(ls ? 'Last sync: '+new Date(ls).toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Belum pernah sync'); const inp=document.getElementById('supabaseKeyInput'); if(inp && !inp.value) inp.value=supabaseKey(); }
-let _supabaseTimer=null;
-function supabasePushDebounced(){ if(!supabaseEnabled()) return; clearTimeout(_supabaseTimer); _supabaseTimer=setTimeout(supabasePush, 800); }
-async function supabasePush(){ if(!supabaseEnabled()) return; try{ const payload={invoices,cancelledPVs,customCats,hiddenCats}; const res=await fetch(SUPABASE_URL+'/rest/v1/app_data',{method:'POST',headers:{apikey:supabaseKey(),Authorization:'Bearer '+supabaseKey(),'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({id:1,data:payload,updated_at:new Date().toISOString()})}); if(res.ok){ try{ localStorage.setItem('ik_lastSync', new Date().toISOString()); }catch(e){} updateSupabaseStatus(); } }catch(e){} }
-async function supabasePull(manual){ if(!supabaseEnabled()){ if(manual) alert('Masukkan anon key dulu dalam Setting > Supabase'); return; } try{ const res=await fetch(SUPABASE_URL+'/rest/v1/app_data?id=eq.1&select=data,updated_at',{headers:{apikey:supabaseKey(),Authorization:'Bearer '+supabaseKey()}}); if(!res.ok){ if(manual) alert('Tak dapat tarik dari Supabase. Check key & table app_data dah buat ke belum (SQL Editor).'); return; } const arr=await res.json(); const row=arr && arr[0]; if(!row || !row.data){ if(manual) alert('Cloud kosong. Tekan Sync Sekarang untuk hantar data phone ni ke cloud.'); return; } const cloud=row.data; const existingIds=new Set(invoices.map(x=>String(x.id||''))); const existingKeys=new Set(invoices.map(x=>String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase())); let added=0; (cloud.invoices||[]).forEach(x=>{ const idKey=String(x.id||''); const key=String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase(); if((idKey && existingIds.has(idKey)) || existingKeys.has(key)) return; invoices.push(x); added++; }); const existingPV=new Set(cancelledPVs.map(x=>(x.pv||'')+'|'+(x.date||''))); (cloud.cancelledPVs||[]).forEach(x=>{ const k=(x.pv||'')+'|'+(x.date||''); if(!existingPV.has(k)){ cancelledPVs.push(x); existingPV.add(k); } }); if(cloud.customCats) customCats=[...new Set([...customCats,...cloud.customCats])]; if(cloud.hiddenCats) hiddenCats=[...new Set([...hiddenCats,...cloud.hiddenCats])]; if(added>0 || manual){ save(); render(); } try{ localStorage.setItem('ik_lastSync', new Date().toISOString()); }catch(e){} updateSupabaseStatus('Sync ok • '+added+' baru dari cloud'); if(manual) showToast('Tarik dari cloud siap: '+added+' baru'); }catch(e){ if(manual) alert('Sync gagal. Check internet & key.'); } }
 function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2200); }
 function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ const cur=sel.value; sel.innerHTML=allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur&&allCats().includes(cur))sel.value=cur; } const f=document.getElementById('fltCat'); if(f){ const cur=f.value; f.innerHTML='<option value="">Semua kategori</option>'+allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur)f.value=cur; } }
 function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='batal'){ return []; } return list; }
 function gotoTab(name){ tab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name)); selected.clear(); render(); }
+function updateBackupReminder(){ try{ const el=document.getElementById('backupReminder'); if(!el) return; let last=''; try{ last=localStorage.getItem('ik_lastExport')||''; }catch(e){} const lastDay=last ? new Date(last).toISOString().slice(0,10) : ''; const td=today(); if(lastDay===td){ el.style.display='none'; } else { el.style.display='block'; el.textContent='⚠️ Belum backup hari ni ('+invoices.length+' invoice dalam phone) - tekan sini untuk Export'; } }catch(e){} }
 function render(){
+  updateBackupReminder();
   rebuildCatList();
   const list=filtered();
   const _tabLabel = tab==='paid' ? ' Dah Bayar' : tab==='unpaid' ? ' Belum Bayar' : '';
@@ -494,7 +542,16 @@ function render(){
   // bulk bar
   let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-green" id="bulkPay">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove();
 }
-function setThumb(img){ pendingImg=img||''; const p=document.getElementById('thumbPreview'), ic=document.getElementById('thumbIcon'), tx=document.getElementById('thumbText'); if(img){ p.src=img; p.style.display='block'; ic.style.display='none'; if(tx) tx.style.display='none'; } else { p.style.display='none'; ic.style.display='block'; if(tx) tx.style.display='block'; } }
+// ===== AUTO PDF + MULTI-PAGE (dari code ni) - gambar (Camera/Gallery) -> PDF, 1 invoice = banyak pages, NATIVE iPhone kekal =====
+let _lastAutoPdfFor='';
+function autoPdfEnabled(){ try{ const v=localStorage.getItem('ik_auto_pdf'); return v===null ? true : v==='1'; }catch(e){ return true; } }
+function updateAutoPdfBadge(){ const b=document.getElementById('autoPdfBadge'); if(!b) return; if(pendingPdf && pendingPdf.length>100){ b.style.display='block'; b.textContent='PDF Auto dah siap - '+pendingPages.length+' page'+(pendingPages.length>1?'s':'')+' - boleh view / share PDF'; } else if(autoPdfEnabled() && pendingPages.length){ b.style.display='block'; b.style.color='#6D28D9'; b.style.background='#F5F3FF'; b.style.borderColor='#DDD6FE'; b.textContent='Auto PDF: ON - gambar ni akan jadi PDF'; } else if(pendingPages.length){ b.style.display='block'; b.style.color='#666'; b.style.background='#F9FAFB'; b.style.borderColor='#E5E7EB'; b.textContent='Auto PDF: OFF'; } else { b.style.display='none'; } }
+async function imgToPdfDataUrl(imgDataUrl){ if(!window.jspdf) return null; const img=await new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('img')); im.src=imgDataUrl; }); const { jsPDF }=window.jspdf; const portrait=img.height>=img.width; const doc=new jsPDF({orientation:portrait?'portrait':'landscape',unit:'mm',format:'a4'}); const pw=doc.internal.pageSize.getWidth(), ph=doc.internal.pageSize.getHeight(); const m=8, aw=pw-m*2, ah=ph-m*2; let w=aw, h=Math.round(aw*img.height/img.width); if(h>ah){ h=ah; w=Math.round(ah*img.width/img.height); } const x=m+Math.round((aw-w)/2), y=m+Math.round((ah-h)/2); const small=await new Promise((res)=>{ const maxW=1400, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc)); const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(img,0,0,cv.width,cv.height); res(cv.toDataURL('image/jpeg',0.82)); }); doc.addImage(small,'JPEG',x,y,w,h); return doc.output('datauristring'); }
+async function autoMakePdfForInvoice(img){ try{ if(!img || !String(img).startsWith('data:image')) return; if(!autoPdfEnabled()){ updateAutoPdfBadge(); return; } if(pendingPdf && pendingPdf.length>100) return; if(_lastAutoPdfFor===img) return; _lastAutoPdfFor=img; const pdf=await imgToPdfDataUrl(img); if(!pdf) return; if(pendingImg!==img) return; pendingPdf=pdf; updateAutoPdfBadge(); }catch(e){} }
+function updatePagesUI(){ const strip=document.getElementById('pagesStrip'); if(!strip) return; if(!pendingPages.length){ strip.style.display='none'; return; } strip.style.display='block'; const c=document.getElementById('pagesCount'); if(c) c.textContent=pendingPages.length+' page'+(pendingPages.length>1?'s':'')+' - auto jadi 1 PDF'; const box=document.getElementById('pagesThumbs'); if(!box) return; box.innerHTML=''; pendingPages.forEach((src,idx)=>{ const _disp=(String(src).startsWith('IDBIMG:') && _imgCache[String(src).slice(7)]) ? _imgCache[String(src).slice(7)] : src; const w=document.createElement('div'); w.style.cssText='position:relative;flex:none;width:64px;height:84px;border-radius:10px;overflow:hidden;border:2px solid '+(idx===0?'#5B21B6':'#E2E8F0')+';background:#fff;cursor:pointer'; const im=document.createElement('img'); im.src=_disp; im.style.cssText='width:100%;height:100%;object-fit:cover'; im.onclick=()=>{ _pendingPageAction={mode:'replace',idx:idx}; imgTarget='invoice'; document.getElementById('fImg').click(); }; /* NATIVE */ const lab=document.createElement('span'); lab.textContent='P'+(idx+1); lab.style.cssText='position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px'; const del=document.createElement('button'); del.textContent='x'; del.style.cssText='position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#EF4444;color:#fff;border:0;font-weight:800;font-size:12px;line-height:1'; del.onclick=(e)=>{ e.stopPropagation(); pendingPages.splice(idx,1); if(!pendingPages.length){ pendingImg=''; pendingPdf=''; setThumb(''); } else { pendingImg=pendingPages[0]; setThumb(pendingImg); } rebuildPdfFromPages(); }; w.appendChild(im); w.appendChild(lab); w.appendChild(del); box.appendChild(w); }); }
+async function rebuildPdfFromPages(){ try{ if(!pendingPages.length){ pendingPdf=''; updateAutoPdfBadge(); updatePagesUI(); return; } if(!autoPdfEnabled()){ pendingPdf=''; updatePagesUI(); return; } if(!window.jspdf) return; const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'}); for(let i=0;i<pendingPages.length;i++){ if(i>0) doc.addPage(); const _psrc=await resolveImgData(pendingPages[i]); const im=await new Promise((res)=>{ const x=new Image(); x.onload=()=>res(x); x.onerror=()=>res(null); x.src=_psrc; }); if(!im) continue; const pw=doc.internal.pageSize.getWidth(), ph=doc.internal.pageSize.getHeight(); const m=6, aw=pw-m*2, ah=ph-m*2; let w=aw, h=Math.round(aw*im.height/im.width); if(h>ah){ h=ah; w=Math.round(ah*im.width/im.height); } const small=await new Promise((r)=>{ const maxW=1400, sc=Math.min(1,maxW/im.width); const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(im.width*sc)); cv.height=Math.max(1,Math.round(im.height*sc)); const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(im,0,0,cv.width,cv.height); r(cv.toDataURL('image/jpeg',0.82)); }); doc.addImage(small,'JPEG', m+Math.round((aw-w)/2), m+Math.round((ah-h)/2), w, h); } pendingPdf=doc.output('datauristring'); pendingImg=pendingPages[0]||''; updateAutoPdfBadge(); updatePagesUI(); }catch(e){} }
+async function handleNewInvoiceImage(img){ if(!img) return; if(_pendingPageAction && _pendingPageAction.mode==='replace'){ const idx=_pendingPageAction.idx||0; if(pendingPages[idx]) pendingPages[idx]=img; else pendingPages.push(img); } else if(_pendingPageAction && _pendingPageAction.mode==='add'){ pendingPages.push(img); } else { if(!pendingPages.length) pendingPages.push(img); else pendingPages[0]=img; } _pendingPageAction=null; pendingImg=pendingPages[0]||''; setThumb(pendingImg); const b=document.getElementById('autoPdfBadge'); if(b){ b.style.display='block'; b.textContent='Buat PDF... '+pendingPages.length+' page'; } await rebuildPdfFromPages(); showToast(pendingPages.length>1 ? 'Page ditambah - total '+pendingPages.length+' pages, PDF auto update' : 'Gambar -> PDF auto siap'); }
+function setThumb(img){ pendingImg=img||''; const p=document.getElementById('thumbPreview'), ic=document.getElementById('thumbIcon'), tx=document.getElementById('thumbText'); if(img){ p.src=img; p.style.display='block'; ic.style.display='none'; if(tx) tx.style.display='none'; } else { p.style.display='none'; ic.style.display='block'; if(tx) tx.style.display='block'; _lastAutoPdfFor=''; } const _hint=document.querySelector('.add-hero-hint'); if(_hint) _hint.style.display=img?'none':'block'; updateAutoPdfBadge(); if(img && pendingPages.length<=1) autoMakePdfForInvoice(img); }
 function processFile(file,isScan,target){
   if(!file) return;
   // Safety: kalau PDF sampai sini terus (bypass override), convert jugak
@@ -665,13 +722,14 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
  // For add/change pay, we need a handler: when image chosen for pay in detail, save to this invoice
  window._payDetailId = x.id;
  b.querySelector('#delBtn').onclick=()=>{ if(confirm('Padam invoice ni?')){ invoices=invoices.filter(y=>y.id!==id); selected.delete(id); save(); render(); document.getElementById('detailModal').classList.remove('open'); } };
- b.querySelector('#editBtn').onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; rebuildCatList(); document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash');  document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=x.img||''; pendingPdf=x.pdf||''; setThumb(pendingImg); document.getElementById('addModal').classList.add('open'); };
+ b.querySelector('#editBtn').onclick=async()=>{ document.getElementById('detailModal').classList.remove('open'); document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; rebuildCatList(); document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today();  document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; pendingPages=await resolvePagesArray(x.pages && x.pages.length ? x.pages.slice() : (x.img ? [x.img] : [])); _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open'); };
+
  const dp1=b.querySelector('#dlPdfOne'); if(dp1) dp1.onclick=()=>downloadPdfOne(x);
  const payB=b.querySelector('#detailPayBtn'); if(payB) payB.onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); openPay('single',x.id); };
 
  document.getElementById('detailModal').classList.add('open');
 }
-function nextPV(){ const nums=invoices.filter(x=>x.pv).map(x=>parseInt((x.pv||'').split('-')[2]||'0')); const maxv=Math.max(0,...nums, ...cancelledPVs.map(c=>parseInt((c.pv||'').split('-')[2]||'0'))); const d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); return `PV-${yy}${mm}-${String(maxv+1).padStart(3,'0')}`; }
+function nextPV(dateStr){ let d; if(dateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))){ d=new Date(String(dateStr)+'T00:00:00'); } else { d=new Date(); } if(isNaN(d)) d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); const prefix='PV-'+yy+mm+'-'; let maxv=0; [...invoices.filter(x=>x.pv).map(x=>x.pv), ...cancelledPVs.map(c=>c.pv||'')].forEach(pv=>{ if(String(pv).startsWith(prefix)){ const n=parseInt(String(pv).split('-')[2]||'0'); if(!isNaN(n) && n>maxv) maxv=n; } }); return prefix+String(maxv+1).padStart(3,'0'); }
 let editPVInfo=null, deletePayResit=false;
 function updatePayThumbDelete(show){
   const d=document.getElementById('payThumbDelete'); if(d) d.style.display=show?'block':'none';
@@ -700,6 +758,12 @@ function renderPayInvList(){
     box.appendChild(wrap);
   });
 }
+// ===== RESIT PAYMENT - SAMA MACAM INVOICE: multi-page + auto PDF + NATIVE =====
+function setPayThumb(img){ pendingPayImg=img||''; const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); if(img){ if(pp){ pp.src=img; pp.style.display='block'; } if(pi) pi.style.display='none'; updatePayThumbDelete(true); } else { if(pp){ pp.src=''; pp.style.display='none'; } if(pi) pi.style.display='block'; updatePayThumbDelete(false); } updatePayPdfBadge(); }
+function updatePayPdfBadge(){ const b=document.getElementById('payPdfBadge'); if(!b) return; if(pendingPayPdf && pendingPayPdf.length>100){ b.style.display='block'; b.textContent='Resit PDF Auto dah siap - '+pendingPayPages.length+' page'+(pendingPayPages.length>1?'s':''); } else if(pendingPayPages.length){ b.style.display='block'; b.style.color='#6D28D9'; b.style.background='#F5F3FF'; b.style.borderColor='#DDD6FE'; b.textContent='Auto PDF: ON - resit ni akan jadi PDF'; } else { b.style.display='none'; } }
+function updatePayPagesUI(){ const strip=document.getElementById('payPagesStrip'); if(!strip) return; if(!pendingPayPages.length){ strip.style.display='none'; return; } strip.style.display='block'; const c=document.getElementById('payPagesCount'); if(c) c.textContent=pendingPayPages.length+' page'+(pendingPayPages.length>1?'s':'')+' - auto jadi 1 PDF'; const box=document.getElementById('payPagesThumbs'); if(!box) return; box.innerHTML=''; pendingPayPages.forEach((p,idx)=>{ const _disp=(String(p).startsWith('IDBIMG:') && _imgCache[String(p).slice(7)]) ? _imgCache[String(p).slice(7)] : p; const w=document.createElement('div'); w.style.cssText='position:relative;flex:none;width:64px;height:84px;border-radius:10px;overflow:hidden;border:2px solid '+(idx===0?'#5B21B6':'#E2E8F0')+';background:#fff;cursor:pointer'; const im=document.createElement('img'); im.src=_disp; im.style.cssText='width:100%;height:100%;object-fit:cover'; im.onclick=()=>{ _pendingPayPageAction={mode:'replace',idx:idx}; imgTarget='pay'; document.getElementById('fImg').click(); }; const lab=document.createElement('span'); lab.textContent='P'+(idx+1); lab.style.cssText='position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px'; const del=document.createElement('button'); del.textContent='x'; del.style.cssText='position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#EF4444;color:#fff;border:0;font-weight:800;font-size:12px;line-height:1'; del.onclick=(e)=>{ e.stopPropagation(); pendingPayPages.splice(idx,1); if(!pendingPayPages.length){ pendingPayImg=''; pendingPayPdf=''; deletePayResit=true; setPayThumb(''); } else { pendingPayImg=pendingPayPages[0]; setPayThumb(pendingPayImg); } rebuildPayPdfFromPages(); }; w.appendChild(im); w.appendChild(lab); w.appendChild(del); box.appendChild(w); }); }
+async function rebuildPayPdfFromPages(){ try{ if(!pendingPayPages.length){ pendingPayPdf=''; updatePayPdfBadge(); updatePayPagesUI(); return; } if(!window.jspdf) return; const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'}); for(let i=0;i<pendingPayPages.length;i++){ if(i>0) doc.addPage(); const _psrc=await resolveImgData(pendingPayPages[i]); const im=await new Promise((res)=>{ const x=new Image(); x.onload=()=>res(x); x.onerror=()=>res(null); x.src=_psrc; }); if(!im) continue; const pw=doc.internal.pageSize.getWidth(), ph=doc.internal.pageSize.getHeight(); const m=6, aw=pw-m*2, ah=ph-m*2; let w=aw, h=Math.round(aw*im.height/im.width); if(h>ah){ h=ah; w=Math.round(ah*im.width/im.height); } const small=await new Promise((r)=>{ const maxW=1400, sc=Math.min(1,maxW/im.width); const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(im.width*sc)); cv.height=Math.max(1,Math.round(im.height*sc)); const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(im,0,0,cv.width,cv.height); r(cv.toDataURL('image/jpeg',0.82)); }); doc.addImage(small,'JPEG', m+Math.round((aw-w)/2), m+Math.round((ah-h)/2), w, h); } pendingPayPdf=doc.output('datauristring'); pendingPayImg=pendingPayPages[0]||''; updatePayPdfBadge(); updatePayPagesUI(); }catch(e){} }
+async function handleNewPayImage(img){ if(!img) return; if(_pendingPayPageAction && _pendingPayPageAction.mode==='replace'){ const idx=_pendingPayPageAction.idx||0; if(pendingPayPages[idx]) pendingPayPages[idx]=img; else pendingPayPages.push(img); } else if(_pendingPayPageAction && _pendingPayPageAction.mode==='add'){ pendingPayPages.push(img); } else { if(!pendingPayPages.length) pendingPayPages.push(img); else pendingPayPages[0]=img; } _pendingPayPageAction=null; pendingPayImg=pendingPayPages[0]||''; deletePayResit=false; setPayThumb(pendingPayImg); const b=document.getElementById('payPdfBadge'); if(b){ b.style.display='block'; b.textContent='Buat PDF... '+pendingPayPages.length+' page'; } await rebuildPayPdfFromPages(); showToast(pendingPayPages.length>1 ? 'Resit Page ditambah - total '+pendingPayPages.length+' pages, PDF auto update' : 'Resit -> PDF auto siap'); }
 function openPay(mode, singleId){
   payMode=mode; editPVInfo=null; payTarget = mode==='single'? [singleId] : [...selected];
   const items=payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
@@ -707,7 +771,7 @@ function openPay(mode, singleId){
   document.getElementById('payList').innerHTML=items.map(x=>`<div>• ${x.name} - ${fmt(signedPrice(x))} - ${x.inv}${isCN(x)?' (CN - Credit Note)':''}</div>`).join('');
   const _pd=document.getElementById('payDateInput'); if(_pd) _pd.value=today();
   const _pc=document.getElementById('payConfirm'); if(_pc) _pc.textContent='Confirm Bayar';
-  pendingPayImg=''; pendingPayPdf=''; pendingInvImgs={}; pendingInvPdfs={}; deleteInvImgs={}; _payInvTargetId=null; deletePayResit=false; pendingInvImgs={}; pendingInvPdfs={}; deleteInvImgs={}; _payInvTargetId=null; updatePayThumbDelete(false);
+  pendingPayImg=''; pendingPayPdf=''; pendingPayPages=[]; _pendingPayPageAction=null; pendingInvImgs={}; pendingInvPdfs={}; deleteInvImgs={}; _payInvTargetId=null; deletePayResit=false; pendingInvImgs={}; pendingInvPdfs={}; deleteInvImgs={}; _payInvTargetId=null; updatePayThumbDelete(false); setPayThumb(''); updatePayPagesUI();
   const pp=document.getElementById('payThumbPreview'); pp.style.display='none'; document.getElementById('payThumbIcon').style.display='block';
   const methods=['Cash','Bank Transfer','QR / E-Wallet'];
   document.getElementById('payMethods').innerHTML=methods.map(m=>`<label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" value="${m}" class="pm" style="width:20px"> ${m}</label>`).join('');
@@ -716,7 +780,7 @@ function openPay(mode, singleId){
   renderPayInvList();
   document.getElementById('payModal').classList.add('open');
 }
-function openEditPay(pv, payDate){
+async function openEditPay(pv, payDate){
   // Edit Bayar macam modal Bayar - tapi PV kekal, isi data lama
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate);
   if(!items.length) return;
@@ -747,9 +811,11 @@ function openEditPay(pv, payDate){
   }
   // Resit lama - tunjuk thumb lama + pangkah untuk padam
   deletePayResit=false;
-  const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon');
-  const oldResit=items.find(x=>x.paymentImg)?.paymentImg||'';
-  if(oldResit && pp){ pp.src=oldResit; pp.style.display='block'; if(pi) pi.style.display='none'; updatePayThumbDelete(true); } else { if(pp) pp.style.display='none'; if(pi) pi.style.display='block'; updatePayThumbDelete(false); }
+  const _oldItem=items.find(x=>x.paymentImg);
+  const oldResit=_oldItem?.paymentImg||'';
+  const oldPages=(_oldItem && _oldItem.paymentPages && _oldItem.paymentPages.length ? _oldItem.paymentPages.slice() : (oldResit ? [oldResit] : []));
+  pendingPayPages=await resolvePagesArray(oldPages); _pendingPayPageAction=null; pendingPayImg=await resolveImgData(oldResit); pendingPayPdf=_oldItem?.paymentPdf||'';
+  setPayThumb(oldResit); updatePayPagesUI(); updatePayPdfBadge();
   renderPayInvList();
   document.getElementById('payModal').classList.add('open');
 }
@@ -955,27 +1021,25 @@ document.getElementById('dlCsvAcc').onclick=()=>{ const csv=csvForAccounting(fil
 document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV download'); };
 document.getElementById('copyCsv').onclick=async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('csvText').value); showToast('CSV dah copy'); }catch(e){ document.getElementById('csvText').select(); document.execCommand('copy'); showToast('CSV dah copy'); } };
 document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(filtered());
-document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); updateSupabaseStatus(); document.getElementById('settingModal').classList.add('open'); };
+document.getElementById('backupReminder').onclick=()=>{ try{ updateLastExportLabel(); updateStorageLabel(); }catch(e){} document.getElementById('settingModal').classList.add('open'); };
+document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); try{ updateStorageLabel(); const _fb=document.getElementById('freeSpaceBtn'); if(_fb && !_fb.dataset.wired){ _fb.dataset.wired='1'; _fb.onclick=()=>{ try{ offloadMedia(true); save(); updateStorageLabel(); showToast('Free Space siap - gambar dipindah ke IndexedDB, invoice text selamat'); }catch(e){ alert('Free Space gagal: '+e.message); } }; }
+const _ab=document.getElementById('archiveOldBtn'); if(_ab && !_ab.dataset.wired){ _ab.dataset.wired='1'; _ab.onclick=async()=>{ try{ const cutoff=new Date(); cutoff.setFullYear(cutoff.getFullYear()-1); const cutoffStr=cutoff.toISOString().slice(0,10); const old= invoices.filter(x=>x.date && x.date<cutoffStr); if(!old.length){ alert('Takde invoice lebih 1 tahun. Semua masih baru, tak perlu Archive.'); return; } const total=old.reduce((s,x)=>s+signedPrice(x),0); if(!confirm('Archive '+old.length+' invoice lama (sebelum '+cutoffStr+')?\nTotal: '+fmt(total)+'\n\n1. File Archive PENUH (dengan gambar) akan download dulu\n2. Lepas download, invoice tu akan dipadam dari phone\n3. Kalau nak tengok balik, Import file Archive tu.')) return; showToast('Sediakan Archive...'); const full=[]; for(const x of old){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); full.push(y); } const data={invoices:full,cancelledPVs,customCats,exportedAt:new Date().toISOString(),backupFull:true,archive:true,archiveCutoff:cutoffStr}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-ARCHIVE-sebelum-'+cutoffStr+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); const ids=new Set(old.map(x=>x.id)); invoices=invoices.filter(x=>!ids.has(x.id)); save(); render(); updateStorageLabel(); showToast('Archive siap - '+old.length+' invoice lama dah dipadam dari phone, file Archive dah download'); }catch(e){ alert('Archive gagal: '+e.message); } }; } }catch(e){} document.getElementById('settingModal').classList.add('open'); };
 document.getElementById('settingClose').onclick=document.getElementById('settingBack').onclick=document.getElementById('settingDone').onclick=()=>document.getElementById('settingModal').classList.remove('open');
 function fmtLastExport(){ try{ const v=localStorage.getItem('ik_lastExport'); if(!v) return 'Belum pernah Export DB'; const d=new Date(v); const s=d.toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); const n=localStorage.getItem('ik_lastExportCount')||''; return 'Last Export: '+s+(n?' • '+n+' invoice':''); }catch(e){ return 'Belum pernah Export DB'; } }
 function updateLastExportLabel(){ const el=document.getElementById('lastExportLabel'); if(el) el.textContent=fmtLastExport(); }
-document.getElementById('icloudBackupBtn').onclick=()=>{ const now=new Date(); const data={invoices,cancelledPVs,customCats,exportedAt:now.toISOString()}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); showToast('Export DB download - simpan dalam Files / iCloud'); document.getElementById('settingModal').classList.remove('open'); };
+document.getElementById('icloudBackupBtn').onclick=async()=>{ showToast('Sediakan backup PENUH (dengan gambar)...'); try{ const fullInvoices=[]; for(const x of invoices){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); fullInvoices.push(y); } const now=new Date(); const data={invoices:fullInvoices,cancelledPVs,customCats,exportedAt:now.toISOString(),backupFull:true}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); try{ updateBackupReminder(); }catch(e){} showToast('Export DB PENUH download - ada gambar sekali, simpan dalam Files / iCloud'); document.getElementById('settingModal').classList.remove('open'); }catch(e){ alert('Export gagal: '+e.message); } };
 
 document.getElementById('driveClose').onclick=document.getElementById('driveBack').onclick=document.getElementById('driveDone').onclick=()=>document.getElementById('driveModal').classList.remove('open');
 document.getElementById('openDrive').onclick=()=>window.open('https://drive.google.com','_blank');
- const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-backup-'+today()+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('Export DB download'); };
 document.getElementById('settingImport').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); const incoming=d.invoices||[]; const existingIds=new Set(invoices.map(x=>String(x.id||''))); const existingKeys=new Set(invoices.map(x=>String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase())); const seenIds=new Set(); const seenKeys=new Set(); const baru=[]; let skip=0; incoming.forEach(x=>{ const idKey=String(x.id||''); const key=String(x.name||'').trim().toLowerCase()+'|'+String(x.inv||'').trim().toUpperCase(); if((idKey && (existingIds.has(idKey)||seenIds.has(idKey))) || existingKeys.has(key) || seenKeys.has(key)){ skip++; return; } if(idKey) seenIds.add(idKey); seenKeys.add(key); baru.push(x); }); const existingPV=new Set(cancelledPVs.map(x=>(x.pv||'')+'|'+(x.date||''))); const baruPV=(d.cancelledPVs||[]).filter(x=>{ const k=(x.pv||'')+'|'+(x.date||''); if(existingPV.has(k)) return false; existingPV.add(k); return true; }); const skipPV=(d.cancelledPVs||[]).length-baruPV.length; if(!baru.length && !baruPV.length){ alert('Semua data dalam file ni dah ada. Takde yang baru, jadi takde double.'); return; } if(!confirm('Import '+baru.length+' invoice baru?\n('+skip+' dah ada - akan skip, tak double)\n'+baruPV.length+' PV batal baru, '+skipPV+' dah ada.'))return; invoices=[...baru,...invoices]; cancelledPVs=[...baruPV,...cancelledPVs]; if(d.customCats) customCats=[...new Set([...customCats,...d.customCats])]; save(); render(); showToast('Import siap: '+baru.length+' baru, '+skip+' dah ada - skip'); }catch(err){ alert('File tak valid'); } }; r.readAsText(f); e.target.value=''; };
 document.getElementById('settingCatBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); renderCatManager(); document.getElementById('catModal').classList.add('open'); };
-
-document.getElementById('supabaseSaveKey').onclick=()=>{ const v=document.getElementById('supabaseKeyInput').value.trim(); if(!v){ alert('Paste anon key dulu'); return; } try{ localStorage.setItem('ik_supabase_key', v); }catch(e){} updateSupabaseStatus('Key disimpan - cuba sync...'); supabasePush(); showToast('Supabase key disimpan'); };
-document.getElementById('supabaseSyncNow').onclick=()=>{ if(!supabaseEnabled()){ alert('Masukkan anon key dulu'); return; } supabasePush(); showToast('Sync ke cloud...'); };
-document.getElementById('supabasePullNow').onclick=()=>supabasePull(true);
-setTimeout(()=>{ if(supabaseEnabled()) supabasePull(false); }, 1200);
 document.getElementById('catCloseBtn').onclick=document.getElementById('catBack').onclick=()=>document.getElementById('catModal').classList.remove('open');
 document.getElementById('addCatBtn').onclick=()=>{ const v=document.getElementById('newCatInput').value.trim(); if(!v){alert('Isi nama kategori dulu');return;} if(allCats().includes(v)){alert('Dah ada');return;} customCats.push(v); save(); rebuildCatList(); render(); renderCatManager(); document.getElementById('newCatInput').value=''; showToast('Kategori baru ditambah'); };
 function renderCatManager(){ const box=document.getElementById('catListBox'); box.innerHTML=''; allCats().forEach(c=>{ const row=document.createElement('div'); row.style.cssText='display:flex;gap:8px;align-items:center;background:#f8fafc;border:1px solid #eee;border-radius:10px;padding:8px 10px'; row.innerHTML=`<span style="flex:1;font-weight:600">${c}</span>`; const eb=document.createElement('button'); eb.textContent='Edit'; eb.className='btn btn-light'; eb.style.cssText='padding:6px 10px;font-size:12px'; eb.onclick=()=>{ const baru=prompt('Edit kategori "'+c+'" jadi:',c); if(!baru||!baru.trim()||baru.trim()===c)return; const nc=baru.trim(); if(DEFAULT_CATS.includes(c)){ if(!hiddenCats.includes(c)) hiddenCats.push(c); } else { customCats=customCats.map(x=>x===c?nc:x); } if(!customCats.includes(nc)&&!DEFAULT_CATS.includes(nc)) customCats.push(nc); invoices.forEach(inv=>{if(inv.cat===c)inv.cat=nc}); save(); render(); renderCatManager(); showToast('Kategori ditukar'); }; const db=document.createElement('button'); db.textContent='Padam'; db.className='btn btn-light'; db.style.cssText='padding:6px 10px;font-size:12px;color:#dc2626'; db.onclick=()=>{ if(!confirm('Padam kategori "'+c+'"?'))return; if(DEFAULT_CATS.includes(c)){ if(!hiddenCats.includes(c)) hiddenCats.push(c); } else { customCats=customCats.filter(x=>x!==c); } invoices.forEach(inv=>{if(inv.cat===c)inv.cat='';}); save(); render(); renderCatManager(); }; row.appendChild(eb); row.appendChild(db); box.appendChild(row); }); }
-document.getElementById('addBtnTop').onclick=()=>{ editId=null; pendingImg=''; pendingPdf=''; setThumb(''); rebuildCatList(); document.getElementById('addTitle').textContent='Tambah Invoice'; document.getElementById('fName').value=''; document.getElementById('fInv').value=''; document.getElementById('fPrice').value=''; document.getElementById('fNote').value=''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=false; document.getElementById('fDate').value=today(); const _sb=document.getElementById('supSuggest'); if(_sb) _sb.style.display='none'; const _sh=document.getElementById('supHint'); if(_sh) _sh.style.display='none'; document.getElementById('addModal').classList.add('open'); };
+document.getElementById('addBtnTop').onclick=()=>{ editId=null; pendingImg=''; pendingPdf=''; pendingPages=[]; _pendingPageAction=null; setThumb(''); updatePagesUI(); rebuildCatList(); document.getElementById('addTitle').textContent='Tambah Invoice'; document.getElementById('fName').value=''; document.getElementById('fInv').value=''; document.getElementById('fPrice').value=''; document.getElementById('fNote').value=''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=false; if(document.getElementById('fBank')) document.getElementById('fBank').checked=false; document.getElementById('fDate').value=today(); if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=today(); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display='none'; const _sb=document.getElementById('supSuggest'); if(_sb) _sb.style.display='none'; const _sh=document.getElementById('supHint'); if(_sh) _sh.style.display='none'; document.getElementById('addModal').classList.add('open'); };
+/* BANK TRANSFER - tick = keluar Tarikh Payment */
+(function(){ const _c=document.getElementById('fCash'), _b=document.getElementById('fBank'), _w=document.getElementById('bankPayDateWrap'), _pd=document.getElementById('fPayDate'), _fd=document.getElementById('fDate'); if(!_c||!_b) return; const _sync=()=>{ if(_b.checked){ _c.checked=false; if(_w) _w.style.display='block'; if(_pd && !_pd.value) _pd.value=_fd?.value||today(); } else { if(_w) _w.style.display='none'; } }; _b.onchange=_sync; _b.onclick=()=>{ setTimeout(_sync,0); }; _c.onchange=()=>{ if(_c.checked){ _b.checked=false; if(_w) _w.style.display='none'; } }; _c.onclick=()=>{ setTimeout(()=>{ if(_c.checked){ _b.checked=false; if(_w) _w.style.display='none'; } },0); }; })();
 document.getElementById('addClose').onclick=document.getElementById('addBack').onclick=document.getElementById('addCancel').onclick=()=>{ document.getElementById('addModal').classList.remove('open'); const _sb=document.getElementById('supSuggest'); if(_sb) _sb.style.display='none'; const _sh=document.getElementById('supHint'); if(_sh) _sh.style.display='none'; };
 function getSuppliers(){ return [...new Set(invoices.map(x=>x.name).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
 function normSupName(s){ return String(s||'').trim().replace(/\s+/g,' '); }
@@ -984,16 +1048,17 @@ document.getElementById('fName').oninput=showSupSuggest;
 document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementById('fName').value; let name=normSupName(_raw); const _ex=getSuppliers().find(s=>s.toLowerCase()===name.toLowerCase()); if(_ex) name=_ex; inv=document.getElementById('fInv').value.trim(), date=document.getElementById('fDate').value, cat=document.getElementById('fCat').value, note=(document.getElementById('fNote')?document.getElementById('fNote').value.trim():''); if(!name) name='Tanpa Nama'; if(!inv) inv='INV-' + new Date().toISOString().slice(0,10) + '-' + String(Date.now()).slice(-4); let price=parseFloat(document.getElementById('fPrice').value); if(isNaN(price)) price=0; if(String(inv||'').trim().toUpperCase().startsWith('CN') && price>0) price=-Math.abs(price); // Elak redundant - supplier sama + no invoice sama = dah ada
   const _dup = invoices.find(y=> y.id!==editId && String(y.inv||'').trim().toUpperCase()===String(inv||'').trim().toUpperCase() && String(y.name||'').trim().toLowerCase()===String(name||'').trim().toLowerCase());
   if(_dup){ alert('Dah ada invoice sama!\n\n'+_dup.name+' - '+_dup.inv+' - '+fmtDate(_dup.date)+' - '+fmt(signedPrice(_dup))+'\n\nTukar No Invoice lain dulu.'); return; }
-  if(!date) date=today(); const isCash=!!document.getElementById('fCash')?.checked; let becamePaid=false; if(editId){ const x=invoices.find(y=>y.id===editId);
+  if(!date) date=today(); const isCash=!!document.getElementById('fCash')?.checked; const isBank=!!document.getElementById('fBank')?.checked; const bankPayDate=document.getElementById('fPayDate')?.value||date; const payDateToUse=isBank?bankPayDate:date; const payMethodToUse=isCash?'Cash':isBank?'Bank Transfer':''; let becamePaid=false; let becamePaidMethod=''; if(editId){ const x=invoices.find(y=>y.id===editId);
     let _pdfField = pendingPdf!=='' ? pendingPdf : (pendingImg && pendingImg!==x.img ? '' : (x.pdf||''));
     // Kalau PDF baru besar, pindah ke IndexedDB
     if(_pdfField && String(_pdfField).startsWith('data:') && _pdfField.length>500*1024){ const _k='inv_'+x.id; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-    Object.assign(x,{name,inv,price,date,cat,note,img:pendingImg||x.img, pdf:_pdfField, hasPdf:!!_pdfField}); if(!x.paid && isCash){ const _pv=nextPV(); Object.assign(x,{paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; }
+    Object.assign(x,{name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg||x.img), pdf:_pdfField, hasPdf:!!_pdfField, pages:pendingPages.slice()}); if(x.paid && x.payMethod==='Cash' && isCash){ x.payDate=date; } if(x.paid && x.payMethod==='Bank Transfer' && isBank){ x.payDate=bankPayDate; } if(x.paid && (isCash||isBank) && x.payMethod!==payMethodToUse){ x.payMethod=payMethodToUse; x.payDate=payDateToUse; } if(!x.paid && (isCash||isBank)){ const _pv=nextPV(payDateToUse); Object.assign(x,{paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; }
   } else { const _newId=Date.now().toString();
   let _pdfField=pendingPdf||'';
   if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-  if(isCash){ const _pv=nextPV(); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:pendingImg,pdf:_pdfField,hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:pendingImg,pdf:_pdfField,hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar (Cash)'); } else { render(); showToast('Invoice disimpan'); } };
-document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; document.getElementById('fImg').click(); }; // NATIVE iPhone - terus keluar Photo Library / Take Photo / Choose File
+  if(isCash||isBank){ const _pv=nextPV(payDateToUse); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar ('+becamePaidMethod+')'); } else { render(); showToast('Invoice disimpan'); } };
+document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; _pendingPageAction = pendingPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE iPhone - terus Photo Library / Take Photo / Choose File, bukan modal Camera/Gallery */
+document.getElementById('addPageBtn').onclick=()=>{ imgTarget='invoice'; _pendingPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE jugak untuk Tambah Page */
 document.getElementById('srcCancel').onclick=document.getElementById('srcBack').onclick=()=>document.getElementById('imgSourceModal').classList.remove('open');
 document.getElementById('srcCamera').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); document.getElementById('fImgCamera').click(); };
 document.getElementById('srcGallery').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); document.getElementById('fImg').click(); };
@@ -1061,7 +1126,7 @@ processFile = function(file,isScan,target){
     const _r=new FileReader();
     _r.onload=()=>{
       const pdfUrl=_r.result;
-      if(target==='pay' || target==='payDetail' || target==='payPV'){ pendingPayPdf=pdfUrl; } else { pendingPdf=pdfUrl; if(target==='viewer' && _viewCtx && (_viewCtx.kind==='payment'||_viewCtx.kind==='paymentPV')){ pendingPayPdf=pdfUrl; } }
+      if(target==='pay' || target==='payDetail' || target==='payPV'){ pendingPayPdf=pdfUrl; } else { pendingPdf=pdfUrl; if(target==='invoice'){ pendingPages=[]; } if(target==='viewer' && _viewCtx && (_viewCtx.kind==='payment'||_viewCtx.kind==='paymentPV')){ pendingPayPdf=pdfUrl; } }
       pdfToImageFile(file).then(imgFile=>{
         if(!imgFile) return;
         // Baca thumb muka 1 jadi dataURL, terus set tanpa crop
@@ -1084,16 +1149,16 @@ processFile = function(file,isScan,target){
               else { pendingImg=out; setThumb(out); }
               showToast('PDF dikemaskini');
             } else if(target==='pay'){
-              pendingPayImg=out; deletePayResit=false;
-              const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon');
-              if(pp){ pp.src=out; pp.style.display='block'; } if(pi) pi.style.display='none'; updatePayThumbDelete(true);
-              showToast('PDF dimasukkan');
+              deletePayResit=false;
+              if(_pendingPayPageAction && _pendingPayPageAction.mode==='add' && pendingPayPages.length){ pendingPayPages.push(out); _pendingPayPageAction=null; pendingPayImg=pendingPayPages[0]; setPayThumb(pendingPayImg); rebuildPayPdfFromPages(); }
+              else { _pendingPayPageAction=null; pendingPayPages=[out]; pendingPayImg=out; setPayThumb(out); updatePayPagesUI(); }
+              showToast('PDF Resit dimasukkan');
             } else if(target==='payDetail'){
               const inv=invoices.find(x=>x.id===window._payDetailId);
-              if(inv){ inv.paymentImg=out; if(pendingPayPdf) inv.paymentPdf=pendingPayPdf; save(); render(); openDetail(inv.id); showToast('Resit PDF disimpan'); }
+              if(inv){ inv.paymentImg=out; inv.paymentPages=[out]; if(pendingPayPdf) inv.paymentPdf=pendingPayPdf; save(); render(); openDetail(inv.id); showToast('Resit PDF disimpan'); }
             } else if(target==='payPV'){
               const pvInfo=window._payPV;
-              if(pvInfo){ const items=invoices.filter(x=>x.paid&&x.pv===pvInfo.pv&&x.payDate===pvInfo.payDate); items.forEach(x=>{ x.paymentImg=out; if(pendingPayPdf) x.paymentPdf=pendingPayPdf; }); if(items.length){ save(); render(); openPVDetail(pvInfo.pv,pvInfo.payDate); showToast('Resit PDF disimpan - '+items.length+' invoice'); } }
+              if(pvInfo){ const items=invoices.filter(x=>x.paid&&x.pv===pvInfo.pv&&x.payDate===pvInfo.payDate); items.forEach(x=>{ x.paymentImg=out; x.paymentPages=[out]; if(pendingPayPdf) x.paymentPdf=pendingPayPdf; }); if(items.length){ save(); render(); openPVDetail(pvInfo.pv,pvInfo.payDate); showToast('Resit PDF disimpan - '+items.length+' invoice'); } }
             } else {
               // Invoice biasa - terus set thumb, tak payah crop macam Smart Receipt
               pendingImg=out; setThumb(out); showToast('PDF dimasukkan - tekan gambar untuk view PDF');
@@ -1116,13 +1181,17 @@ processFile = function(file,isScan,target){
     // Gambar biasa - resize, terus pending, tak masuk Crop
     const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); pendingInvImgs[_id]=out; pendingInvPdfs[_id]=''; deleteInvImgs[_id]=false; renderPayInvList(); showToast('Gambar invoice dimasukkan'); }; img.src=r.result; }; r.readAsDataURL(file); return;
   }
+  // Resit Payment - gambar biasa: SAMA MACAM INVOICE, no crop, multi-page + auto PDF
+  if(target==='pay'){
+    if(!file) return; const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); handleNewPayImage(out); }; img.src=r.result; }; r.readAsDataURL(file); return;
+  }
   // Kalau pilih gambar biasa, clear PDF lama supaya tak tertinggal PDF lama
-  if(target==='pay' || target==='payDetail' || target==='payPV'){ pendingPayPdf=''; } else if(target==='invoice' || !target || target===''){ pendingPdf=''; }
+  if(target==='payDetail' || target==='payPV'){ pendingPayPdf=''; } else if(target==='invoice' || !target || target===''){ pendingPdf=''; }
   if(target==='payDetail'){
-    if(!file) return; const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); const inv=invoices.find(x=>x.id===window._payDetailId); if(inv){ inv.paymentImg=out; if(pendingPayPdf) inv.paymentPdf=pendingPayPdf; save(); render(); openDetail(inv.id); showToast('Resit Payment disimpan'); } }; img.src=r.result; }; r.readAsDataURL(file); return;
+    if(!file) return; const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); const inv=invoices.find(x=>x.id===window._payDetailId); if(inv){ inv.paymentImg=out; inv.paymentPages=[out]; if(pendingPayPdf) inv.paymentPdf=pendingPayPdf; save(); render(); openDetail(inv.id); showToast('Resit Payment disimpan'); } }; img.src=r.result; }; r.readAsDataURL(file); return;
   }
   if(target==='payPV'){
-    if(!file) return; const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); const pvInfo=window._payPV; if(pvInfo){ const items=invoices.filter(x=>x.paid&&x.pv===pvInfo.pv&&x.payDate===pvInfo.payDate); items.forEach(x=>{ x.paymentImg=out; if(pendingPayPdf) x.paymentPdf=pendingPayPdf; }); if(items.length){ save(); render(); openPVDetail(pvInfo.pv,pvInfo.payDate); showToast('Resit Payment disimpan - '+items.length+' invoice'); } } }; img.src=r.result; }; r.readAsDataURL(file); return;
+    if(!file) return; const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1600, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.85); const pvInfo=window._payPV; if(pvInfo){ const items=invoices.filter(x=>x.paid&&x.pv===pvInfo.pv&&x.payDate===pvInfo.payDate); items.forEach(x=>{ x.paymentImg=out; x.paymentPages=[out]; if(pendingPayPdf) x.paymentPdf=pendingPayPdf; }); if(items.length){ save(); render(); openPVDetail(pvInfo.pv,pvInfo.payDate); showToast('Resit Payment disimpan - '+items.length+' invoice'); } } }; img.src=r.result; }; r.readAsDataURL(file); return;
   }
   _origProcess(file,isScan,target);
 };
@@ -1138,11 +1207,11 @@ function _viewerApplyNewImage(out, pdfUrl){
     _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
   } else if(_viewCtx.kind==='payment'){
     const inv=invoices.find(x=>x.id===_viewCtx.id); if(!inv) return;
-    inv.paymentImg=out; if(pdfUrl){ inv.paymentPdf=pdfUrl; } else { inv.paymentPdf=''; }
+    inv.paymentImg=out; inv.paymentPages=[out]; if(pdfUrl){ inv.paymentPdf=pdfUrl; } else { inv.paymentPdf=''; }
     _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
   } else if(_viewCtx.kind==='paymentPV'){
     const items=invoices.filter(x=>x.paid&&x.pv===_viewCtx.pv&&x.payDate===_viewCtx.payDate);
-    items.forEach(x=>{ x.paymentImg=out; if(pdfUrl) x.paymentPdf=pdfUrl; else x.paymentPdf=''; });
+    items.forEach(x=>{ x.paymentImg=out; x.paymentPages=[out]; if(pdfUrl) x.paymentPdf=pdfUrl; else x.paymentPdf=''; });
     _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
   }
   save(); render();
@@ -1192,8 +1261,9 @@ document.getElementById('imgViewEditBtn').onclick=()=>{ if(!_viewImgSrc){ showTo
 document.getElementById('detailClose').onclick=document.getElementById('detailBack').onclick=()=>document.getElementById('detailModal').classList.remove('open');
 document.getElementById('pvClose').onclick=document.getElementById('pvBack').onclick=()=>document.getElementById('pvModal').classList.remove('open');
 document.getElementById('payClose').onclick=document.getElementById('payBack').onclick=document.getElementById('payCancel').onclick=()=>{ document.getElementById('payModal').classList.remove('open'); render(); };
-document.getElementById('payThumbBox').onclick=()=>{ imgTarget='pay'; document.getElementById('fImg').click(); }; // NATIVE
-document.getElementById('payThumbDelete').onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam resit payment ni?')) return; pendingPayImg=''; pendingPayPdf=''; deletePayResit=true; const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); if(pp){ pp.src=''; pp.style.display='none'; } if(pi) pi.style.display='block'; updatePayThumbDelete(false); showToast('Resit dipadam - tekan Simpan untuk simpan'); };
+document.getElementById('payThumbBox').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - sama macam Invoice */
+document.getElementById('addPayPageBtn').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - Tambah Page Resit */
+document.getElementById('payThumbDelete').onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam resit payment ni?')) return; pendingPayImg=''; pendingPayPdf=''; pendingPayPages=[]; _pendingPayPageAction=null; deletePayResit=true; updatePayPagesUI(); const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); if(pp){ pp.src=''; pp.style.display='none'; } if(pi) pi.style.display='block'; updatePayThumbDelete(false); updatePayPdfBadge(); showToast('Resit dipadam - tekan Simpan untuk simpan'); };
 document.getElementById('payConfirm').onclick=()=>{
   const checked=[...document.querySelectorAll('.pm:checked')].map(c=>c.value);
   if(!checked.length){ alert('Pilih cara bayar dulu'); return; }
@@ -1205,15 +1275,13 @@ document.getElementById('payConfirm').onclick=()=>{
   // Kalau Edit, kekalkan PV lama, jangan buat PV baru
   let pv, pd;
   if(payMode==='editPV' && editPVInfo){ pv=editPVInfo.pv; pd=document.getElementById('payDateInput')?.value||editPVInfo.payDate; }
-  else { pv=nextPV(); pd=document.getElementById('payDateInput')?.value||today(); }
+  else { pd=document.getElementById('payDateInput')?.value||today(); pv=nextPV(pd); }
   items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null;
     // Gambar Invoice dalam Bayar/Edit Bayar - pending macam Resit
     if(deleteInvImgs[x.id]){ if(x.pdf && String(x.pdf).startsWith('IDB:')) idbDeletePdf(String(x.pdf).slice(4)); x.img=''; x.pdf=''; }
     else { if(pendingInvImgs[x.id]) x.img=pendingInvImgs[x.id]; if(pendingInvPdfs[x.id]){ let _pp2=pendingInvPdfs[x.id]; if(_pp2.length>500*1024){ const _k2='inv_'+x.id; idbSavePdf(_k2,_pp2); _pp2='IDB:'+_k2; } x.pdf=_pp2; } else if(pendingInvImgs[x.id] && pendingInvPdfs[x.id]===''){ x.pdf=''; } }
-    if(deletePayResit){ // User tekan ✕ kat Edit Bayar - padam resit lama
-      if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4));
-      x.paymentImg=''; x.paymentPdf='';
-    } else { if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } } });
+    if(deletePayResit){ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); x.paymentImg=''; x.paymentPdf=''; x.paymentPages=[]; }
+    else { if(pendingPayPages.length){ x.paymentImg=pendingPayPages[0]; x.paymentPages=pendingPayPages.slice(); } else if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } } });
   selected.clear(); save(); document.getElementById('payModal').classList.remove('open');
   if(payMode==='editPV'){ showToast(`Edit Bayar siap - ${pv}`); gotoTab('paid'); if(editPVInfo) setTimeout(()=>openPVDetail(pv, pd), 300); }
   else { showToast(`Bayar siap - ${pv} - ${items.length} invoice`); gotoTab('paid'); }
@@ -1408,9 +1476,9 @@ function showCropEditor(dataUrl, target, isScan){
       _apply(out); return;
     }
     if(isScan){
-      const tmp=new Image(); tmp.onload=()=>{ const cv=document.createElement('canvas'); cv.width=tmp.width; cv.height=tmp.height; const ctx=cv.getContext('2d'); ctx.drawImage(tmp,0,0); try{ const id=ctx.getImageData(0,0,cv.width,cv.height), d=id.data; for(let i=0;i<d.length;i+=4){ const g=d[i]*0.3+d[i+1]*0.59+d[i+2]*0.11; let v=(g-128)*1.3+128; v=Math.max(0,Math.min(255,v)); d[i]=d[i+1]=d[i+2]=v; } ctx.putImageData(id,0,0);}catch(e){} const finalOut=cv.toDataURL('image/jpeg',0.85); setThumb(finalOut); m.remove(); showToast('Scan siap'); }; tmp.src=out; return;
+      const tmp=new Image(); tmp.onload=()=>{ const cv=document.createElement('canvas'); cv.width=tmp.width; cv.height=tmp.height; const ctx=cv.getContext('2d'); ctx.drawImage(tmp,0,0); try{ const id=ctx.getImageData(0,0,cv.width,cv.height), d=id.data; for(let i=0;i<d.length;i+=4){ const g=d[i]*0.3+d[i+1]*0.59+d[i+2]*0.11; let v=(g-128)*1.3+128; v=Math.max(0,Math.min(255,v)); d[i]=d[i+1]=d[i+2]=v; } ctx.putImageData(id,0,0);}catch(e){} const finalOut=cv.toDataURL('image/jpeg',0.85); if(target==='invoice' || target==='payInv'){ handleNewInvoiceImage(finalOut); } else { setThumb(finalOut); } m.remove(); showToast('Scan siap'); }; tmp.src=out; return;
     }
-    setThumb(out); m.remove(); showToast('Gambar dimasukkan');
+    if(target==='invoice' || target==='payInv'){ handleNewInvoiceImage(out); } else { setThumb(out); } m.remove(); showToast('Gambar dimasukkan');
   };
 }
 
