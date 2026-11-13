@@ -132,7 +132,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
 
-</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</style></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -702,7 +702,7 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
 
  document.getElementById('detailModal').classList.add('open');
 }
-function nextPV(){ const nums=invoices.filter(x=>x.pv).map(x=>parseInt((x.pv||'').split('-')[2]||'0')); const maxv=Math.max(0,...nums, ...cancelledPVs.map(c=>parseInt((c.pv||'').split('-')[2]||'0'))); const d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); return `PV-${yy}${mm}-${String(maxv+1).padStart(3,'0')}`; }
+function nextPV(dateStr){ let d; if(dateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))){ d=new Date(String(dateStr)+'T00:00:00'); } else { d=new Date(); } if(isNaN(d)) d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); const prefix='PV-'+yy+mm+'-'; let maxv=0; [...invoices.filter(x=>x.pv).map(x=>x.pv), ...cancelledPVs.map(c=>c.pv||'')].forEach(pv=>{ if(String(pv).startsWith(prefix)){ const n=parseInt(String(pv).split('-')[2]||'0'); if(!isNaN(n) && n>maxv) maxv=n; } }); return prefix+String(maxv+1).padStart(3,'0'); }
 let editPVInfo=null, deletePayResit=false;
 function updatePayThumbDelete(show){
   const d=document.getElementById('payThumbDelete'); if(d) d.style.display=show?'block':'none';
@@ -1013,11 +1013,11 @@ document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementByI
     let _pdfField = pendingPdf!=='' ? pendingPdf : (pendingImg && pendingImg!==x.img ? '' : (x.pdf||''));
     // Kalau PDF baru besar, pindah ke IndexedDB
     if(_pdfField && String(_pdfField).startsWith('data:') && _pdfField.length>500*1024){ const _k='inv_'+x.id; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-    Object.assign(x,{name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg||x.img), pdf:_pdfField, hasPdf:!!_pdfField, pages:pendingPages.slice()}); if(!x.paid && isCash){ const _pv=nextPV(); Object.assign(x,{paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; }
+    Object.assign(x,{name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg||x.img), pdf:_pdfField, hasPdf:!!_pdfField, pages:pendingPages.slice()}); if(x.paid && x.payMethod==='Cash' && isCash){ x.payDate=date; } if(!x.paid && isCash){ const _pv=nextPV(date); Object.assign(x,{paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; }
   } else { const _newId=Date.now().toString();
   let _pdfField=pendingPdf||'';
   if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-  if(isCash){ const _pv=nextPV(); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar (Cash)'); } else { render(); showToast('Invoice disimpan'); } };
+  if(isCash){ const _pv=nextPV(date); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:date,payMethod:'Cash',split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar (Cash)'); } else { render(); showToast('Invoice disimpan'); } };
 document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; _pendingPageAction = pendingPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE iPhone - terus Photo Library / Take Photo / Choose File, bukan modal Camera/Gallery */
 document.getElementById('addPageBtn').onclick=()=>{ imgTarget='invoice'; _pendingPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE jugak untuk Tambah Page */
 document.getElementById('srcCancel').onclick=document.getElementById('srcBack').onclick=()=>document.getElementById('imgSourceModal').classList.remove('open');
@@ -1231,7 +1231,7 @@ document.getElementById('payConfirm').onclick=()=>{
   // Kalau Edit, kekalkan PV lama, jangan buat PV baru
   let pv, pd;
   if(payMode==='editPV' && editPVInfo){ pv=editPVInfo.pv; pd=document.getElementById('payDateInput')?.value||editPVInfo.payDate; }
-  else { pv=nextPV(); pd=document.getElementById('payDateInput')?.value||today(); }
+  else { pd=document.getElementById('payDateInput')?.value||today(); pv=nextPV(pd); }
   items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null;
     // Gambar Invoice dalam Bayar/Edit Bayar - pending macam Resit
     if(deleteInvImgs[x.id]){ if(x.pdf && String(x.pdf).startsWith('IDB:')) idbDeletePdf(String(x.pdf).slice(4)); x.img=''; x.pdf=''; }
