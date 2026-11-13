@@ -142,19 +142,19 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
 
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
 
-<div class="info" id="infoBar">0 invoice • RM0.00</div>
+<div class="info" id="infoBar">0 invoice Dah Bayar • RM0.00</div>
 <div class="row"><div class="search">🔍 <input id="q" placeholder="Cari supplier / no invoice..." autocomplete="off"></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
-<div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
+<div class="tabs"><button class="tab" data-tab="all">Semua</button><button class="tab active" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
 <div id="backupReminder" style="display:block;background:rgb(255, 251, 235);border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;cursor:pointer">⚠️ Belum backup hari ni (0 invoice dalam phone) - tekan sini untuk Export</div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
-<div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
+<div id="list"><p style="text-align:center;color:#666">Tiada invoice Dah Bayar</p></div>
 </div>
 
 
@@ -746,7 +746,7 @@ function renderPayInvList(){
     // Kalau ada pending / delete, tunjuk pending; kalau delete, tunjuk kosong
     const _dispImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || '');
     thumb.innerHTML=_dispImg?`<img src="${_dispImg}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
-    thumb.onclick=()=>{ _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); }; // NATIVE macam Resit Payment - terus Photo Library / Take Photo / Choose File
+    thumb.onclick=()=>{ const _disp = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || ''); if(_disp){ const _pdf = deleteInvImgs[x.id] ? '' : (pendingInvPdfs[x.id] || x.pdf || ''); openImgView(_disp, 'Gambar Invoice - '+x.name, (x.inv||'')+' • '+x.date, _pdf, {kind:'payInv', id:x.id}); } else { _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); } }; // Ada gambar -> VIEW dulu (Edit/Upload dalam viewer), kosong baru UPLOAD
     const delBtn=document.createElement('button'); delBtn.textContent='✕'; delBtn.style.cssText='display:'+(_dispImg?'block':'none')+';position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)';
     delBtn.onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam gambar invoice '+x.name+' ni?')) return; pendingInvImgs[x.id]=''; pendingInvPdfs[x.id]=''; deleteInvImgs[x.id]=true; renderPayInvList(); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); };
     thumbBox.appendChild(thumb); thumbBox.appendChild(delBtn);
@@ -1145,7 +1145,7 @@ processFile = function(file,isScan,target){
               const _pdfUrl=pendingPdf||'';
               // Kalau viewer tengah tunjuk invoice, pendingPdf tu PDF baru; kalau resit, kena simpan ke paymentPdf
               if(_viewCtx && _viewCtx.kind==='invoice'){ _viewerApplyNewImage(out,_pdfUrl); }
-              else if(_viewCtx && (_viewCtx.kind==='payment'||_viewCtx.kind==='paymentPV')){ _viewerApplyNewImage(out,_pdfUrl); }
+              else if(_viewCtx && (_viewCtx.kind==='payment'||_viewCtx.kind==='paymentPV'||_viewCtx.kind==='payInv'||_viewCtx.kind==='payResit')){ _viewerApplyNewImage(out,_pdfUrl); }
               else { pendingImg=out; setThumb(out); }
               showToast('PDF dikemaskini');
             } else if(target==='pay'){
@@ -1201,6 +1201,27 @@ document.getElementById('imgViewClose').onclick=document.getElementById('imgView
 // ===== Viewer macam video: Upload / Edit / Share / Delete =====
 function _viewerApplyNewImage(out, pdfUrl){
   if(!_viewCtx) return;
+  // PENDING dalam Bayar/Edit Bayar - jangan save() terus, biar Simpan Edit yang simpan
+  if(_viewCtx.kind==='payInv'){
+    pendingInvImgs[_viewCtx.id]=out; pendingInvPdfs[_viewCtx.id]=pdfUrl||''; deleteInvImgs[_viewCtx.id]=false;
+    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+    try{ renderPayInvList(); }catch(e){}
+    const _imgEl=document.getElementById('imgViewImg'); if(_imgEl && _viewImgSrc){ _imgEl.src=_viewImgSrc; }
+    document.getElementById('imgViewModal').classList.add('open');
+    showViewTab(_viewPdfSrc?'pdf':'img');
+    showToast('Gambar invoice dikemaskini - tekan Simpan untuk simpan');
+    return;
+  }
+  if(_viewCtx.kind==='payResit'){
+    pendingPayImg=out; pendingPayPages=[out]; pendingPayPdf=pdfUrl||''; deletePayResit=false;
+    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+    try{ setPayThumb(out); updatePayPagesUI(); updatePayPdfBadge(); }catch(e){}
+    const _imgEl2=document.getElementById('imgViewImg'); if(_imgEl2 && _viewImgSrc){ _imgEl2.src=_viewImgSrc; }
+    document.getElementById('imgViewModal').classList.add('open');
+    showViewTab(_viewPdfSrc?'pdf':'img');
+    showToast('Resit dikemaskini - tekan Simpan untuk simpan');
+    return;
+  }
   if(_viewCtx.kind==='invoice'){
     const inv=invoices.find(x=>x.id===_viewCtx.id); if(!inv) return;
     inv.img=out; if(pdfUrl){ inv.pdf=pdfUrl; } else { inv.pdf=''; }
@@ -1223,8 +1244,11 @@ function _viewerApplyNewImage(out, pdfUrl){
 }
 function _viewerDelete(){
   if(!_viewCtx){ showToast('Tak dapat kenal invoice ni'); return; }
-  const _isPay = _viewCtx.kind==='payment' || _viewCtx.kind==='paymentPV';
+  const _isPay = _viewCtx.kind==='payment' || _viewCtx.kind==='paymentPV' || _viewCtx.kind==='payResit';
   if(!confirm('Padam '+(_isPay?'resit payment':'gambar invoice')+' ni?')) return;
+  // PENDING dalam Bayar/Edit Bayar - clear pending je, jangan padam invoice terus
+  if(_viewCtx.kind==='payInv'){ pendingInvImgs[_viewCtx.id]=''; pendingInvPdfs[_viewCtx.id]=''; deleteInvImgs[_viewCtx.id]=true; try{ renderPayInvList(); }catch(e){} document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); return; }
+  if(_viewCtx.kind==='payResit'){ pendingPayImg=''; pendingPayPages=[]; pendingPayPdf=''; deletePayResit=true; try{ setPayThumb(''); updatePayPagesUI(); updatePayPdfBadge(); }catch(e){} document.getElementById('imgViewModal').classList.remove('open'); showToast('Resit dipadam - tekan Simpan untuk simpan'); return; }
   if(_viewCtx.kind==='invoice'){
     const inv=invoices.find(x=>x.id===_viewCtx.id); if(inv){ if(inv.pdf && String(inv.pdf).startsWith('IDB:')) idbDeletePdf(String(inv.pdf).slice(4)); inv.img=''; inv.pdf=''; }
   } else if(_viewCtx.kind==='payment'){
@@ -1261,7 +1285,7 @@ document.getElementById('imgViewEditBtn').onclick=()=>{ if(!_viewImgSrc){ showTo
 document.getElementById('detailClose').onclick=document.getElementById('detailBack').onclick=()=>document.getElementById('detailModal').classList.remove('open');
 document.getElementById('pvClose').onclick=document.getElementById('pvBack').onclick=()=>document.getElementById('pvModal').classList.remove('open');
 document.getElementById('payClose').onclick=document.getElementById('payBack').onclick=document.getElementById('payCancel').onclick=()=>{ document.getElementById('payModal').classList.remove('open'); render(); };
-document.getElementById('payThumbBox').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - sama macam Invoice */
+document.getElementById('payThumbBox').onclick=()=>{ const _has = (typeof pendingPayPages!=='undefined' && pendingPayPages.length) ? pendingPayPages[0] : (pendingPayImg||''); if(_has){ const _title='Resit Payment'; const _meta=(typeof payTarget!=='undefined' && payTarget.length ? payTarget.map(id=>{ const _it=invoices.find(y=>y.id===id); return _it?(_it.name+' - '+_it.inv):''; }).join(' • ') : ''); openImgView(_has, _title, _meta, pendingPayPdf||'', {kind:'payResit', id:(payTarget&&payTarget[0])||''}); } else { imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); } }; /* Ada resit -> VIEW dulu, kosong baru UPLOAD */
 document.getElementById('addPayPageBtn').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - Tambah Page Resit */
 document.getElementById('payThumbDelete').onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam resit payment ni?')) return; pendingPayImg=''; pendingPayPdf=''; pendingPayPages=[]; _pendingPayPageAction=null; deletePayResit=true; updatePayPagesUI(); const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); if(pp){ pp.src=''; pp.style.display='none'; } if(pi) pi.style.display='block'; updatePayThumbDelete(false); updatePayPdfBadge(); showToast('Resit dipadam - tekan Simpan untuk simpan'); };
 document.getElementById('payConfirm').onclick=()=>{
@@ -1324,16 +1348,16 @@ function showCropEditor(dataUrl, target, isScan){
   m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><b id="cropTitle" style="color:#fff;font-size:18px">Edit Scan</b><div style="display:flex;gap:8px"><button id="cropFitBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px">↔ Muatkan</button><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
   <div style="background:#000;color:#aaa;font-size:11px;text-align:center;padding:2px 12px 6px">Drag bulat putih di 4 bucu — kalau bulat bawah tak nampak, tekan ↔ Muatkan</div>
   <div id="editStage" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
-  <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:auto;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:24px;box-sizing:border-box">
+  <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:hidden;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:8px;box-sizing:border-box">
   <div id="zoomSpacer" style="position:relative;margin:auto;display:flex;justify-content:center;align-items:flex-start">
   <div id="cropWrap" style="position:relative;flex:0 0 auto;background:#000;border-radius:0;overflow:hidden;touch-action:none;transform-origin:0 0">
     <img id="cropImg" src="${dataUrl}" style="width:100%;height:auto;display:block;border-radius:0">
     <svg id="dimSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"><path id="dimPath" d="" fill="rgba(0,0,0,0.55)" fill-rule="evenodd"></path></svg>
     <svg id="quadSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2"><polygon id="quadPoly" points="" fill="rgba(168,85,247,0.02)" stroke="#c026d3" stroke-width="1" vector-effect="non-scaling-stroke" opacity="1"></polygon></svg>
-    <div data-quad="0" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
-    <div data-quad="1" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
-    <div data-quad="2" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
-    <div data-quad="3" style="position:absolute;width:44px;height:44px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="0" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="1" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="2" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
+    <div data-quad="3" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
   </div>
   </div>
   <div id="loupe" style="display:none;position:absolute;width:170px;height:170px;border-radius:50%;border:1.5px solid #fff;background:#000;overflow:hidden;z-index:20;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 1px rgba(168,85,247,0.6)">
@@ -1343,7 +1367,7 @@ function showCropEditor(dataUrl, target, isScan){
     <div style="position:absolute;top:50%;left:0;right:0;height:0.5px;background:rgba(168,85,247,0.6)"></div>
   </div>
   </div>
-  <div style="display:flex;gap:8px;justify-content:center;align-items:center;padding:8px 12px 4px;background:#000"><button id="cropZoomOut" style="background:#1a1a1a;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:9px 16px;border-radius:999px;font-weight:700;font-size:13px">− Kecilkan</button><span style="font-size:11px;color:#aaa">Gambar besar sangat? Tekan Kecilkan</span><button id="cropZoomIn" style="background:#1a1a1a;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:9px 16px;border-radius:999px;font-weight:700;font-size:13px">+ Besarkan</button></div><p style="font-size:11px;color:#999;margin:8px 12px 12px"></p>
+  <p style="font-size:11px;color:#999;margin:8px 12px 12px"></p>
   </div>
   <div id="reviewStage" style="display:none;text-align:center;background:#000;color:#fff;flex:1;flex-direction:column">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:#000;padding:4px 0"><button id="reviewBack" style="background:transparent;color:#fff;border:0;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer">←</button><b style="color:#fff">Review</b><button id="reviewDone" style="background:#fff;color:#000;border:0;padding:9px 18px;border-radius:999px;font-weight:700;cursor:pointer">✓</button></div>
@@ -1355,7 +1379,7 @@ function showCropEditor(dataUrl, target, isScan){
   document.body.appendChild(m);
   let cur=dataUrl; let orig=dataUrl; let reviewOrig=dataUrl;
   let quad=[{x:6,y:6},{x:94,y:6},{x:94,y:94},{x:6,y:94}];
-  let fitW=0, fitH=0; let zoom=1; let zoomScale=0.78;
+  let fitW=0, fitH=0; let zoom=1;
   const imgEl=m.querySelector('#cropImg'); const wrap=m.querySelector('#cropWrap'); const poly=m.querySelector('#quadPoly'); const handles=Array.from(m.querySelectorAll('[data-quad]'));
   function renderQuad(){
     handles.forEach((h,i)=>{ h.style.left=quad[i].x+'%'; h.style.top=quad[i].y+'%'; });
@@ -1366,11 +1390,11 @@ function showCropEditor(dataUrl, target, isScan){
   }
   function fitImage(){
     const vp=m.querySelector('#cropViewport'); const w=m.querySelector('#cropWrap'); const im=m.querySelector('#cropImg'); if(!vp||!w||!im) return;
-    // Gallery gambar besar - jangan isi penuh viewport, bagi 78% je supaya bulat 4 bucu tak rapat ke tepi screen, senang drag
-    const vw=Math.max(100, vp.clientWidth-80); const vh=Math.max(100, vp.clientHeight-170);
+    // MESTI muat dalam viewport + ruang untuk bulat handle (16px radius + margin) - kalau tak, bulat bawah terkeluar bawah screen macam screenshot
+    const vw=Math.max(100, vp.clientWidth-44); const vh=Math.max(100, vp.clientHeight-44);
     const iw=im.naturalWidth||0; const ih=im.naturalHeight||0;
     if(!iw||!ih){ setTimeout(fitImage, 120); return; }
-    const baseSc=Math.min(vw/iw, vh/ih, 1); const sc=baseSc*zoomScale; fitW=Math.round(iw*sc); fitH=Math.round(ih*sc);
+    const sc=Math.min(vw/iw, vh/ih, 1); fitW=Math.round(iw*sc); fitH=Math.round(ih*sc);
     w.style.width=fitW+'px'; w.style.height=fitH+'px'; w.style.maxWidth='100%'; w.style.maxHeight='100%'; im.style.width=fitW+'px'; im.style.height=fitH+'px'; im.style.maxWidth='100%'; im.style.maxHeight='100%';
     const sp=m.querySelector('#zoomSpacer'); if(sp){ sp.style.width=fitW+'px'; sp.style.height=fitH+'px'; sp.style.maxWidth='100%'; sp.style.maxHeight='100%'; }
     renderQuad();
@@ -1459,9 +1483,6 @@ function showCropEditor(dataUrl, target, isScan){
   window.addEventListener('resize', fitImage);
   try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', fitImage); }catch(e){}
   const _fitBtn=m.querySelector('#cropFitBtn'); if(_fitBtn) _fitBtn.onclick=()=>{ fitImage(); setTimeout(fitImage, 60); };
-  const _zOut=m.querySelector('#cropZoomOut'); if(_zOut) _zOut.onclick=()=>{ zoomScale=Math.max(0.45, zoomScale-0.15); fitImage(); };
-  const _zIn=m.querySelector('#cropZoomIn'); if(_zIn) _zIn.onclick=()=>{ zoomScale=Math.min(1.0, zoomScale+0.15); fitImage(); };
-  if(_fitBtn) _fitBtn.onclick=()=>{ zoomScale=0.78; fitImage(); setTimeout(fitImage, 60); };
   // Next - warp ikut quad sekarang
   m.querySelector('#cropUse').onclick=()=>{ warpPerspective(cur, quad, (warped)=>{ reviewOrig=cur; cur=warped; showReview(warped); }); };
   m.querySelector('#cropCancel').onclick=()=>{ m.remove(); if(target==='viewer') document.getElementById('imgViewModal').classList.add('open'); };
