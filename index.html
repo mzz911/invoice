@@ -96,7 +96,43 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 .sr-note{flex-direction:column;align-items:stretch;gap:6px}
 .sr-note label{align-self:flex-start}
 .sr-note input{text-align:left;color:#111827}
-</style></head>
+
+/* Tambah Invoice - Style Baru V2: Kad Bersih (hanya #addModal, lain tak usik) */
+#addModal.add-v2 .sheet{background:#fff;border-radius:24px;padding:0 18px 18px;overflow:hidden}
+#addModal.add-v2 .closeRow{padding:14px 0 6px}
+#addModal.add-v2 .add-hero{margin:6px 0 0}
+#addModal.add-v2 #thumbBox{width:100%!important;height:148px!important;border:2px dashed #C4B5FD!important;border-radius:18px!important;background:#F8F7FF!important;flex-direction:column;gap:4px}
+#addModal.add-v2 #thumbBox #thumbIcon{font-size:36px}
+#addModal.add-v2 .add-hero-hint{font-size:12px;color:#7C3AED;font-weight:700}
+#addModal.add-v2 .add-price{margin:18px 0 6px;text-align:center}
+#addModal.add-v2 .add-price label{display:block;margin:0 0 2px;font-size:11px;letter-spacing:.14em;color:#9CA3AF;font-weight:800}
+#addModal.add-v2 .add-price input{width:100%;border:0;border-bottom:2px solid #E9D5FF;box-shadow:none!important;border-radius:0;padding:4px 0 8px;font-size:38px;font-weight:900;color:#4C1D95;text-align:center;background:transparent}
+#addModal.add-v2 .add-price input:focus{outline:none;border-bottom-color:#7C3AED}
+#addModal.add-v2 .add-price input::placeholder{color:#D8B4FE}
+#addModal.add-v2 .add-card{background:#F9FAFB;border:1px solid #F1F5F9;border-radius:18px;padding:4px 16px;margin:14px 0}
+#addModal.add-v2 .add-field{padding:12px 0;border-bottom:1px solid #EEF2F7}
+#addModal.add-v2 .add-field:last-child{border-bottom:0}
+#addModal.add-v2 .add-field label{display:block;margin:0 0 4px;font-size:11px;letter-spacing:.08em;color:#9CA3AF;font-weight:800;text-transform:uppercase}
+#addModal.add-v2 .add-field input,#addModal.add-v2 .add-field select{width:100%;border:0;box-shadow:none!important;padding:0;font-size:16px;font-weight:700;color:#111827;text-align:left;background:transparent}
+#addModal.add-v2 .add-field input::placeholder{color:#C7C9D1;font-weight:500}
+#addModal.add-v2 .add-field input:focus,#addModal.add-v2 .add-field select:focus{outline:none}
+#addModal.add-v2 #supSuggest{margin:8px 0 0}
+#addModal.add-v2 .add-cash{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:16px;padding:14px 16px;margin:10px 0}
+#addModal.add-v2 .add-cash label{margin:0;font-size:14px;font-weight:800;color:#92400E}
+#addModal.add-v2 .add-cash small{display:block;font-weight:600;color:#B45309;font-size:11px}
+#addModal.add-v2 #fCash{appearance:none;-webkit-appearance:none;width:52px!important;height:30px!important;border-radius:999px;background:#E5E7EB;position:relative;cursor:pointer;flex:none;box-shadow:none!important;padding:0!important;transition:.2s}
+#addModal.add-v2 #fCash:checked{background:#16A34A}
+#addModal.add-v2 #fCash::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.2s}
+#addModal.add-v2 #fCash:checked::after{left:25px}
+#addModal.add-v2 .add-note{background:#fff;border:1px solid #EDE9FE;border-radius:16px;padding:12px 16px;margin:10px 0}
+#addModal.add-v2 .add-note label{display:block;margin:0 0 4px;font-size:11px;letter-spacing:.08em;color:#9CA3AF;font-weight:800;text-transform:uppercase}
+#addModal.add-v2 .add-note input{width:100%;border:0;box-shadow:none!important;padding:0;font-size:15px;font-weight:600;color:#111827;background:transparent}
+#addModal.add-v2 .add-note input:focus{outline:none}
+#addModal.add-v2 .add-actions{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
+#addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
+#addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
+
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -112,19 +148,22 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 <!-- ADD / EDIT -->
-<div class="modal" id="addModal"><div class="sheet">
+<div class="modal add-v2 open" id="addModal"><div class="sheet">
 <div class="closeRow"><button id="addBack">← Kembali</button><b id="addTitle">Tambah Invoice</b><button id="addClose">✕ Tutup</button></div>
 <input id="fImg" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgCamera" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgFiles" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-<div class="sr-top"><div id="thumbBox" style="width:96px;height:96px;flex-shrink:0;border:2px dashed #C4B5FD;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F5F3FF;overflow:hidden"><span id="thumbIcon" style="font-size:32px">📷</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div><div class="sr-price"><label>Harga (RM)</label><input id="fPrice" type="number" step="0.01" placeholder="0.00"></div></div>
-<div class="sr-row"><label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off"></div>
-<div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:-2px 0 8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div>
-<div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:-2px 0 8px;cursor:pointer"></div>
-<div class="sr-row"><label>No Invoice</label><input id="fInv" placeholder="No Invoice"></div>
-<div class="sr-row"><label>Tarikh Invoice</label><input id="fDate" type="date"></div>
-<div class="sr-row"><label>Kategori</label><select id="fCat"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div>
-<div class="sr-row"><label>💵 Cash - Terus Dah Bayar</label><input type="checkbox" id="fCash"></div>
-<div class="sr-row sr-note"><label>Nota / Remark</label><input id="fNote" placeholder=""></div>
-<div class="row" style="margin-top:16px"><button class="btn btn-light" id="addCancel" style="flex:1">Batal</button><button class="btn btn-green" id="addSave" style="flex:1">Simpan</button></div>
+<div class="add-hero"><div id="thumbBox" style="width:100%;height:148px;flex-shrink:0;border:2px dashed #C4B5FD;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F8F7FF;overflow:hidden"><span id="thumbIcon" style="font-size: 36px; display: block;">📷</span><span class="add-hero-hint">Tekan untuk ambil gambar resit</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div></div>
+<div class="add-price"><label>JUMLAH - RM</label><input id="fPrice" type="number" step="0.01" placeholder="0.00"></div>
+<div class="add-card">
+<div class="add-field"><label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off"></div>
+<div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:8px 0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div>
+<div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:4px 0 8px;cursor:pointer"></div>
+<div class="add-field"><label>No Invoice</label><input id="fInv" placeholder="No Invoice"></div>
+<div class="add-field"><label>Tarikh Invoice</label><input id="fDate" type="date"></div>
+<div class="add-field"><label>Kategori</label><select id="fCat"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div>
+</div>
+<div class="add-cash"><div><label>Cash - Terus Dah Bayar</label><small>Terus tanda Dah Bayar + PV auto</small></div><input type="checkbox" id="fCash"></div>
+<div class="add-note"><label>Nota / Remark</label><input id="fNote" placeholder="Catatan (optional)"></div>
+<div class="add-actions"><button class="btn btn-light" id="addCancel">Batal</button><button class="btn btn-green" id="addSave">Simpan Invoice</button></div>
 </div></div>
 
 <!-- IMG SOURCE -->
