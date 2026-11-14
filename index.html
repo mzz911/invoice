@@ -148,7 +148,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
 
 <div class="info" id="infoBar">0 invoice • RM0.00</div>
-<div class="row"><div class="search">🔍 <input id="q" placeholder="Cari supplier / no invoice..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="clearSearch" style="display: none; border: 0px; background: rgb(229, 231, 235); color: rgb(55, 65, 81); border-radius: 50%; width: 30px; height: 30px; min-width: 30px; font-size: 15px; font-weight: 800; line-height: 1; cursor: pointer; padding: 0px; flex-shrink: 0;">✕</button></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
+<div class="row"><div class="search">🔍 <input id="q" placeholder="Cari supplier / no invoice..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="clearSearch" style="display:none;border:0;background:#E5E7EB;color:#374151;border-radius:50%;width:30px;height:30px;min-width:30px;font-size:15px;font-weight:800;line-height:1;cursor:pointer;padding:0;flex-shrink:0">✕</button></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
 <div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
@@ -738,7 +738,7 @@ function renderPayInvList(){
     // Kalau ada pending / delete, tunjuk pending; kalau delete, tunjuk kosong
     const _dispImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || '');
     thumb.innerHTML=_dispImg?`<img src="${_dispImg}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
-    thumb.onclick=()=>{ _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); }; // NATIVE macam Resit Payment - terus Photo Library / Take Photo / Choose File
+    thumb.onclick=()=>{ const _curImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || ''); if(_curImg){ const _curPdf = deleteInvImgs[x.id] ? '' : (pendingInvPdfs[x.id] || x.pdf || ''); openImgView(_curImg,'Gambar Invoice - '+x.name,(x.inv||'')+' • '+(x.date||''),_curPdf,{kind:'payInvPreview',id:x.id}); } else { _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); } }; // Gambar Invoice: ada gambar -> VIEW dulu macam screenshot, kosong baru NATIVE picker
     const delBtn=document.createElement('button'); delBtn.textContent='✕'; delBtn.style.cssText='display:'+(_dispImg?'block':'none')+';position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)';
     delBtn.onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam gambar invoice '+x.name+' ni?')) return; pendingInvImgs[x.id]=''; pendingInvPdfs[x.id]=''; deleteInvImgs[x.id]=true; renderPayInvList(); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); };
     thumbBox.appendChild(thumb); thumbBox.appendChild(delBtn);
@@ -1207,6 +1207,13 @@ function _viewerApplyNewImage(out, pdfUrl){
     const items=invoices.filter(x=>x.paid&&x.pv===_viewCtx.pv&&x.payDate===_viewCtx.payDate);
     items.forEach(x=>{ x.paymentImg=out; x.paymentPages=[out]; if(pdfUrl) x.paymentPdf=pdfUrl; else x.paymentPdf=''; });
     _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+  } else if(_viewCtx.kind==='payInvPreview'){
+    // Edit Bayar - pending je, jangan save terus, user kena tekan Simpan Edit dulu
+    pendingInvImgs[_viewCtx.id]=out; pendingInvPdfs[_viewCtx.id]=pdfUrl||''; deleteInvImgs[_viewCtx.id]=false;
+    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+    try{ renderPayInvList(); }catch(e){}
+    const _imgEl=document.getElementById('imgViewImg'); if(_imgEl) _imgEl.src=out;
+    document.getElementById('imgViewModal').classList.add('open'); showViewTab(_viewPdfSrc?'pdf':'img'); showToast('Gambar invoice dikemaskini - tekan Simpan untuk simpan'); return;
   }
   save(); render();
   if(document.getElementById('payModal')?.classList.contains('open')){ try{ renderPayInvList(); }catch(e){} }
@@ -1226,6 +1233,10 @@ function _viewerDelete(){
   } else if(_viewCtx.kind==='paymentPV'){
     const items=invoices.filter(x=>x.paid&&x.pv===_viewCtx.pv&&x.payDate===_viewCtx.payDate);
     items.forEach(x=>{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); x.paymentImg=''; x.paymentPdf=''; });
+  } else if(_viewCtx.kind==='payInvPreview'){
+    pendingInvImgs[_viewCtx.id]=''; pendingInvPdfs[_viewCtx.id]=''; deleteInvImgs[_viewCtx.id]=true;
+    try{ renderPayInvList(); }catch(e){}
+    document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); return;
   }
   save(); render(); if(document.getElementById('payModal')?.classList.contains('open')){ try{ renderPayInvList(); }catch(e){} } document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar dipadam');
 }
