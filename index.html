@@ -62,7 +62,7 @@ h1{margin:4px 0 2px;font-size:26px;color:#fff}.sub{color:rgba(255,255,255,.85);f
 .pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;margin:1px 0;line-height:1.3}.paid{background:#dcfce7;color:#14532d}.unpaid{background:#fee2e2;color:#991b1b}.pv{background:#ede9fe;color:#4C1D95}.cash{background:#fef9c3;color:#854d0e}
 .bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E5E7EB;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:40}
 .bottom .btn{width:100%;padding:15px;font-size:16px;background:linear-gradient(135deg,#4C1D95,#6D28D9)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50;overflow:auto}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50;overflow:auto} #imgViewModal{z-index:100 !important}
 .modal.open{display:block}
 .sheet{background:#EEF0F5;margin:20px auto;max-width:720px;border-radius:20px;padding:18px;padding-top:0;position:relative;overflow:hidden}
 .sheet h2{margin:6px 0 12px}
@@ -642,7 +642,7 @@ function openPVGroupGallery(items, pvLabel){
   _viewGallery=_list; _viewGalleryIdx=0; _viewGalleryPV=pvLabel||'';
   showGalleryItem(0);
 }
-async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=ctx;
+async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=ctx; try{ const _vm=document.getElementById('imgViewModal'); if(_vm) _vm.style.zIndex='100'; }catch(e){}
   // Gallery: kalau ada gallery, simpan + tunjuk bar. Kalau single, sembunyi bar
   if(gallery && gallery.items && gallery.items.length>1){ _viewGallery=gallery.items; _viewGalleryIdx=gallery.idx||0; _viewGalleryPV=gallery.pv||''; }
   else if(!gallery){ _viewGallery=null; _viewGalleryIdx=0; _viewGalleryPV=''; const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }
