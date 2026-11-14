@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barcode Ikan - Prepack</title>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+body{font-family:Arial,sans-serif;padding:15px;background:#f5f5f5;max-width:480px;margin:auto}
+h2{text-align:center}
+label{font-weight:bold;display:block;margin-top:12px}
+input,select{width:100%;padding:12px;font-size:18px;margin-top:5px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+.box{background:white;padding:15px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+button{width:100%;padding:14px;font-size:18px;background:#007bff;color:white;border:none;border-radius:8px;margin-top:15px;font-weight:bold}
+.result{background:white;padding:15px;border-radius:12px;margin-top:15px;text-align:center;display:none}
+.price{font-size:28px;font-weight:bold;color:#d32f2f}
+.barcode-num{font-size:18px;letter-spacing:2px;margin:10px 0}
+@media print{body{background:white} .box,button,.no-print{display:none} .result{display:block !important;box-shadow:none}}
+</style>
+</head>
+<body>
+<h2>🐟 Barcode Prepack Ikan</h2>
+<div class="box">
+<label>PLU / Kod Ikan (5 digit)</label>
+<input id="plu" value="00122" maxlength="5" inputmode="numeric">
+<label>Nama Ikan</label>
+<input id="nama" value="Ikan Jahan">
+<label>Harga Sekilo (RM)</label>
+<input id="hargaKg" value="22" type="number" step="0.01" inputmode="decimal">
+<label>Berat (gram) - timbang je, masuk sini</label>
+<input id="gram" placeholder="Contoh: 350" type="number" inputmode="numeric" autofocus>
+<button onclick="buat()">BUAT BARCODE</button>
+<button onclick="window.print()" style="background:#28a745">PRINT LABEL</button>
+</div>
+
+<div class="result" id="result">
+<div id="namaOut" style="font-size:20px;font-weight:bold"></div>
+<div id="beratOut"></div>
+<div class="price" id="hargaOut"></div>
+<svg id="barcode"></svg>
+<div class="barcode-num" id="numOut"></div>
+<div class="no-print" style="font-size:12px;color:#888">Scan kat Loyverse untuk test</div>
+</div>
+
+<script>
+function checkDigit(first12){
+  let s=0;
+  for(let i=0;i<12;i++){
+    let d=parseInt(first12[i]);
+    s += (i+1)%2==1 ? d*1 : d*3;
+  }
+  return (10 - (s%10))%10;
+}
+function buat(){
+  let plu = document.getElementById('plu').value.padStart(5,'0');
+  let nama = document.getElementById('nama').value;
+  let hargaKg = parseFloat(document.getElementById('hargaKg').value);
+  let gram = parseFloat(document.getElementById('gram').value);
+  if(!gram){ alert('Masuk gram dulu!'); return; }
+  let kg = gram/1000;
+  let total = Math.round(kg * hargaKg * 100)/100;
+  let totalCents = Math.round(total*100);
+  let ppppp = String(totalCents).padStart(5,'0');
+  let base12 = '02' + plu + ppppp;
+  let c = checkDigit(base12);
+  let full = base12 + c;
+
+  document.getElementById('result').style.display='block';
+  document.getElementById('namaOut').innerText = nama + ' - ' + plu;
+  document.getElementById('beratOut').innerText = gram + 'g  (' + kg.toFixed(2) + 'kg)  x  RM' + hargaKg.toFixed(2) + '/kg';
+  document.getElementById('hargaOut').innerText = 'RM' + total.toFixed(2);
+  document.getElementById('numOut').innerText = full;
+  JsBarcode('#barcode', full, {format:'EAN13', width:2, height:80, displayValue:false});
+  // simpan last PLU & harga untuk ikan seterusnya
+  localStorage.setItem('plu', plu);
+  localStorage.setItem('hargaKg', hargaKg);
+  localStorage.setItem('nama', nama);
+}
+document.getElementById('gram').addEventListener('keypress', function(e){ if(e.key==='Enter') buat(); });
+</script>
+</body>
+</html>
