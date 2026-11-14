@@ -142,7 +142,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
 
-</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</style></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -738,7 +738,7 @@ function renderPayInvList(){
     // Kalau ada pending / delete, tunjuk pending; kalau delete, tunjuk kosong
     const _dispImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || '');
     thumb.innerHTML=_dispImg?`<img src="${_dispImg}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:28px">📷</span>';
-    thumb.onclick=()=>{ _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); }; // NATIVE macam Resit Payment - terus Photo Library / Take Photo / Choose File
+    thumb.onclick=()=>{ const _curImg = deleteInvImgs[x.id] ? '' : (pendingInvImgs[x.id] || x.img || ''); if(_curImg){ const _curPdf = deleteInvImgs[x.id] ? '' : (pendingInvPdfs[x.id] || x.pdf || ''); openImgView(_curImg,'Gambar Invoice - '+x.name,(x.inv||'')+' • '+(x.date||''),_curPdf,{kind:'payInvPreview',id:x.id}); } else { _payInvTargetId=x.id; imgTarget='payInv'; document.getElementById('fImg').click(); } }; // Ada gambar -> VIEW dulu, kosong baru NATIVE picker
     const delBtn=document.createElement('button'); delBtn.textContent='✕'; delBtn.style.cssText='display:'+(_dispImg?'block':'none')+';position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;color:#fff;border:2px solid #fff;font-weight:700;font-size:14px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,.3)';
     delBtn.onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam gambar invoice '+x.name+' ni?')) return; pendingInvImgs[x.id]=''; pendingInvPdfs[x.id]=''; deleteInvImgs[x.id]=true; renderPayInvList(); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); };
     thumbBox.appendChild(thumb); thumbBox.appendChild(delBtn);
@@ -1207,6 +1207,19 @@ function _viewerApplyNewImage(out, pdfUrl){
     const items=invoices.filter(x=>x.paid&&x.pv===_viewCtx.pv&&x.payDate===_viewCtx.payDate);
     items.forEach(x=>{ x.paymentImg=out; x.paymentPages=[out]; if(pdfUrl) x.paymentPdf=pdfUrl; else x.paymentPdf=''; });
     _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+  } else if(_viewCtx.kind==='payInvPreview'){
+    // Edit Bayar - pending je, jangan save terus, user kena tekan Simpan Edit dulu
+    pendingInvImgs[_viewCtx.id]=out; pendingInvPdfs[_viewCtx.id]=pdfUrl||''; deleteInvImgs[_viewCtx.id]=false;
+    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+    try{ renderPayInvList(); }catch(e){}
+    const _imgEl=document.getElementById('imgViewImg'); if(_imgEl) _imgEl.src=out;
+    document.getElementById('imgViewModal').classList.add('open'); showViewTab(_viewPdfSrc?'pdf':'img'); showToast('Gambar invoice dikemaskini - tekan Simpan untuk simpan'); return;
+  } else if(_viewCtx.kind==='payPreview'){
+    pendingPayImg=out; pendingPayPdf=pdfUrl||''; pendingPayPages=[out]; deletePayResit=false;
+    try{ setPayThumb(out); updatePayPdfBadge(); updatePayPagesUI(); }catch(e){}
+    _viewImgSrc=out; _viewPdfSrc=pdfUrl||'';
+    const _imgEl2=document.getElementById('imgViewImg'); if(_imgEl2) _imgEl2.src=out;
+    document.getElementById('imgViewModal').classList.add('open'); showViewTab(_viewPdfSrc?'pdf':'img'); showToast('Resit dikemaskini - tekan Simpan untuk simpan'); return;
   }
   save(); render();
   if(document.getElementById('payModal')?.classList.contains('open')){ try{ renderPayInvList(); }catch(e){} }
@@ -1217,7 +1230,7 @@ function _viewerApplyNewImage(out, pdfUrl){
 }
 function _viewerDelete(){
   if(!_viewCtx){ showToast('Tak dapat kenal invoice ni'); return; }
-  const _isPay = _viewCtx.kind==='payment' || _viewCtx.kind==='paymentPV';
+  const _isPay = _viewCtx.kind==='payment' || _viewCtx.kind==='paymentPV' || _viewCtx.kind==='payPreview';
   if(!confirm('Padam '+(_isPay?'resit payment':'gambar invoice')+' ni?')) return;
   if(_viewCtx.kind==='invoice'){
     const inv=invoices.find(x=>x.id===_viewCtx.id); if(inv){ if(inv.pdf && String(inv.pdf).startsWith('IDB:')) idbDeletePdf(String(inv.pdf).slice(4)); inv.img=''; inv.pdf=''; }
@@ -1226,6 +1239,14 @@ function _viewerDelete(){
   } else if(_viewCtx.kind==='paymentPV'){
     const items=invoices.filter(x=>x.paid&&x.pv===_viewCtx.pv&&x.payDate===_viewCtx.payDate);
     items.forEach(x=>{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); x.paymentImg=''; x.paymentPdf=''; });
+  } else if(_viewCtx.kind==='payInvPreview'){
+    pendingInvImgs[_viewCtx.id]=''; pendingInvPdfs[_viewCtx.id]=''; deleteInvImgs[_viewCtx.id]=true;
+    try{ renderPayInvList(); }catch(e){}
+    document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar invoice dipadam - tekan Simpan untuk simpan'); return;
+  } else if(_viewCtx.kind==='payPreview'){
+    pendingPayImg=''; pendingPayPdf=''; pendingPayPages=[]; deletePayResit=true;
+    try{ setPayThumb(''); updatePayPdfBadge(); updatePayPagesUI(); }catch(e){}
+    document.getElementById('imgViewModal').classList.remove('open'); showToast('Resit dipadam - tekan Simpan untuk simpan'); return;
   }
   save(); render(); if(document.getElementById('payModal')?.classList.contains('open')){ try{ renderPayInvList(); }catch(e){} } document.getElementById('imgViewModal').classList.remove('open'); showToast('Gambar dipadam');
 }
@@ -1255,7 +1276,7 @@ document.getElementById('imgViewEditBtn').onclick=()=>{ if(!_viewImgSrc){ showTo
 document.getElementById('detailClose').onclick=document.getElementById('detailBack').onclick=()=>document.getElementById('detailModal').classList.remove('open');
 document.getElementById('pvClose').onclick=document.getElementById('pvBack').onclick=()=>document.getElementById('pvModal').classList.remove('open');
 document.getElementById('payClose').onclick=document.getElementById('payBack').onclick=document.getElementById('payCancel').onclick=()=>{ document.getElementById('payModal').classList.remove('open'); render(); };
-document.getElementById('payThumbBox').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - sama macam Invoice */
+document.getElementById('payThumbBox').onclick=()=>{ const _curResit = pendingPayImg || (pendingPayPages && pendingPayPages[0]) || ''; if(_curResit){ openImgView(_curResit,'Resit Payment',(editPVInfo?.pv||'')+' • '+(editPVInfo?.payDate||''),pendingPayPdf||'',{kind:'payPreview'}); } else { imgTarget='pay'; _pendingPayPageAction = pendingPayPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); } }; /* Ada resit -> VIEW dulu, kosong baru NATIVE picker */
 document.getElementById('addPayPageBtn').onclick=()=>{ imgTarget='pay'; _pendingPayPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE - Tambah Page Resit */
 document.getElementById('payThumbDelete').onclick=(e)=>{ e.stopPropagation(); if(!confirm('Padam resit payment ni?')) return; pendingPayImg=''; pendingPayPdf=''; pendingPayPages=[]; _pendingPayPageAction=null; deletePayResit=true; updatePayPagesUI(); const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); if(pp){ pp.src=''; pp.style.display='none'; } if(pi) pi.style.display='block'; updatePayThumbDelete(false); updatePayPdfBadge(); showToast('Resit dipadam - tekan Simpan untuk simpan'); };
 document.getElementById('payConfirm').onclick=()=>{
