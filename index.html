@@ -142,7 +142,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
 
-</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</style></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -1314,8 +1314,8 @@ function warpPerspective(dataUrl, quadPct, cb){
 function showCropEditor(dataUrl, target, isScan){
   const existing=document.getElementById('cropModal'); if(existing) existing.remove();
   const m=document.createElement('div'); m.id='cropModal'; m.className='modal open';
-  m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><b id="cropTitle" style="color:#fff;font-size:18px">Edit Scan</b><div style="display:flex;gap:8px"><button id="cropFitBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px">↔ Muatkan</button><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
-  <div style="background:#000;color:#aaa;font-size:11px;text-align:center;padding:2px 12px 6px">Drag bulat putih di 4 bucu — kalau bulat bawah tak nampak, tekan ↔ Muatkan</div>
+  m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><b id="cropTitle" style="color:#fff;font-size:18px">Edit Scan</b><div style="display:flex;gap:8px"><button id="cropAutoBtn" style="background:#7C3AED;color:#fff;border:0;padding:8px 12px;border-radius:999px;font-weight:700;font-size:13px">✦ Auto</button><button id="cropFitBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 12px;border-radius:999px;font-weight:600;font-size:13px">↔ Muatkan</button><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
+  <div style="background:#000;color:#aaa;font-size:11px;text-align:center;padding:2px 12px 6px">Auto Crop dah cari tepi kertas — kalau tak ngam, drag bulat putih je</div>
   <div id="editStage" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
   <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:hidden;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:8px;box-sizing:border-box">
   <div id="zoomSpacer" style="position:relative;margin:auto;display:flex;justify-content:center;align-items:flex-start">
@@ -1367,6 +1367,45 @@ function showCropEditor(dataUrl, target, isScan){
     w.style.width=fitW+'px'; w.style.height=fitH+'px'; w.style.maxWidth='100%'; w.style.maxHeight='100%'; im.style.width=fitW+'px'; im.style.height=fitH+'px'; im.style.maxWidth='100%'; im.style.maxHeight='100%';
     const sp=m.querySelector('#zoomSpacer'); if(sp){ sp.style.width=fitW+'px'; sp.style.height=fitH+'px'; sp.style.maxWidth='100%'; sp.style.maxHeight='100%'; }
     renderQuad();
+  }
+  // ===== AUTO CROP macam Smart Receipt: detect tepi kertas, quad terus duduk ngam2 =====
+  let _autoDone=false;
+  function autoDetectPaper(){
+    try{
+      const probe=new Image();
+      probe.onload=()=>{
+        try{
+          const maxW=600, sc=Math.min(1, maxW/probe.width);
+          const w=Math.max(1, Math.round(probe.width*sc)), h=Math.max(1, Math.round(probe.height*sc));
+          const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+          const ctx=cv.getContext('2d'); ctx.drawImage(probe,0,0,w,h);
+          const d=ctx.getImageData(0,0,w,h).data;
+          const bright=new Uint8Array(w*h);
+          for(let y=0;y<h;y++) for(let x=0;x<w;x++){ const i=(y*w+x)*4; const g=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114; bright[y*w+x]= g>170 ? 1 : 0; }
+          const rowR=new Float32Array(h), colR=new Float32Array(w);
+          for(let y=0;y<h;y++){ let c=0; for(let x=0;x<w;x++) c+=bright[y*w+x]; rowR[y]=c/w; }
+          for(let x=0;x<w;x++){ let c=0; for(let y=0;y<h;y++) c+=bright[y*w+x]; colR[x]=c/h; }
+          // Screenshot / PDF penuh frame (semua putih) -> kertas dah penuh, pakai inset 2.5% je, ngam2
+          let allWhite=true; for(let y=0;y<h;y++) if(rowR[y]<0.92){ allWhite=false; break; }
+          if(allWhite){ quad=[{x:2.5,y:2.5},{x:97.5,y:2.5},{x:97.5,y:97.5},{x:2.5,y:97.5}]; renderQuad(); return; }
+          let top=0, bottom=h-1, left=0, right=w-1;
+          for(let y=0;y<h;y++){ if(rowR[y]>0.55){ top=y; break; } }
+          for(let y=h-1;y>=0;y--){ if(rowR[y]>0.55){ bottom=y; break; } }
+          for(let x=0;x<w;x++){ if(colR[x]>0.55){ left=x; break; } }
+          for(let x=w-1;x>=0;x--){ if(colR[x]>0.55){ right=x; break; } }
+          const bw=right-left, bh=bottom-top;
+          // Kalau box tak logik (terlalu kecik / terlalu besar) -> fallback inset 3% (lagi ketat dari 6% lama)
+          if(bw<w*0.4 || bh<h*0.4){ quad=[{x:3,y:3},{x:97,y:3},{x:97,y:97},{x:3,y:97}]; renderQuad(); return; }
+          // Margin 1% ke dalam supaya tak potong tulisan tepi
+          const mx=w*0.01, my=h*0.01;
+          const lx=Math.max(0,(left+mx)/w*100), rx=Math.min(100,(right-mx)/w*100);
+          const ty=Math.max(0,(top+my)/h*100), by=Math.min(100,(bottom-my)/h*100);
+          quad=[{x:lx,y:ty},{x:rx,y:ty},{x:rx,y:by},{x:lx,y:by}];
+          renderQuad();
+        }catch(e){}
+      };
+      probe.src=dataUrl;
+    }catch(e){}
   }
   function showEdit(){ m.querySelector('#editStage').style.display='flex'; m.querySelector('#reviewStage').style.display='none'; m.querySelector('#cropTitle').textContent='Edit Scan'; const cu=m.querySelector('#cropUse'); if(cu) cu.style.display='block'; const hd=m.querySelector('#cropHeader'); if(hd) hd.style.display='flex'; }
   function showReview(url){ m.querySelector('#editStage').style.display='none'; const rs=m.querySelector('#reviewStage'); rs.style.display='flex'; m.querySelector('#reviewImg').src=url; const hd=m.querySelector('#cropHeader'); if(hd) hd.style.display='none'; }
@@ -1446,12 +1485,13 @@ function showCropEditor(dataUrl, target, isScan){
   // POINTER je - jangan campur touch, nanti double event buat bulat lompat
   handles.forEach((h,i)=>{ h.addEventListener('pointerdown', (e)=> quadPointerDown(e,i)); });
   window.addEventListener('pointermove', quadPointerMove, {passive:false}); window.addEventListener('pointerup', quadPointerUp); window.addEventListener('pointercancel', quadPointerUp);
-  const _fitImg=m.querySelector('#cropImg'); if(_fitImg){ _fitImg.onload=()=>{ fitImage(); setTimeout(fitImage, 120); }; if(_fitImg.complete) setTimeout(fitImage, 50); }
+  const _fitImg=m.querySelector('#cropImg'); if(_fitImg){ _fitImg.onload=()=>{ fitImage(); if(!_autoDone){ _autoDone=true; setTimeout(autoDetectPaper, 80); } setTimeout(fitImage, 120); }; if(_fitImg.complete){ setTimeout(fitImage, 50); if(!_autoDone){ _autoDone=true; setTimeout(autoDetectPaper, 120); } } }
   // Layout iPhone lambat settle (URL bar naik/turun) - fit berkali-kali awal-awal supaya gambar tak overflow
   requestAnimationFrame(()=>fitImage()); setTimeout(fitImage, 100); setTimeout(fitImage, 350); setTimeout(fitImage, 800);
   window.addEventListener('resize', fitImage);
   try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', fitImage); }catch(e){}
   const _fitBtn=m.querySelector('#cropFitBtn'); if(_fitBtn) _fitBtn.onclick=()=>{ fitImage(); setTimeout(fitImage, 60); };
+  const _autoBtn=m.querySelector('#cropAutoBtn'); if(_autoBtn) _autoBtn.onclick=()=>{ autoDetectPaper(); showToast('Auto Crop - tepi kertas dikesan'); };
   // Next - warp ikut quad sekarang
   m.querySelector('#cropUse').onclick=()=>{ warpPerspective(cur, quad, (warped)=>{ reviewOrig=cur; cur=warped; showReview(warped); }); };
   m.querySelector('#cropCancel').onclick=()=>{ m.remove(); if(target==='viewer') document.getElementById('imgViewModal').classList.add('open'); };
