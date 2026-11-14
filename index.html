@@ -142,7 +142,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
 
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -395,12 +395,12 @@ function render(){
         const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
         const _firstImg=g.items.find(x=>x.img)?.img||'';
         const _firstItem=g.items.find(x=>x.img)||g.items[0];
-        d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?`<img src="${_firstImg}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${pvCountLabel(g.items)} • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+        d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?`<img src="${_firstImg}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${pvCountLabel(g.items)}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
         // Thumb - tekan gambar view gambar invoice macam Belum Bayar, bukan buka PV
         const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem && _firstItem.img) openImgView(_firstItem.img,'Gambar Invoice - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.pdf||'',{kind:'invoice',id:_firstItem.id}); else if(_firstItem && _firstItem.pdf) openImgViewOnlyPdf(_firstItem.pdf,'PDF - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.img,{kind:'invoice',id:_firstItem.id}); else { _viewCtx={kind:'invoice',id:_firstItem.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       } else {
         const x=g.items[0];
-        d.innerHTML=`<div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div></div><div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill paid">Dah Bayar</span></div>`;
+        d.innerHTML=`<div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div></div><div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill paid">Dah Bayar</span>${x.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${x.payMethod}</div>`:''}</div>`;
       }
       // Click - buka detail, kalau swipe tengah buka, tutup dulu
       let suppressClick=false; const cc=inner;
@@ -476,7 +476,7 @@ function render(){
       const d=document.createElement('div'); d.className='card swipeInner';
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
-      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${pvCountLabel(g.items)} • ${g.payMethod||''}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${hasResit?`<div>🧾</div>`:''}</div>`;
+      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b><div>${g.pv} • ${fmtDate(g.payDate)} • ${pvCountLabel(g.items)}</div>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${invs}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
       const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); else { _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       // Click + swipe Cancel PV - sama macam tab Dah Bayar
       let _supAll=false; const _ccAll=d;
