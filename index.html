@@ -141,6 +141,29 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 .add-actions{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
+/* COMPACT - Add Invoice muat 1 page, tak payah scroll */
+#addModal.add-v2 .sheet{padding:0 14px 10px !important;max-height:100dvh !important;overflow:hidden !important}
+#addModal.add-v2 .closeRow{padding:8px 0 2px !important}
+#addModal.add-v2 #thumbBox{height:68px !important;border-radius:12px !important;flex-direction:row !important;gap:8px !important}
+#addModal.add-v2 #thumbBox #thumbIcon{font-size:22px !important}
+#addModal.add-v2 .add-hero-hint{font-size:11px !important}
+#addModal.add-v2 .add-price{margin:8px 0 2px !important}
+#addModal.add-v2 .add-price input{font-size:26px !important;padding:2px 0 4px !important}
+#addModal.add-v2 .add-card{margin:8px 0 !important;padding:2px 12px !important;border-radius:12px !important}
+#addModal.add-v2 .add-field{padding:7px 0 !important}
+#addModal.add-v2 .add-field label{font-size:10px !important;margin:0 0 1px !important}
+#addModal.add-v2 .add-field input,#addModal.add-v2 .add-field select{font-size:14px !important}
+#addModal.add-v2 .add-cash,#addModal.add-v2 .add-bank{padding:8px 12px !important;margin:6px 0 !important;border-radius:12px !important}
+#addModal.add-v2 .add-cash label,#addModal.add-v2 .add-bank label{font-size:13px !important}
+#addModal.add-v2 #fCash,#addModal.add-v2 #fBank{width:44px !important;height:26px !important}
+#addModal.add-v2 #fCash::after,#addModal.add-v2 #fBank::after{width:20px !important;height:20px !important;top:3px !important;left:3px !important}
+#addModal.add-v2 #fCash:checked::after,#addModal.add-v2 #fBank:checked::after{left:21px !important}
+#addModal.add-v2 #bankPayDateWrap{padding:8px 12px !important;margin:6px 0 !important}
+#addModal.add-v2 .add-note{padding:8px 12px !important;margin:6px 0 !important;border-radius:12px !important}
+#addModal.add-v2 .add-note input{font-size:14px !important}
+#addModal.add-v2 .add-actions{margin-top:8px !important;padding:6px 0 2px !important}
+#addModal.add-v2 #addCancel,#addModal.add-v2 #addSave{padding:10px !important;font-size:15px !important}
+
 
 </style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
