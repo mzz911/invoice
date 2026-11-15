@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -571,7 +571,7 @@ function render(){
       const d=document.createElement('div'); d.className='card swipeInner'; d.dataset.pv=g.pv||''; d.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) d.classList.add('flash-saved');
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
-      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
+      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?supaImgTag(_firstImg2):'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
       const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); else { _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       // Click + swipe Cancel PV - sama macam tab Dah Bayar
       let _supAll=false; const _ccAll=d;
@@ -711,7 +711,7 @@ function updateGalleryBar(){
     _viewGallery.forEach((it, idx)=>{
       const b=document.createElement('div'); b.style.cssText='width:44px;height:44px;flex-shrink:0;border-radius:8px;overflow:hidden;cursor:pointer;border:'+(idx===_viewGalleryIdx?'3px solid #16a34a':'1px solid #ddd')+';background:#f8fafc;display:flex;align-items:center;justify-content:center';
       const _src=it.img||'';
-      b.innerHTML=_src?`<img src="${_src}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:18px">📄</span>';
+      b.innerHTML=_src?(String(supaFixExpiredUrl(_src)).startsWith('SUPA:')?`<img data-supa="${supaFixExpiredUrl(_src)}" src="" style="width:100%;height:100%;object-fit:cover">`:`<img src="${supaFixExpiredUrl(_src)}" style="width:100%;height:100%;object-fit:cover">`):'<span style="font-size:18px">📄</span>';
       b.title=it.inv||'';
       b.onclick=(e)=>{ e.stopPropagation(); showGalleryItem(idx); };
       const lbl=document.createElement('div'); lbl.style.cssText='font-size:9px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44px';
