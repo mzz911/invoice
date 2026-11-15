@@ -232,7 +232,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <!-- SETTING -->
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
-<button class="btn btn-green" id="icloudBackupBtn" style="padding:16px;text-align:left">⬆️ Export DB - Backup PENUH (dengan gambar)</button>
+<button class="btn btn-green" id="icloudBackupBtn" style="padding:16px;text-align:left">⬆️ Export DB - Backup PENUH (dengan gambar)</button><button class="btn btn-light" id="textOnlyBackupBtn" style="padding:16px;text-align:left">📄 Export DB - Text Sahaja (Kecil, Selalu Jadi) - List, PV, Tarikh, Jumlah je, tanpa gambar</button><div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Kalau Export Penuh 400MB crash, buat yang Text Sahaja dulu — sekurang-kurangnya list 305 tu selamat. Lepas tu buat Penuh dalam bahagian kecik.</div>
 <div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:8px;text-align:center">⚠️ JANGAN tekan Clear History dalam Safari. Nanti semua invoice hilang.</div>
 <div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
 <div id="storageLabel" style="font-size:12px;color:#666;text-align:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px">Storage: kira...</div>
@@ -1069,8 +1069,89 @@ const _ab=document.getElementById('archiveOldBtn'); if(_ab && !_ab.dataset.wired
 document.getElementById('settingClose').onclick=document.getElementById('settingBack').onclick=document.getElementById('settingDone').onclick=()=>document.getElementById('settingModal').classList.remove('open');
 function fmtLastExport(){ try{ const v=localStorage.getItem('ik_lastExport'); if(!v) return 'Belum pernah Export DB'; const d=new Date(v); const s=d.toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); const n=localStorage.getItem('ik_lastExportCount')||''; return 'Last Export: '+s+(n?' • '+n+' invoice':''); }catch(e){ return 'Belum pernah Export DB'; } }
 function updateLastExportLabel(){ const el=document.getElementById('lastExportLabel'); if(el) el.textContent=fmtLastExport(); }
-document.getElementById('icloudBackupBtn').onclick=async()=>{ showToast('Sediakan backup PENUH (dengan gambar)...'); try{ const fullInvoices=[]; for(const x of invoices){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); fullInvoices.push(y); } const now=new Date(); const data={invoices:fullInvoices,cancelledPVs,customCats,exportedAt:now.toISOString(),backupFull:true}; const blob=new Blob([JSON.stringify(data)],{type:'application/json'}); const pad=n=>String(n).padStart(2,'0'); const fname='invoice-kedai-backup-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json'; let _shared=false; try{ const _file=new File([blob],fname,{type:'application/json'}); if(navigator.share && (!navigator.canShare || navigator.canShare({files:[_file]}))){ await navigator.share({files:[_file],title:'Backup Invoice Kedai'}); _shared=true; } }catch(_se){ if(_se && _se.name==='AbortError'){ showToast('Share dibatalkan - backup tak download'); return; } } if(!_shared){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(()=>{ try{a.remove();}catch(e){} URL.revokeObjectURL(a.href); },3000); } try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){} updateLastExportLabel(); try{ updateBackupReminder(); }catch(e){} showToast('Export DB PENUH download - ada gambar sekali, simpan dalam Files / iCloud'); document.getElementById('settingModal').classList.remove('open'); }catch(e){ alert('Export gagal: '+e.message); } };
-
+document.getElementById('icloudBackupBtn').onclick=async()=>{
+  // EXPORT PENUH - pecah 50 invoice satu file, supaya Safari iPhone tak crash (400MB sekali gus = crash)
+  try{
+    const CHUNK=50;
+    const totalChunks=Math.ceil(invoices.length/CHUNK);
+    if(totalChunks>1){
+      if(!confirm('Data besar: '+invoices.length+' invoice (lebih kurang 400MB).\n\nSafari iPhone tak larat download sekali gus, nanti crash.\n\nKita pecah jadi '+totalChunks+' file kecik (50 invoice satu file).\n\nTekan OK untuk mula Bahagian 1/'+totalChunks+'. Lepas setiap bahagian download, tekan OK untuk sambung bahagian seterusnya.')){
+        return;
+      }
+    }
+    for(let ci=0; ci<totalChunks; ci++){
+      const chunkInvoices=invoices.slice(ci*CHUNK, (ci+1)*CHUNK);
+      showToast('Sediakan Bahagian '+(ci+1)+'/'+totalChunks+' ('+chunkInvoices.length+' invoice)... Tunggu, jangan lock phone');
+      const fullChunk=[];
+      for(const x of chunkInvoices){
+        const y={...x};
+        y.img=await resolveImgData(x.img||'');
+        y.pdf=await resolvePdfData(x.pdf||'');
+        y.paymentImg=await resolveImgData(x.paymentImg||'');
+        y.paymentPdf=await resolvePdfData(x.paymentPdf||'');
+        y.pages=await resolvePagesArray(x.pages||[]);
+        y.paymentPages=await resolvePagesArray(x.paymentPages||[]);
+        fullChunk.push(y);
+      }
+      const now=new Date();
+      const pad=n=>String(n).padStart(2,'0');
+      const data={invoices:fullChunk,cancelledPVs,customCats,exportedAt:now.toISOString(),backupFull:true,chunk:ci+1,totalChunks:totalChunks,chunkSize:CHUNK};
+      const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+      const fname='invoice-kedai-backup-BHG'+(ci+1)+'of'+totalChunks+'-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json';
+      let _shared=false;
+      try{
+        const _file=new File([blob],fname,{type:'application/json'});
+        if(navigator.share && (!navigator.canShare || navigator.canShare({files:[_file]}))){
+          await navigator.share({files:[_file],title:'Backup Invoice Kedai Bhg '+(ci+1)});
+          _shared=true;
+        }
+      }catch(_se){
+        if(_se && _se.name==='AbortError'){ showToast('Share dibatalkan di Bahagian '+(ci+1)); return; }
+      }
+      if(!_shared){
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(()=>{ try{a.remove();}catch(e){} URL.revokeObjectURL(a.href); },3000);
+      }
+      // Tunggu user save file ni dulu, baru sambung chunk seterusnya - kalau tidak Share kedua kena block Safari
+      if(ci<totalChunks-1){
+        if(!confirm('Bahagian '+(ci+1)+'/'+totalChunks+' dah dihantar ke Share Sheet.\n\nDah tekan Save to Files > Downloads?\n\nTekan OK untuk sambung Bahagian '+(ci+2)+'/'+totalChunks+'. Tekan Cancel kalau nak berhenti sini dulu.')){
+          showToast('Export berhenti di Bahagian '+(ci+1)+'/'+totalChunks);
+          return;
+        }
+      }
+    }
+    try{ const now2=new Date(); localStorage.setItem('ik_lastExport', now2.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)); }catch(e){}
+    updateLastExportLabel(); try{ updateBackupReminder(); }catch(e){}
+    showToast('Export Penuh siap - '+totalChunks+' file, simpan dalam Files / Downloads');
+    document.getElementById('settingModal').classList.remove('open');
+  }catch(e){ alert('Export gagal: '+e.message); }
+};
+document.getElementById('textOnlyBackupBtn').onclick=async()=>{
+  // EXPORT TEXT SAHAJA - tanpa gambar, file kecik <1MB, selalu jadi walau data 400MB
+  try{
+    showToast('Sediakan backup Text Sahaja...');
+    const textOnly=invoices.map(x=>{ const y={...x}; y.img=''; y.pdf=''; y.paymentImg=''; y.paymentPdf=''; y.pages=[]; y.paymentPages=[]; return y; });
+    const now=new Date();
+    const data={invoices:textOnly,cancelledPVs,customCats,exportedAt:now.toISOString(),backupFull:false,backupTextOnly:true,note:'Text sahaja, tanpa gambar - untuk list / PV / jumlah. Gambar masih dalam phone.'};
+    const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+    const pad=n=>String(n).padStart(2,'0');
+    const fname='invoice-kedai-TEXT-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'-'+pad(now.getHours())+pad(now.getMinutes())+'.json';
+    let _shared=false;
+    try{
+      const _file=new File([blob],fname,{type:'application/json'});
+      if(navigator.share && (!navigator.canShare || navigator.canShare({files:[_file]}))){
+        await navigator.share({files:[_file],title:'Backup Text Invoice Kedai'});
+        _shared=true;
+      }
+    }catch(_se){ if(_se && _se.name==='AbortError'){ showToast('Share dibatalkan'); return; } }
+    if(!_shared){
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(()=>{ try{a.remove();}catch(e){} URL.revokeObjectURL(a.href); },3000);
+    }
+    try{ localStorage.setItem('ik_lastExport', now.toISOString()); localStorage.setItem('ik_lastExportCount', String(invoices.length)+' (text)'); }catch(e){}
+    updateLastExportLabel(); try{ updateBackupReminder(); }catch(e){}
+    showToast('Export Text Sahaja siap - file kecik, simpan dalam Files');
+    document.getElementById('settingModal').classList.remove('open');
+  }catch(e){ alert('Export Text gagal: '+e.message); }
+};
 document.getElementById('driveClose').onclick=document.getElementById('driveBack').onclick=document.getElementById('driveDone').onclick=()=>document.getElementById('driveModal').classList.remove('open');
 document.getElementById('openDrive').onclick=()=>window.open('https://drive.google.com','_blank');
 document.getElementById('settingImport').onclick=()=>document.getElementById('importFile').click();
