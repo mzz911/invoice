@@ -162,23 +162,9 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 .add-actions{background:#F1F2F6 !important}
 #addModal.add-v2 #bankPayDateWrap label{color:#6B7280 !important;font-size:14px !important;letter-spacing:0 !important;text-transform:none !important}
 #addModal.add-v2 #bankPayDateWrap input{font-size:15px !important;text-align:right !important}
-/* FIX BUG No Invoice melimpah - input width:100% + label dalam flex = overflow, iOS zoom + bar ^ v ✓ terapung */
-#addModal.add-v2 .sheet{box-sizing:border-box;overflow-y:auto;-webkit-overflow-scrolling:touch}
-#addModal.add-v2 .sheet *{box-sizing:border-box}
-#addModal.add-v2 div[style*="background:#fff"]{overflow:hidden;max-width:100%}
-#addModal.add-v2 .add-field{display:flex !important;align-items:center !important;gap:10px !important;min-width:0 !important}
-#addModal.add-v2 .add-field label{flex:0 0 auto !important;white-space:nowrap !important;max-width:45% !important;overflow:hidden !important;text-overflow:ellipsis !important}
-#addModal.add-v2 .add-field input,#addModal.add-v2 .add-field select{flex:1 1 0 !important;width:auto !important;min-width:0 !important;max-width:100% !important;font-size:16px !important;-webkit-text-size-adjust:100%}
-#addModal.add-v2 .add-price > div{display:flex !important;align-items:center !important;gap:10px !important;min-width:0 !important}
-#addModal.add-v2 .add-price label{flex:0 0 auto !important;white-space:nowrap !important}
-#addModal.add-v2 .add-price input{flex:1 1 0 !important;width:auto !important;min-width:0 !important;max-width:100% !important;font-size:18px !important}
-#addModal.add-v2 #fInv,#addModal.add-v2 #fName,#addModal.add-v2 #fPrice,#addModal.add-v2 #fDate,#addModal.add-v2 #fCat,#addModal.add-v2 #fPayDate{flex:1 1 0 !important;width:auto !important;min-width:0 !important}
-#addModal.add-v2 input:focus,#addModal.add-v2 select:focus{outline:none !important;box-shadow:none !important;-webkit-tap-highlight-color:transparent}
-#addModal.add-v2 input{-webkit-appearance:none;appearance:none}
 
 
-
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -1079,7 +1065,6 @@ function openRenameSupplier(){ const sel=document.getElementById('renameOld'); c
 function updateRenamePreview(){ const oldV=(document.getElementById('renameOld').value||'').trim(); const newV=(document.getElementById('renameNew').value||'').trim(); const cnt=invoices.filter(x=>(x.name||'').trim()===oldV).length; const c=document.getElementById('renameCount'); const p=document.getElementById('renamePreview'); if(!oldV){ c.textContent=''; p.textContent='Pilih nama lama dulu'; return; } c.textContent=oldV+' — ada '+cnt+' invoice pakai nama ni'; if(!newV){ p.textContent='Taip nama baru yang betul kat bawah'; return; } if(newV.toLowerCase()===oldV.toLowerCase()){ p.textContent='Nama baru sama dengan nama lama'; return; } p.textContent='Akan tukar '+cnt+' invoice: '+oldV+' → '+newV; }
 document.getElementById('renameOld').onchange=updateRenamePreview;
 document.getElementById('renameNew').oninput=updateRenamePreview;
-['fName','fInv','fPrice','fDate','fCat','fPayDate','fNote'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('focus',()=>{ setTimeout(()=>{ try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} },250); }); });
 document.getElementById('renameDoBtn').onclick=()=>{ const oldV=(document.getElementById('renameOld').value||'').trim(); const newV=(document.getElementById('renameNew').value||'').trim(); if(!oldV){ alert('Pilih nama lama dulu'); return; } if(!newV){ alert('Taip nama baru dulu'); return; } if(newV.toLowerCase()===oldV.toLowerCase()){ alert('Nama baru sama dengan nama lama'); return; } const cnt=invoices.filter(x=>(x.name||'').trim()===oldV).length; if(!cnt){ alert('Tiada invoice pakai nama ni'); return; } if(!confirm('Tukar '+cnt+' invoice?\n\n'+oldV+'\n→ '+newV)){ return; } invoices.forEach(x=>{ if((x.name||'').trim()===oldV) x.name=newV; }); save(); render(); openRenameSupplier(); showToast('Siap - '+cnt+' invoice dah tukar ke '+newV); };
 
 document.getElementById('catCloseBtn').onclick=document.getElementById('catBack').onclick=()=>document.getElementById('catModal').classList.remove('open');
