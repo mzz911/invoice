@@ -162,6 +162,10 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 .add-actions{background:#F1F2F6 !important}
 #addModal.add-v2 #bankPayDateWrap label{color:#6B7280 !important;font-size:14px !important;letter-spacing:0 !important;text-transform:none !important}
 #addModal.add-v2 #bankPayDateWrap input{font-size:15px !important;text-align:right !important}
+/* HIGHLIGHT kad yang baru simpan / edit */
+@keyframes flashSaved{0%{box-shadow:0 0 0 3px #5B21B6}100%{box-shadow:0 0 0 0 transparent}}
+.flash-saved{animation:flashSaved 1.2s ease 2;border-color:#5B21B6 !important;background:#F5F3FF !important}
+
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
@@ -370,6 +374,18 @@ function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ c
 function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='batal'){ return []; } return list; }
 function gotoTab(name){ tab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name)); selected.clear(); render(); }
 function updateBackupReminder(){ try{ const el=document.getElementById('backupReminder'); if(!el) return; let last=''; try{ last=localStorage.getItem('ik_lastExport')||''; }catch(e){} const lastDay=last ? new Date(last).toISOString().slice(0,10) : ''; const td=today(); if(lastDay===td){ el.style.display='none'; } else { el.style.display='block'; el.textContent='⚠️ Belum backup hari ni ('+invoices.length+' invoice dalam phone) - tekan sini untuk Export'; } }catch(e){} }
+function scrollToSaved(savedId, savedPv){
+  if(!savedId && !savedPv) return;
+  setTimeout(()=>{
+    let el=null;
+    if(savedId) el=document.querySelector('[data-ids*="'+savedId+'"]')||document.querySelector('[data-inv-id="'+savedId+'"]');
+    if(!el && savedPv) el=document.querySelector('[data-pv="'+savedPv+'"]');
+    if(!el) return;
+    try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){ el.scrollIntoView(); }
+    el.classList.add('flash-saved');
+    setTimeout(()=>el.classList.remove('flash-saved'), 2600);
+  }, 180);
+}
 function render(){
   updateBackupReminder();
   rebuildCatList();
@@ -413,7 +429,7 @@ function render(){
         delBtn=document.createElement('button'); delBtn.type='button'; delBtn.className='swipeDel'; delBtn.style.width='100px'; delBtn.style.background='#dc2626'; delBtn.style.fontSize='13px'; delBtn.textContent='Batal Bayar';
         wrap.appendChild(delBtn);
       }
-      const inner=document.createElement('div'); inner.className='card swipeInner';
+      const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.pv=g.pv||''; inner.dataset.ids=(g.items||[]).map(x=>x.id).join(',');
       wrap.appendChild(inner);
       const d=inner;
       if(g.pv){
@@ -499,7 +515,7 @@ function render(){
       const _remAll=document.createElement('button'); _remAll.type='button'; _remAll.style.cssText='flex:1;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _remAll.textContent='Remove All';
       const _delAll=document.createElement('button'); _delAll.type='button'; _delAll.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _delAll.textContent='Cancel PV';
       _actsAll.appendChild(_remAll); _actsAll.appendChild(_delAll); _wrapAll.appendChild(_actsAll);
-      const d=document.createElement('div'); d.className='card swipeInner';
+      const d=document.createElement('div'); d.className='card swipeInner'; d.dataset.pv=g.pv||''; d.dataset.ids=(g.items||[]).map(x=>x.id).join(',');
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
       d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
@@ -529,7 +545,7 @@ function render(){
     const c=document.createElement('div'); c.className='swipeWrap';
     const _isPaidSingle = !!(x.paid && !x.pv);
     const del=document.createElement('button'); del.type='button'; del.className='swipeDel'; del.textContent=_isPaidSingle?'Batal Bayar':'Delete'; if(_isPaidSingle){ del.style.width='100px'; del.style.background='#dc2626'; del.style.fontSize='13px'; }
-    const inner=document.createElement('div'); inner.className='card swipeInner';
+    const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.invId=x.id; inner.dataset.pv=x.pv||'';
     c.appendChild(del); c.appendChild(inner);
     const cc=inner;
     const splitTxt = x.payMethod==='Split Payment' && x.split ? 'Split: '+Object.entries(x.split).filter(([k,v])=>v>0).map(([k,v])=>`${k.replace('Bank Transfer','Bank').replace('QR / E-Wallet','QR')} ${Number(v)}`).join(' • ') : '';
@@ -1089,7 +1105,7 @@ document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementByI
   } else { const _newId=Date.now().toString();
   let _pdfField=pendingPdf||'';
   if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-  if(isCash||isBank){ const _pv=nextPV(payDateToUse); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar ('+becamePaidMethod+')'); } else { render(); showToast('Invoice disimpan'); } };
+  if(isCash||isBank){ const _pv=nextPV(payDateToUse); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; const _savedId=editId||(typeof _newId!=='undefined'?_newId:'')||''; let _savedPv=''; try{ const _sx=invoices.find(y=>y.id===_savedId); _savedPv=_sx?(_sx.pv||''):''; }catch(e){} if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar ('+becamePaidMethod+')'); } else { const _isPaidNow=(()=>{ try{ const _sx=invoices.find(y=>y.id===_savedId); return !!(_sx&&_sx.paid); }catch(e){ return false; } })(); if(_isPaidNow && tab==='unpaid'){ gotoTab('paid'); } else if(!_isPaidNow && tab==='paid'){ gotoTab('unpaid'); } else { render(); } showToast('Invoice disimpan'); } scrollToSaved(_savedId, _savedPv); };
 document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; _pendingPageAction = pendingPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE iPhone - terus Photo Library / Take Photo / Choose File, bukan modal Camera/Gallery */
 document.getElementById('addPageBtn').onclick=()=>{ imgTarget='invoice'; _pendingPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE jugak untuk Tambah Page */
 document.getElementById('srcCancel').onclick=document.getElementById('srcBack').onclick=()=>document.getElementById('imgSourceModal').classList.remove('open');
