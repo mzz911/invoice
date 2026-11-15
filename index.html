@@ -236,7 +236,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:8px;text-align:center">⚠️ JANGAN tekan Clear History dalam Safari. Nanti semua invoice hilang.</div>
 <div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
 <div id="storageLabel" style="font-size:12px;color:#666;text-align:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px">Storage: kira...</div>
-<button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button><button class="btn btn-light" id="shrinkBtn" style="padding:16px;text-align:left">🗜️ Kecilkan Gambar + PDF Lama - Jimat Space</button><div style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Kecilkan = gambar ke 900px, quality 0.6 + PDF auto buat balik dari gambar kecik tu. PDF asal yang banyak page (lebih 1 page) tak usik, selamat. Buat Export DB dulu sebelum tekan.</div>
+<button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button><button class="btn btn-light" id="shrinkBtn" style="padding:16px;text-align:left">🗜️ Kecilkan Gambar + PDF Lama - Jimat Space</button><div style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Kecilkan = gambar ke 900px, quality 0.6 + PDF auto buat balik dari gambar kecik tu. PDF asal yang banyak page (lebih 1 page) tak usik, selamat. Buat Export DB dulu sebelum tekan.</div><button class="btn btn-light" id="deleteAutoPdfBtn" style="padding:16px;text-align:left">🗑️ Buang PDF Auto - Simpan Gambar Je (Jimat Separuh Lagi)</button><div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Buang PDF auto je, gambar kekal boleh baca. PDF asal yang banyak muka (lebih 1 page) TAK buang, selamat. Auto PDF untuk invoice baru pun akan OFF, supaya tak besar balik. Buat Export DB dulu sebelum tekan.</div>
 <button class="btn btn-light" id="archiveOldBtn" style="padding:16px;text-align:left">📦 Archive Lama - Export invoice &gt;1 tahun, lepas tu padam dari phone</button>
 <div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Archive = simpan invoice lama dalam file, lepas tu buang dari phone. File tu simpan dalam Files. Nak tengok balik, Import file tu.</div>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1154,6 +1154,54 @@ async function _imgToSmallPdf(imgDataUrl){ try{ if(!window.jspdf) return ''; con
 async function shrinkAllImages(){ if(!confirm('Kecilkan SEMUA gambar + PDF?\n\nGambar lama (1200px, 1-2MB) akan jadi 900px, quality 0.6 (150-250KB). PDF auto akan buat balik dari gambar kecik tu, jadi PDF pun kecik.\n\nPDF asal yang banyak page (lebih 1 page) TAK usik, selamat.\n\nDAH Export DB dulu? Tekan OK untuk teruskan, Cancel kalau belum Export.')) return; showToast('Kecilkan gambar + PDF... jangan tutup app'); let before=0, after=0, count=0, pdfCount=0; const _sz=s=>Math.round((String(s||'').length*0.75)/1024); for(const x of invoices){ for(const field of ['img','paymentImg']){ const raw=x[field]; if(!raw) continue; const resolved=await resolveImgData(raw); if(!resolved) continue; before+=_sz(resolved); const small=await _compressOneImg(resolved, 900, 0.6); after+=_sz(small); if(small && small.length < resolved.length){ count++; if(String(raw).startsWith('IDBIMG:')){ const k=String(raw).slice(7); await idbSavePdf(k, small); _imgCache[k]=small; } else if(small.length>400*1024){ const k='inv_'+x.id+(field==='paymentImg'?'_pay':''); await idbSavePdf(k, small); _imgCache[k]=small; x[field]='IDBIMG:'+k; } else { x[field]=small; } } else { after-= _sz(small); after+=_sz(resolved); } } if(x.paymentPages && x.paymentPages.length){ const newPages=[]; for(const p of x.paymentPages){ const r=await resolveImgData(p); if(!r){ newPages.push(p); continue; } before+=_sz(r); const s2=await _compressOneImg(r, 900, 0.6); after+=_sz(s2); if(s2 && s2.length < r.length){ count++; if(String(p).startsWith('IDBIMG:')){ const k=String(p).slice(7); await idbSavePdf(k, s2); _imgCache[k]=s2; newPages.push(p); } else if(s2.length>400*1024){ const k='inv_'+x.id+'_paypg_'+newPages.length; await idbSavePdf(k, s2); _imgCache[k]=s2; newPages.push('IDBIMG:'+k); } else { newPages.push(s2); } } else { newPages.push(p); } } x.paymentPages=newPages; } // PDF - buat balik dari gambar kecik, kalau 1 page je
     for(const pair of [['pdf','img','pages'],['paymentPdf','paymentImg','paymentPages']]){ const pdfField=pair[0], imgField=pair[1], pagesField=pair[2]; const rawPdf=x[pdfField]; if(!rawPdf) continue; const pagesLen=(x[pagesField] && x[pagesField].length) ? x[pagesField].length : 0; if(pagesLen>1) continue; const resolvedPdf=await resolvePdfData(rawPdf); if(!resolvedPdf) continue; before+=_sz(resolvedPdf); const imgForPdf=await resolveImgData(x[imgField]||''); if(!imgForPdf || !String(imgForPdf).startsWith('data:image')){ after+=_sz(resolvedPdf); continue; } const newPdf=await _imgToSmallPdf(imgForPdf); if(newPdf && newPdf.length < resolvedPdf.length){ pdfCount++; after+=_sz(newPdf); if(String(rawPdf).startsWith('IDB:')){ const k=String(rawPdf).slice(4); await idbSavePdf(k, newPdf); } else if(newPdf.length>500*1024){ const k=(pdfField==='paymentPdf'?'paypdf_':'pdf_')+x.id; await idbSavePdf(k, newPdf); x[pdfField]='IDB:'+k; } else { x[pdfField]=newPdf; } } else { after+=_sz(resolvedPdf); } } } save(); render(); try{ updateStorageLabel(); }catch(e){} const savedMB=((before-after)/1024).toFixed(1); showToast('Siap! '+count+' gambar + '+pdfCount+' PDF dikecilkan, jimat ~'+savedMB+'MB'); }
 document.getElementById('shrinkBtn').onclick=()=>shrinkAllImages();
+async function deleteAutoPdfs(){
+  if(!confirm('Buang PDF Auto - Simpan Gambar Je?\n\nPDF auto tu benda sama je dengan gambar (PDF tu buat balik dari gambar). Buang PDF, gambar kekal, masih boleh baca macam biasa.\n\nPDF asal yang banyak muka (lebih 1 page) TAK buang, selamat.\n\nAuto PDF untuk invoice baru pun akan OFF, supaya tak besar balik.\n\nDAH Export DB dulu? Tekan OK untuk teruskan.')) return;
+  showToast('Buang PDF auto... jangan tutup app');
+  let before=0, after=0, delPdf=0, delPayPdf=0, keepMulti=0;
+  const _sz=s=>Math.round((String(s||'').length*0.75)/1024);
+  for(const x of invoices){
+    // PDF invoice - buang kalau ada gambar, dan bukan multi-page
+    if(x.pdf){
+      const pagesLen=(x.pages && x.pages.length) ? x.pages.length : 0;
+      const hasImg=!!(await resolveImgData(x.img||''));
+      if(pagesLen>1){ keepMulti++; }
+      else if(hasImg){
+        const resolvedPdf=await resolvePdfData(x.pdf);
+        before+=_sz(resolvedPdf); after+=0;
+        if(String(x.pdf).startsWith('IDB:')){ try{ await idbDeletePdf(String(x.pdf).slice(4)); }catch(e){} }
+        x.pdf='';
+        delPdf++;
+      } else {
+        // Takde gambar, jangan buang PDF - nanti hilang terus
+        const resolvedPdf=await resolvePdfData(x.pdf);
+        before+=_sz(resolvedPdf); after+=_sz(resolvedPdf);
+      }
+    }
+    // PDF resit - buang kalau ada gambar resit, dan bukan multi-page
+    if(x.paymentPdf){
+      const payPagesLen=(x.paymentPages && x.paymentPages.length) ? x.paymentPages.length : 0;
+      const hasPayImg=!!(await resolveImgData(x.paymentImg||''));
+      if(payPagesLen>1){ keepMulti++; }
+      else if(hasPayImg){
+        const resolvedPayPdf=await resolvePdfData(x.paymentPdf);
+        before+=_sz(resolvedPayPdf); after+=0;
+        if(String(x.paymentPdf).startsWith('IDB:')){ try{ await idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} }
+        x.paymentPdf='';
+        delPayPdf++;
+      } else {
+        const resolvedPayPdf=await resolvePdfData(x.paymentPdf);
+        before+=_sz(resolvedPayPdf); after+=_sz(resolvedPayPdf);
+      }
+    }
+  }
+  try{ localStorage.setItem('ik_auto_pdf','0'); }catch(e){}
+  try{ updateAutoPdfBadge(); }catch(e){}
+  save(); render();
+  try{ updateStorageLabel(); }catch(e){}
+  const savedMB=((before-after)/1024).toFixed(1);
+  showToast('Siap! Buang ' + delPdf + ' PDF invoice + ' + delPayPdf + ' PDF resit, jimat ~' + savedMB + 'MB. Gambar kekal, Auto PDF OFF.');
+}
+document.getElementById('deleteAutoPdfBtn').onclick=()=>deleteAutoPdfs();
 document.getElementById('settingCatBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); renderCatManager(); document.getElementById('catModal').classList.add('open'); };
 document.getElementById('renameSupplierBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); openRenameSupplier(); document.getElementById('renameSupplierModal').classList.add('open'); };
 document.getElementById('renameClose').onclick=document.getElementById('renameBack').onclick=document.getElementById('renameDone').onclick=()=>document.getElementById('renameSupplierModal').classList.remove('open');
