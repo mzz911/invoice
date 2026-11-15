@@ -162,7 +162,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 .add-actions{background:#F1F2F6 !important}
 #addModal.add-v2 #bankPayDateWrap label{color:#6B7280 !important;font-size:14px !important;letter-spacing:0 !important;text-transform:none !important}
 #addModal.add-v2 #bankPayDateWrap input{font-size:15px !important;text-align:right !important}
-/* HIGHLIGHT kad yang baru simpan / edit */
+/* PIN - invoice baru simpan duduk paling atas, tak payah scroll */
 @keyframes flashSaved{0%{box-shadow:0 0 0 3px #5B21B6}100%{box-shadow:0 0 0 0 transparent}}
 .flash-saved{animation:flashSaved 1.2s ease 2;border-color:#5B21B6 !important;background:#F5F3FF !important}
 
@@ -372,20 +372,9 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2200); }
 function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ const cur=sel.value; sel.innerHTML=allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur&&allCats().includes(cur))sel.value=cur; } const f=document.getElementById('fltCat'); if(f){ const cur=f.value; f.innerHTML='<option value="">Semua kategori</option>'+allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur)f.value=cur; } }
 function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='batal'){ return []; } return list; }
+let _pinSavedId=''; let _pinSavedPv=''; let _pinJustSet=false;
 function gotoTab(name){ tab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name)); selected.clear(); render(); }
 function updateBackupReminder(){ try{ const el=document.getElementById('backupReminder'); if(!el) return; let last=''; try{ last=localStorage.getItem('ik_lastExport')||''; }catch(e){} const lastDay=last ? new Date(last).toISOString().slice(0,10) : ''; const td=today(); if(lastDay===td){ el.style.display='none'; } else { el.style.display='block'; el.textContent='⚠️ Belum backup hari ni ('+invoices.length+' invoice dalam phone) - tekan sini untuk Export'; } }catch(e){} }
-function scrollToSaved(savedId, savedPv){
-  if(!savedId && !savedPv) return;
-  setTimeout(()=>{
-    let el=null;
-    if(savedId) el=document.querySelector('[data-ids*="'+savedId+'"]')||document.querySelector('[data-inv-id="'+savedId+'"]');
-    if(!el && savedPv) el=document.querySelector('[data-pv="'+savedPv+'"]');
-    if(!el) return;
-    try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){ el.scrollIntoView(); }
-    el.classList.add('flash-saved');
-    setTimeout(()=>el.classList.remove('flash-saved'), 2600);
-  }, 180);
-}
 function render(){
   updateBackupReminder();
   rebuildCatList();
@@ -409,6 +398,7 @@ function render(){
     list.forEach(x=>{ const k=x.pv ? x.pv+'|'+(x.payDate||'') : 'single|'+x.id; if(!_groups[k]) _groups[k]={pv:x.pv,payDate:x.payDate,payMethod:x.payMethod,items:[]}; _groups[k].items.push(x); });
     Object.values(_groups).forEach(g=>g.items.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.inv||'').localeCompare(b.inv||'')));
     const _glist=Object.values(_groups).sort((a,b)=>(b.payDate||'').localeCompare(a.payDate||'')||(b.pv||'').localeCompare(a.pv||''));
+    if(_pinSavedId && !query){ const _pi=_glist.findIndex(g=>(g.items||[]).some(x=>x.id===_pinSavedId)); if(_pi>0){ const _pg=_glist.splice(_pi,1)[0]; _glist.unshift(_pg); } }
     if(!_glist.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada invoice Dah Bayar</p>';
     let _paidLastDay=''; _glist.forEach(g=>{
       if(g.payDate!==_paidLastDay){ _paidLastDay=g.payDate; const _dayGroups=_glist.filter(x=>x.payDate===g.payDate); const _dayTotal=_dayGroups.reduce((s,gg)=>s+gg.items.reduce((s2,x)=>s2+signedPrice(x),0),0); const _dayAll=_dayGroups.flatMap(gg=>gg.items); const _dayCount=_dayAll.length; const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(g.payDate)+' • '+_dayGroups.length+' PV • '+pvCountLabel(_dayAll)+' • '+fmt(_dayTotal); box.appendChild(_hd); }
@@ -429,7 +419,7 @@ function render(){
         delBtn=document.createElement('button'); delBtn.type='button'; delBtn.className='swipeDel'; delBtn.style.width='100px'; delBtn.style.background='#dc2626'; delBtn.style.fontSize='13px'; delBtn.textContent='Batal Bayar';
         wrap.appendChild(delBtn);
       }
-      const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.pv=g.pv||''; inner.dataset.ids=(g.items||[]).map(x=>x.id).join(',');
+      const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.pv=g.pv||''; inner.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) inner.classList.add('flash-saved');
       wrap.appendChild(inner);
       const d=inner;
       if(g.pv){
@@ -484,6 +474,7 @@ function render(){
       cc.addEventListener('mouseup', e=>{ if(!mDown) return; mDown=false; if(Math.abs(e.clientX-mx)>10) suppressClick=true; setTimeout(()=>suppressClick=false,80); cc.style.transition='transform .2s ease'; const cur=parseFloat((cc.style.transform||'').replace(/[^0-9\-\.]/g,''))||0; if(cur<-(g.pv?100:50)){ cc.style.transform='translateX(-'+_swW+'px)'; opened=true; cc.dataset.open='1'; closeOthers(); cc.style.transform='translateX(-'+_swW+'px)'; } else { closeSwipe(); } });
       box.appendChild(wrap);
     });
+    if(_pinJustSet){ _pinJustSet=false; setTimeout(()=>{ try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){} }, 80); }
     return;
   }
   // Semua: Group Dah Bayar ikut PV, sort group by tarikh payment (terbaru dulu). Belum Bayar sort by tarikh invoice (terbaru dulu). Semua campur ikut tarikh - terbaru dulu.
@@ -501,6 +492,7 @@ function render(){
     _paidSingles.forEach(x=>_cards.push({type:'single',item:x,sortKey:x.payDate||x.date||''}));
     _unpaidSorted.forEach(x=>_cards.push({type:'single',item:x,sortKey:x.date||''}));
     _cards.sort((a,b)=>(b.sortKey||'').localeCompare(a.sortKey||''));
+  if(_pinSavedId && !query){ const _pi2=_cards.findIndex(c=> c.type==='group' ? (c.group.items||[]).some(x=>x.id===_pinSavedId) : c.item.id===_pinSavedId); if(_pi2>0){ const _pc=_cards.splice(_pi2,1)[0]; _cards.unshift(_pc); } }
   }
   if(!_cards.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada invoice</p>';
   let _lastDay=''; _cards.forEach(_card=>{
@@ -515,7 +507,7 @@ function render(){
       const _remAll=document.createElement('button'); _remAll.type='button'; _remAll.style.cssText='flex:1;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _remAll.textContent='Remove All';
       const _delAll=document.createElement('button'); _delAll.type='button'; _delAll.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _delAll.textContent='Cancel PV';
       _actsAll.appendChild(_remAll); _actsAll.appendChild(_delAll); _wrapAll.appendChild(_actsAll);
-      const d=document.createElement('div'); d.className='card swipeInner'; d.dataset.pv=g.pv||''; d.dataset.ids=(g.items||[]).map(x=>x.id).join(',');
+      const d=document.createElement('div'); d.className='card swipeInner'; d.dataset.pv=g.pv||''; d.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) d.classList.add('flash-saved');
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
       d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?`<img src="${_firstImg2}">`:'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
@@ -545,7 +537,7 @@ function render(){
     const c=document.createElement('div'); c.className='swipeWrap';
     const _isPaidSingle = !!(x.paid && !x.pv);
     const del=document.createElement('button'); del.type='button'; del.className='swipeDel'; del.textContent=_isPaidSingle?'Batal Bayar':'Delete'; if(_isPaidSingle){ del.style.width='100px'; del.style.background='#dc2626'; del.style.fontSize='13px'; }
-    const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.invId=x.id; inner.dataset.pv=x.pv||'';
+    const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.invId=x.id; inner.dataset.pv=x.pv||''; if(_pinSavedId && x.id===_pinSavedId) inner.classList.add('flash-saved');
     c.appendChild(del); c.appendChild(inner);
     const cc=inner;
     const splitTxt = x.payMethod==='Split Payment' && x.split ? 'Split: '+Object.entries(x.split).filter(([k,v])=>v>0).map(([k,v])=>`${k.replace('Bank Transfer','Bank').replace('QR / E-Wallet','QR')} ${Number(v)}`).join(' • ') : '';
@@ -575,7 +567,7 @@ function render(){
     box.appendChild(c);
   });
   // bulk bar
-  let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-green" id="bulkPay">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove();
+  let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-green" id="bulkPay">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove(); if(_pinJustSet){ _pinJustSet=false; setTimeout(()=>{ try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){} }, 80); }
 }
 // ===== AUTO PDF + MULTI-PAGE (dari code ni) - gambar (Camera/Gallery) -> PDF, 1 invoice = banyak pages, NATIVE iPhone kekal =====
 let _lastAutoPdfFor='';
@@ -1046,7 +1038,7 @@ function updateClearSearch(){ const inp=document.getElementById('q'); const btn=
 const _qEl=document.getElementById('q'); const _liveSearch=e=>{ query=e.target.value; render(); const _sug=document.getElementById('searchSuggest'); if(_sug) _sug.style.display='none'; updateClearSearch(); }; _qEl.oninput=_liveSearch; _qEl.addEventListener('keyup', _liveSearch); _qEl.addEventListener('compositionend', _liveSearch);
 document.getElementById('clearSearch').onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); const inp=document.getElementById('q'); inp.value=''; query=''; const box=document.getElementById('searchSuggest'); if(box) box.style.display='none'; updateClearSearch(); render(); inp.blur(); };
 document.addEventListener('click',e=>{ const box=document.getElementById('searchSuggest'); if(box && !e.target.closest('#searchSuggest') && e.target.id!=='q') box.style.display='none'; });
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{ const _ss=document.getElementById('searchSuggest'); if(_ss) _ss.style.display='none'; tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); selected.clear(); render(); });
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{ const _ss=document.getElementById('searchSuggest'); if(_ss) _ss.style.display='none'; _pinSavedId=''; _pinSavedPv=''; _pinJustSet=false; tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); selected.clear(); render(); });
 document.getElementById('filterBtn').onclick=()=>document.getElementById('filterModal').classList.add('open');
 document.getElementById('filterClose').onclick=document.getElementById('filterBack').onclick=()=>document.getElementById('filterModal').classList.remove('open');
 document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getElementById('fltCat').value; filters.status=document.getElementById('fltStatus').value; filters.pay=document.getElementById('fltPay').value; document.getElementById('filterModal').classList.remove('open'); render(); };
@@ -1105,7 +1097,7 @@ document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementByI
   } else { const _newId=Date.now().toString();
   let _pdfField=pendingPdf||'';
   if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-  if(isCash||isBank){ const _pv=nextPV(payDateToUse); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; const _savedId=editId||(typeof _newId!=='undefined'?_newId:'')||''; let _savedPv=''; try{ const _sx=invoices.find(y=>y.id===_savedId); _savedPv=_sx?(_sx.pv||''):''; }catch(e){} if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar ('+becamePaidMethod+')'); } else { const _isPaidNow=(()=>{ try{ const _sx=invoices.find(y=>y.id===_savedId); return !!(_sx&&_sx.paid); }catch(e){ return false; } })(); if(_isPaidNow && tab==='unpaid'){ gotoTab('paid'); } else if(!_isPaidNow && tab==='paid'){ gotoTab('unpaid'); } else { render(); } showToast('Invoice disimpan'); } scrollToSaved(_savedId, _savedPv); setTimeout(()=>{ try{ if(_savedId) openDetail(_savedId); }catch(e){} }, 350); };
+  if(isCash||isBank){ const _pv=nextPV(payDateToUse); invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; } else { invoices.unshift({id:_newId,name,inv,price,date,cat,note,img:(pendingPages[0]||pendingImg),pdf:_pdfField, pages:pendingPages.slice(),hasPdf:!!_pdfField,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:''}); } } save(); document.getElementById('addModal').classList.remove('open'); const _sb2=document.getElementById('supSuggest'); if(_sb2) _sb2.style.display='none'; const _sh2=document.getElementById('supHint'); if(_sh2) _sh2.style.display='none'; const _savedId2=editId||(typeof _newId!=='undefined'?_newId:'')||''; let _savedPv2=''; try{ const _sx2=invoices.find(y=>y.id===_savedId2); _savedPv2=_sx2?(_sx2.pv||''):''; }catch(e){} _pinSavedId=_savedId2; _pinSavedPv=_savedPv2; _pinJustSet=true; if(becamePaid){ gotoTab('paid'); showToast('Invoice disimpan - Dah Bayar ('+becamePaidMethod+')'); } else { const _isPaidNow2=(()=>{ try{ const _sx=invoices.find(y=>y.id===_savedId2); return !!(_sx&&_sx.paid); }catch(e){ return false; } })(); if(_isPaidNow2 && tab==='unpaid'){ gotoTab('paid'); } else if(!_isPaidNow2 && tab==='paid'){ gotoTab('unpaid'); } else { render(); } showToast('Invoice disimpan'); } };
 document.getElementById('thumbBox').onclick=()=>{ imgTarget='invoice'; _pendingPageAction = pendingPages.length ? {mode:'replace', idx:0} : {mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE iPhone - terus Photo Library / Take Photo / Choose File, bukan modal Camera/Gallery */
 document.getElementById('addPageBtn').onclick=()=>{ imgTarget='invoice'; _pendingPageAction={mode:'add'}; document.getElementById('fImg').click(); }; /* NATIVE jugak untuk Tambah Page */
 document.getElementById('srcCancel').onclick=document.getElementById('srcBack').onclick=()=>document.getElementById('imgSourceModal').classList.remove('open');
