@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -700,8 +700,8 @@ async function renderPdfPages(pdfSrc){
     for(let pn=1; pn<=pdf.numPages; pn++){
       if(myToken!==_pdfRenderToken) return;
       const page=await pdf.getPage(pn);
-      // Scale 1.4 je (dulu 2.2) - A4 1.4 dah cukup baca, canvas tak makan RAM sampai Safari hang.
-      const vp=page.getViewport({scale:1.4});
+      // Scale ikut banyak page: 1-3 muka = 1.4, 4-6 muka = 1.2, >6 muka = 1.0 - kalau banyak page pakai 1.4 semua, RAM Safari penuh & hang.
+      const _sc=pdf.numPages>6?1.0:(pdf.numPages>3?1.2:1.4); const vp=page.getViewport({scale:_sc});
       const cv=document.createElement('canvas');
       cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
       cv.style.cssText='width:100%;height:auto;display:block;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);margin-bottom:10px';
@@ -712,6 +712,7 @@ async function renderPdfPages(pdfSrc){
       const lab=document.createElement('div'); lab.textContent='Muka '+pn+' / '+pdf.numPages;
       lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px';
       wrap.appendChild(lab); box.appendChild(wrap);
+      await new Promise(r=>setTimeout(r,0));
     }
   }catch(e){
     if(myToken!==_pdfRenderToken) return;
@@ -748,7 +749,14 @@ function updateGalleryBar(){
     _viewGallery.forEach((it, idx)=>{
       const b=document.createElement('div'); b.style.cssText='width:44px;height:44px;flex-shrink:0;border-radius:8px;overflow:hidden;cursor:pointer;border:'+(idx===_viewGalleryIdx?'3px solid #16a34a':'1px solid #ddd')+';background:#f8fafc;display:flex;align-items:center;justify-content:center';
       const _src=it.img||'';
-      b.innerHTML=_src?(String(supaFixExpiredUrl(_src)).startsWith('SUPA:')?`<img data-supa="${supaFixExpiredUrl(_src)}" src="" style="width:100%;height:100%;object-fit:cover">`:`<img src="${supaFixExpiredUrl(_src)}" style="width:100%;height:100%;object-fit:cover">`):'<span style="font-size:18px">📄</span>';
+      if(_src && String(supaFixExpiredUrl(_src)).startsWith('SUPA:')){
+        const _supa=supaFixExpiredUrl(_src);
+        const _im=document.createElement('img'); _im.style.cssText='width:100%;height:100%;object-fit:cover';
+        _im.src=''; b.appendChild(_im);
+        (async()=>{ try{ const u=await supaResolveOne(_supa); if(u && !String(u).startsWith('SUPA:')) _im.src=u; }catch(e){} })();
+      } else {
+        b.innerHTML=_src?`<img src="${supaFixExpiredUrl(_src)}" style="width:100%;height:100%;object-fit:cover">`:'<span style="font-size:18px">📄</span>';
+      }
       b.title=it.inv||'';
       b.onclick=(e)=>{ e.stopPropagation(); showGalleryItem(idx); };
       const lbl=document.createElement('div'); lbl.style.cssText='font-size:9px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44px';
@@ -775,6 +783,8 @@ function openPVGroupGallery(items, pvLabel){
   showGalleryItem(0);
 }
 async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=ctx; try{ const _vm=document.getElementById('imgViewModal'); if(_vm) _vm.style.zIndex='100'; }catch(e){}
+  // Buka modal terus + tunjuk Loading - jangan tunggu resolve SUPA / fetch siap baru buka, nanti user ingat tekan tak jadi.
+  try{ document.getElementById('imgViewTitle').textContent=title||'Gambar'; document.getElementById('imgViewMeta').textContent=meta||''; const _b=document.getElementById('imgViewPdfPages'); if(_b && pdfSrc) _b.innerHTML='<p style="padding:20px;color:#666">Loading PDF...</p>'; document.getElementById('imgViewModal').classList.add('open'); }catch(e){}
   // Gallery: kalau ada gallery, simpan + tunjuk bar. Kalau single, sembunyi bar
   if(gallery && gallery.items && gallery.items.length>1){ _viewGallery=gallery.items; _viewGalleryIdx=gallery.idx||0; _viewGalleryPV=gallery.pv||''; }
   else if(!gallery){ _viewGallery=null; _viewGalleryIdx=0; _viewGalleryPV=''; const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }
@@ -842,8 +852,20 @@ ${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar${(x.paymen
 <button class="btn btn-dark" id="dlPdfOne" style="width:100%;margin-top:8px">⬇️ Download PDF - Invoice + Resit Payment</button>
 ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;margin-top:8px">Bayar Invoice Ni</button>`: `<p style="font-size:12px;color:#666;text-align:center;margin-top:10px">Untuk batal PV, swipe kiri kad PV kat tab Dah Bayar</p>`}
 `;
- const di=b.querySelector('#dInvImg'); if(di) di.onclick=()=>openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id}); const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
- const dp=b.querySelector('#dPayImg'); if(dp) dp.onclick=()=>openImgViewOnlyImg(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
+ const di=b.querySelector('#dInvImg'); if(di) di.onclick=()=>{
+   // FIX BANYAK PAGE TAK BOLEH BUKA: dulu hantar x.img (muka 1) je ke viewer, muka 2/3 takde jalan nak tengok.
+   // Sekarang kalau pages>1, hantar SEMUA pages jadi gallery - boleh Prev/Next / swipe.
+   if(x.pages && x.pages.length>1){
+     const _items=x.pages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
+     openImgView(x.pages[0],'Gambar Invoice - '+x.name,x.inv+' • '+x.date+' • '+x.pages.length+' pages',{kind:'invoice',id:x.id},{items:_items, idx:0});
+   } else openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id});
+ }; const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
+ const dp=b.querySelector('#dPayImg'); if(dp) dp.onclick=()=>{
+   if(x.paymentPages && x.paymentPages.length>1){
+     const _items=x.paymentPages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
+     openImgView(x.paymentPages[0],'Resit Payment - '+x.name,x.pv||' • '+x.paymentPages.length+' pages',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate},{items:_items, idx:0});
+   } else openImgViewOnlyImg(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
+ };
  const vp=b.querySelector('#viewPayBtn'); if(vp) vp.onclick=()=>openImgView(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',x.paymentPdf||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate}); const dppb=b.querySelector('#dPayPdfBtn'); if(dppb) dppb.onclick=()=>openImgViewOnlyPdf(x.paymentPdf,'PDF Resit - '+x.name,x.pv||'',x.paymentImg,{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
  const ap=b.querySelector('#addPayBtn'); if(ap) ap.onclick=()=>{ imgTarget='pay'; document.getElementById('fImg').click(); }; // NATIVE
  const cp=b.querySelector('#changePayBtn'); if(cp) cp.onclick=()=>{ if(x.paid && x.pv) openEditPay(x.pv, x.payDate); else { imgTarget='pay'; document.getElementById('fImg').click(); } };
@@ -1089,7 +1111,13 @@ function openPVDetail(pv, payDate){
     + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
   b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openEditInvoice(el.dataset.pvInv); });
-  b.querySelectorAll('[data-resit]').forEach((el,i)=>el.onclick=()=>openImgView((resitPages.length?resitPages:resits)[i],'Resit Payment - '+pv,pv,'',{kind:'paymentPV',pv,payDate}));
+  b.querySelectorAll('[data-resit]').forEach((el,i)=>{ el.onclick=()=>{
+    const _arr=(resitPages.length?resitPages:resits);
+    if(_arr.length>1){
+      const _items=_arr.map(p=>({img:p, pdf:'', name:pv, inv:pv, date:payDate}));
+      openImgView(_arr[i],'Resit Payment - '+pv,pv+' • '+_arr.length+' pages',{kind:'paymentPV',pv,payDate},{items:_items, idx:i});
+    } else openImgView(_arr[i],'Resit Payment - '+pv,pv,'',{kind:'paymentPV',pv,payDate});
+  }; });
   const epPV=b.querySelector('#editPVPayBtn'); if(epPV) epPV.onclick=()=>{ openEditPay(pv, payDate); };
   const dp=b.querySelector('#dlPdfPV'); if(dp) dp.onclick=()=>downloadPdfPV(pv,payDate);
 
