@@ -170,7 +170,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1035,6 +1035,7 @@ function removePVAll(pv, payDate){
     return true;
   }catch(err){ alert('Remove All gagal: '+err.message); console.error(err); return false; }
 }
+async function openEditInvoice(id){ const x=invoices.find(y=>y.id===id); if(!x) return; editId=id; try{ document.getElementById('pvModal').classList.remove('open'); }catch(e){} try{ document.getElementById('detailModal').classList.remove('open'); }catch(e){} document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; try{ rebuildCatList(); }catch(e){} document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today(); document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; pendingPages=await resolvePagesArray(x.pages && x.pages.length ? x.pages.slice() : (x.img ? [x.img] : [])); _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open'); }
 function openPVDetail(pv, payDate){
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if(!items.length) return;
@@ -1046,7 +1047,7 @@ function openPVDetail(pv, payDate){
     + (resits.length?`<div><p style="font-weight:700">Resit Payment</p>`+resits.map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
     + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
-  b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ document.getElementById('pvModal').classList.remove('open'); openDetail(el.dataset.pvInv); });
+  b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openEditInvoice(el.dataset.pvInv); });
   b.querySelectorAll('[data-resit]').forEach((el,i)=>el.onclick=()=>openImgView(resits[i],'Resit Payment - '+pv,pv,'',{kind:'paymentPV',pv,payDate}));
   const epPV=b.querySelector('#editPVPayBtn'); if(epPV) epPV.onclick=()=>{ openEditPay(pv, payDate); };
   const dp=b.querySelector('#dlPdfPV'); if(dp) dp.onclick=()=>downloadPdfPV(pv,payDate);
