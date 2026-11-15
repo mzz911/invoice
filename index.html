@@ -648,33 +648,63 @@ function processFile(file,isScan,target){
   // Safety: kalau PDF sampai sini terus (bypass override), convert jugak
   if(/\.pdf$/i.test(file.name||'') || file.type==='application/pdf'){ showToast('Baca PDF...'); pdfToImageFile(file).then(f=>{ if(f) processFile(f,isScan,target); }); return; } const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const maxW=1200, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc); const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height); const out=cv.toDataURL('image/jpeg',0.72); if(target==='pay'){ pendingPayImg=out; deletePayResit=false; const pp=document.getElementById('payThumbPreview'), pi=document.getElementById('payThumbIcon'); pp.src=out; pp.style.display='block'; pi.style.display='none'; updatePayThumbDelete(true); document.getElementById('imgSourceModal').classList.remove('open'); showToast('Gambar dimasukkan'); } else { document.getElementById('imgSourceModal').classList.remove('open'); showCropEditor(out, target, isScan); } }; img.src=r.result; }; r.readAsDataURL(file);
 }
-async function renderPdfPages(pdfDataUrl){
+let _pdfRenderToken=0;
+async function renderPdfPages(pdfSrc){
   const box=document.getElementById('imgViewPdfPages'); if(!box) return;
+  const myToken=++_pdfRenderToken;
   box.innerHTML='<p style="padding:20px;color:#666">Loading PDF...</p>';
   try{
-    if(!window.pdfjsLib){ const ok=await ensurePdfJs(); if(!ok){
-      // Fallback native: Safari boleh render PDF dari blob URL
-      const bin=atob(pdfDataUrl.split(',')[1]||''); const bytes=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-      const blob=new Blob([bytes],{type:'application/pdf'}); const url=URL.createObjectURL(blob);
-      box.innerHTML='';
-      const fr=document.createElement('iframe'); fr.src=url; fr.style.cssText='width:100%;height:65vh;border:0;background:#fff;border-radius:8px';
-      box.appendChild(fr);
-      const note=document.createElement('p'); note.style.cssText='font-size:12px;color:#666;text-align:center'; note.textContent='PDF dibuka dengan viewer Safari — scroll / pinch zoom macam biasa';
-      box.appendChild(note); return;
-    } }
-    // dataURL -> ArrayBuffer
-    const base64=pdfDataUrl.split(',')[1]||'';
-    const bin=atob(base64); const len=bin.length; const bytes=new Uint8Array(len);
-    for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i);
+    let src=pdfSrc||'';
+    // PUNCA HANG LAMA: src kat sini selalu "SUPA:..." - code lama terus buat atob(split(",")[1])
+    // padahal SUPA: takde koma, base64 jadi kosong, pdf.js sangkut kat Loading selamanya.
+    // Fix: resolve SUPA: dulu jadi signed URL https, baru fetch.
+    if(src && String(src).startsWith('SUPA:')){ try{ src=await supaResolveForView(src); }catch(e){} }
+    if(!src || String(src).startsWith('SUPA:')){ box.innerHTML='<p style="padding:20px;color:#c00">PDF tak dapat buka: link PDF dah tamat / tak jumpa. Tutup & buka balik Detail.</p>'; return; }
+    if(myToken!==_pdfRenderToken) return;
+    // Ambil bytes via fetch - jauh lebih laju & tak hang macam atob() untuk PDF besar kat Safari.
+    // fetch() jalan untuk https signed URL DAN data: URL.
+    let bytes=null;
+    try{
+      const resp=await fetch(src);
+      if(!resp.ok) throw new Error('fetch gagal '+resp.status);
+      const buf=await resp.arrayBuffer();
+      bytes=new Uint8Array(buf);
+    }catch(fe){
+      // Fallback lama untuk data: URL kalau fetch tak jalan
+      try{
+        const base64=String(src).split(',')[1]||'';
+        if(!base64) throw fe;
+        const bin=atob(base64); bytes=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+      }catch(e2){ throw fe; }
+    }
+    if(myToken!==_pdfRenderToken) return;
+    if(!window.pdfjsLib){
+      const ok=await ensurePdfJs();
+      if(!ok){
+        // Fallback native Safari - JANGAN convert blob via atob, guna URL terus kalau https.
+        box.innerHTML='';
+        const fr=document.createElement('iframe');
+        if(String(src).startsWith('http')){ fr.src=src; }
+        else { const blob=new Blob([bytes],{type:'application/pdf'}); fr.src=URL.createObjectURL(blob); }
+        fr.style.cssText='width:100%;height:65vh;border:0;background:#fff;border-radius:8px';
+        box.appendChild(fr);
+        const note=document.createElement('p'); note.style.cssText='font-size:12px;color:#666;text-align:center'; note.textContent='PDF dibuka dengan viewer Safari — scroll / pinch zoom macam biasa';
+        box.appendChild(note); return;
+      }
+    }
+    if(myToken!==_pdfRenderToken) return;
     const pdf=await window.pdfjsLib.getDocument({data: bytes}).promise;
+    if(myToken!==_pdfRenderToken) return;
     box.innerHTML='';
     for(let pn=1; pn<=pdf.numPages; pn++){
+      if(myToken!==_pdfRenderToken) return;
       const page=await pdf.getPage(pn);
-      // Scale 2.2 - tajam macam Smart Receipt, tapi tak berat sangat
-      const vp=page.getViewport({scale:2.2});
+      // Scale 1.4 je (dulu 2.2) - A4 1.4 dah cukup baca, canvas tak makan RAM sampai Safari hang.
+      const vp=page.getViewport({scale:1.4});
       const cv=document.createElement('canvas');
       cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
-      cv.style.cssText='width:100%;height:auto;display:block;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15)';
+      cv.style.cssText='width:100%;height:auto;display:block;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15);margin-bottom:10px';
       const ctx=cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
       await page.render({canvasContext:ctx, viewport:vp}).promise;
       const wrap=document.createElement('div'); wrap.style.cssText='position:relative';
@@ -683,7 +713,10 @@ async function renderPdfPages(pdfDataUrl){
       lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px';
       wrap.appendChild(lab); box.appendChild(wrap);
     }
-  }catch(e){ box.innerHTML='<p style="padding:20px;color:#c00">PDF tak dapat buka: '+(e.message||e)+'</p>'; }
+  }catch(e){
+    if(myToken!==_pdfRenderToken) return;
+    box.innerHTML='<p style="padding:20px;color:#c00">PDF tak dapat buka: '+(e.message||e)+'<br><br>Cuba tekan butang Buka dalam Safari kat atas, atau tutup & buka balik.</p>';
+  }
 }
 let _viewImgSrc='', _viewPdfSrc='', _viewCtx=null;
 function showViewTab(which){
@@ -695,6 +728,7 @@ function showViewTab(which){
     if(bar) bar.style.display='flex';
     if(_viewPdfSrc) renderPdfPages(_viewPdfSrc);
   } else {
+    try{ _pdfRenderToken++; }catch(e){}
     if(imgEl){ imgEl.style.display='block'; if(_viewImgSrc) imgEl.src=_viewImgSrc; }
     if(pdfEl) pdfEl.style.display='none';
     if(bar) bar.style.display='none';
@@ -746,7 +780,9 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
   else if(!gallery){ _viewGallery=null; _viewGalleryIdx=0; _viewGalleryPV=''; const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }
   // Kalau PDF simpan kat IndexedDB (marker IDB:), load dulu
   let pdf = pdfSrc || (src && String(src).startsWith('data:application/pdf') ? src : '');
-  if(pdf && String(pdf).startsWith('SUPA:')){ supaResolveForView(pdf).then(u=>{ _viewPdfSrc=u; }); }
+  // FIX HANG: dulu resolve SUPA: pakai .then() tanpa await, lepas tu _viewPdfSrc terus kena timpa balik
+  // jadi SUPA:... dan renderPdfPages dipanggil dengan SUPA:... -> sangkut kat Loading. Sekarang await dulu.
+  if(pdf && String(pdf).startsWith('SUPA:')){ try{ pdf=await supaResolveForView(pdf); }catch(e){} }
   if(pdf && String(pdf).startsWith('IDB:')){ 
     const _box=document.getElementById('imgViewPdfPages'); 
     document.getElementById('imgViewTitle').textContent=title||'Gambar';
@@ -759,8 +795,8 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
     // Teruskan ke flow biasa dengan pdf sebenar
     openImgView(src,title,meta,pdf,ctx,gallery); return;
   }
-  let _srcFixed = src; try{ if(src && typeof src==='string') _srcFixed=supaFixExpiredUrl(src); }catch(e){} const imgSrc = (_srcFixed && !String(_srcFixed).startsWith('data:application/pdf')) ? _srcFixed : '';
-  if(imgSrc && String(imgSrc).startsWith('SUPA:')){ supaResolveForView(imgSrc).then(u=>{ _viewImgSrc=u; const _el2=document.getElementById('imgViewImg'); if(_el2) _el2.src=u; }); }
+  let _srcFixed = src; try{ if(src && typeof src==='string') _srcFixed=supaFixExpiredUrl(src); }catch(e){} let imgSrc = (_srcFixed && !String(_srcFixed).startsWith('data:application/pdf')) ? _srcFixed : '';
+  if(imgSrc && String(imgSrc).startsWith('SUPA:')){ try{ imgSrc=await supaResolveForView(imgSrc); }catch(e){} }
   // Kalau gambar dalam IDB (IDBIMG:), load dulu dari cache / IDB
   if(imgSrc && String(imgSrc).startsWith('IDBIMG:')){
     const _k=String(imgSrc).slice(7);
@@ -783,7 +819,7 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
   // Takde toggle: kalau ada PDF tunjuk PDF, kalau takde tunjuk gambar je
   if(pdf){
     const ob=document.getElementById('imgViewPdfOpen');
-    if(ob) ob.onclick=()=>{ const b=new Blob([new Uint8Array(atob(pdf.split(',')[1]).split('').map(c=>c.charCodeAt(0)))],{type:'application/pdf'}); const u=URL.createObjectURL(b); window.open(u,'_blank'); setTimeout(()=>URL.revokeObjectURL(u), 60000); };
+    if(ob) ob.onclick=async()=>{ try{ let u=pdf; if(u && String(u).startsWith('SUPA:')){ try{ u=await supaResolveForView(u); }catch(e){} } if(u && String(u).startsWith('http')){ window.open(u,'_blank'); return; } if(u && String(u).startsWith('data:')){ const resp=await fetch(u); const blob=await resp.blob(); const bu=URL.createObjectURL(blob); window.open(bu,'_blank'); setTimeout(()=>URL.revokeObjectURL(bu), 60000); return; } showToast('PDF tak dapat buka'); }catch(e){ showToast('PDF tak dapat buka'); } };
     // Kalau ada dua-dua, default tunjuk PDF (macam Smart Receipt). Kalau tekan gambar kat Detail, Detail akan pass pdf='' jadi tunjuk gambar je.
     showViewTab('pdf');
   } else {
@@ -1348,7 +1384,7 @@ processFile = function(file,isScan,target){
   }
   _origProcess(file,isScan,target);
 };
-document.getElementById('imgViewClose').onclick=document.getElementById('imgViewBack').onclick=()=>{ _viewGallery=null; _viewGalleryIdx=0; _viewGalleryPV=''; document.getElementById('imgViewModal').classList.remove('open'); };
+document.getElementById('imgViewClose').onclick=document.getElementById('imgViewBack').onclick=()=>{ try{ _pdfRenderToken++; }catch(e){} _viewGallery=null; _viewGalleryIdx=0; _viewGalleryPV=''; document.getElementById('imgViewModal').classList.remove('open'); };
 // Swipe kiri/kanan dalam viewer untuk tukar invoice dalam PV (kalau gallery)
 (function(){ const _el=document.getElementById('imgViewImg'); if(!_el) return; let _sx=0, _sy=0; _el.addEventListener('touchstart', e=>{ const _t=e.touches[0]; _sx=_t.clientX; _sy=_t.clientY; }, {passive:true}); _el.addEventListener('touchend', e=>{ if(!_viewGallery || _viewGallery.length<=1) return; const _t=e.changedTouches[0]; const _dx=_t.clientX-_sx, _dy=_t.clientY-_sy; if(Math.abs(_dx)<50 || Math.abs(_dy)>Math.abs(_dx)) return; if(_dx<0) showGalleryItem(_viewGalleryIdx+1); else showGalleryItem(_viewGalleryIdx-1); }, {passive:true}); })();
 // ===== Viewer macam video: Upload / Edit / Share / Delete =====
