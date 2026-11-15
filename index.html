@@ -170,7 +170,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -236,7 +236,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:8px;text-align:center">⚠️ JANGAN tekan Clear History dalam Safari. Nanti semua invoice hilang.</div>
 <div id="lastExportLabel" style="font-size:12px;color:#666;text-align:center;margin-top:-6px">Belum pernah Export DB</div>
 <div id="storageLabel" style="font-size:12px;color:#666;text-align:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px">Storage: kira...</div>
-<button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button><button class="btn btn-light" id="shrinkBtn" style="padding:16px;text-align:left">🗜️ Kecilkan Gambar + PDF Lama - Jimat Space</button><div style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Kecilkan = gambar ke 900px, quality 0.6 + PDF auto buat balik dari gambar kecik tu. PDF asal yang banyak page (lebih 1 page) tak usik, selamat. Buat Export DB dulu sebelum tekan.</div><button class="btn btn-light" id="deleteAutoPdfBtn" style="padding:16px;text-align:left">🗑️ Buang PDF Auto - Simpan Gambar Je (Jimat Separuh Lagi)</button><div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Buang PDF auto je, gambar kekal boleh baca. PDF asal yang banyak muka (lebih 1 page) TAK buang, selamat. Auto PDF untuk invoice baru pun akan OFF, supaya tak besar balik. Buat Export DB dulu sebelum tekan.</div>
+<button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button><button class="btn btn-light" id="shrinkBtn" style="padding:16px;text-align:left">🗜️ Kecilkan Gambar + PDF Lama - Jimat Space</button><div style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Kecilkan = gambar ke 900px, quality 0.6 + PDF auto buat balik dari gambar kecik tu. PDF asal yang banyak page (lebih 1 page) tak usik, selamat. Buat Export DB dulu sebelum tekan.</div><button class="btn btn-light" id="deleteAutoPdfBtn" style="padding:16px;text-align:left">🗑️ Buang PDF Auto - Simpan Gambar Je (Jimat Separuh Lagi)</button><div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Buang PDF auto je, gambar kekal boleh baca. PDF asal yang banyak muka (lebih 1 page) TAK buang, selamat. Auto PDF untuk invoice baru pun akan OFF, supaya tak besar balik. Buat Export DB dulu sebelum tekan.</div><button class="btn btn-light" id="checkStorageBtn" style="padding:16px;text-align:left">🔍 Check Apa Yang Besar - Pecahan Storage</button><div style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Tunjuk pecahan: gambar invoice berapa MB, gambar resit berapa MB, PDF invoice berapa MB, PDF resit berapa MB, PDF banyak muka berapa MB. Baru tau nak buang yang mana.</div>
 <button class="btn btn-light" id="archiveOldBtn" style="padding:16px;text-align:left">📦 Archive Lama - Export invoice &gt;1 tahun, lepas tu padam dari phone</button>
 <div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Archive = simpan invoice lama dalam file, lepas tu buang dari phone. File tu simpan dalam Files. Nak tengok balik, Import file tu.</div>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1202,6 +1202,44 @@ async function deleteAutoPdfs(){
   showToast('Siap! Buang ' + delPdf + ' PDF invoice + ' + delPayPdf + ' PDF resit, jimat ~' + savedMB + 'MB. Gambar kekal, Auto PDF OFF.');
 }
 document.getElementById('deleteAutoPdfBtn').onclick=()=>deleteAutoPdfs();
+async function checkStorageBreakdown(){
+  showToast('Check storage... tunggu sikit, kira 305 invoice');
+  const _sz=s=>Math.round((String(s||'').length*0.75)/1024);
+  let imgMB=0, imgCnt=0, payImgMB=0, payImgCnt=0, pdfMB=0, pdfCnt=0, payPdfMB=0, payPdfCnt=0, multiPdfMB=0, multiPdfCnt=0, multiPayPdfMB=0, multiPayPdfCnt=0, pagesMB=0, pagesCnt=0, payPagesMB=0, payPagesCnt=0, textKB=0;
+  for(const x of invoices){
+    // Text - nama, no invoice, jumlah, tarikh, nota
+    textKB += Math.round((JSON.stringify({n:x.name,inv:x.inv,amt:x.amount,date:x.date,nota:x.nota||'',cat:x.cat||''}).length)/1024*100)/100;
+    // Gambar invoice
+    if(x.img){ const r=await resolveImgData(x.img); if(r){ imgMB+=_sz(r); imgCnt++; } }
+    // Pages invoice (kalau banyak muka)
+    if(x.pages && x.pages.length){ for(const pg of x.pages){ const r=await resolveImgData(pg); if(r){ pagesMB+=_sz(r); pagesCnt++; } } }
+    // PDF invoice
+    if(x.pdf){ const r=await resolvePdfData(x.pdf); if(r){ const s=_sz(r); const isMulti=(x.pages && x.pages.length>1); if(isMulti){ multiPdfMB+=s; multiPdfCnt++; } else { pdfMB+=s; pdfCnt++; } } }
+    // Gambar resit
+    if(x.paymentImg){ const r=await resolveImgData(x.paymentImg); if(r){ payImgMB+=_sz(r); payImgCnt++; } }
+    // Payment pages
+    if(x.paymentPages && x.paymentPages.length){ for(const pg of x.paymentPages){ const r=await resolveImgData(pg); if(r){ payPagesMB+=_sz(r); payPagesCnt++; } } }
+    // PDF resit
+    if(x.paymentPdf){ const r=await resolvePdfData(x.paymentPdf); if(r){ const s=_sz(r); const isMulti=(x.paymentPages && x.paymentPages.length>1); if(isMulti){ multiPayPdfMB+=s; multiPayPdfCnt++; } else { payPdfMB+=s; payPdfCnt++; } } }
+  }
+  const totalKB = imgMB+pagesMB+pdfMB+multiPdfMB+payImgMB+payPagesMB+payPdfMB+multiPayPdfMB;
+  const totalMB = (totalKB/1024).toFixed(1);
+  const perInv = invoices.length ? Math.round(totalKB/invoices.length) : 0;
+  const msg = 'CHECK STORAGE - ' + invoices.length + ' invoice\n\n' +
+    'Gambar Invoice: ' + (imgMB/1024).toFixed(1) + 'MB (' + imgCnt + ' gambar)\n' +
+    'Pages Invoice (extra): ' + (pagesMB/1024).toFixed(1) + 'MB (' + pagesCnt + ' page)\n' +
+    'PDF Invoice (1 muka): ' + (pdfMB/1024).toFixed(1) + 'MB (' + pdfCnt + ' pdf)\n' +
+    'PDF Invoice BANYAK MUKA: ' + (multiPdfMB/1024).toFixed(1) + 'MB (' + multiPdfCnt + ' pdf)\n' +
+    'Gambar Resit: ' + (payImgMB/1024).toFixed(1) + 'MB (' + payImgCnt + ' gambar)\n' +
+    'Pages Resit (extra): ' + (payPagesMB/1024).toFixed(1) + 'MB (' + payPagesCnt + ' page)\n' +
+    'PDF Resit (1 muka): ' + (payPdfMB/1024).toFixed(1) + 'MB (' + payPdfCnt + ' pdf)\n' +
+    'PDF Resit BANYAK MUKA: ' + (multiPayPdfMB/1024).toFixed(1) + 'MB (' + multiPayPdfCnt + ' pdf)\n' +
+    'Text (nama, no, jumlah, nota): ~' + textKB.toFixed(0) + 'KB je\n\n' +
+    'TOTAL: ~' + totalMB + 'MB\n' +
+    'Purata: ~' + perInv + 'KB / invoice';
+  alert(msg);
+}
+document.getElementById('checkStorageBtn').onclick=()=>checkStorageBreakdown();
 document.getElementById('settingCatBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); renderCatManager(); document.getElementById('catModal').classList.add('open'); };
 document.getElementById('renameSupplierBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); openRenameSupplier(); document.getElementById('renameSupplierModal').classList.add('open'); };
 document.getElementById('renameClose').onclick=document.getElementById('renameBack').onclick=document.getElementById('renameDone').onclick=()=>document.getElementById('renameSupplierModal').classList.remove('open');
