@@ -236,6 +236,11 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <button class="btn btn-light" id="cleanOrphanBtn" style="padding:16px;text-align:left;margin-top:8px">🧹 Buang Sampah IDB — Padam Gambar Invoice Yang Dah Dipadam</button><div id="orphanLabel" style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Sampah IDB = key gambar/PDF yang tak dirujuk invoice hidup. Buang Sampah cuma check DB semasa sahaja. Kalau lepas buang Safari masih 400MB, beza tu BUKAN key sampah — tapi file DB Safari yang tak kecut / DB lama / cache origin. Tekan 🔍 Scan Penuh kat bawah untuk nampak mana pergi.</div>
 <button class="btn btn-light" id="scanFullBtn" style="padding:16px;text-align:left;margin-top:8px">🔍 Scan Penuh — Mana Beza 321MB Tu Pergi?</button><div id="scanFullLabel" style="font-size:12px;color:#333;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px;text-align:left;white-space:pre-wrap">Tekan Scan Penuh — dia akan senaraikan SEMUA database dalam origin ni (bukan DB invoice sahaja), semua localStorage, dan cache. Baru nampak 321MB tu kat mana.</div>
 <button class="btn btn-light" id="rebuildDbBtn" style="padding:16px;text-align:left;margin-top:8px">🔧 Rebuild DB — Kecikkan File Safari (404MB → ~83MB)</button><div id="rebuildLabel" style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Rebuild = Export backup dulu (auto download), lepas tu padam file DB lama yang dah kembung &amp; tulis balik dalam file baru yang compact. Invoice hidup kekal. JANGAN tutup tab masa rebuild jalan.</div>
+<button class="btn btn-light" id="deleteOldDbBtn" style="padding:16px;text-align:left;margin-top:8px">🗑️ Padam DB Lama — Bukan DB Invoice</button><div id="oldDbLabel" style="font-size:12px;color:#333;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px;text-align:left;white-space:pre-wrap">DB lama = database lain dalam origin mzz911.github.io ni, BUKAN invoiceKedaiDB.
+
+Contoh: kalau dulu pernah ada app lain / versi lama, DB dia masih simpan dalam phone &amp; kira dalam 404MB tu walaupun app tu dah tak guna.
+
+Tekan Scan Penuh dulu untuk nampak senarai DB, lepas tu tekan butang ni untuk padam yang lama sahaja. DB invoice hidup (invoiceKedaiDB) TAK akan dipadam.</div>
 <button class="btn btn-light" id="freeSpaceBtn" style="padding:16px;text-align:left" data-wired="1">🧹 Free Space - Pindah Gambar ke IndexedDB</button><button class="btn btn-light" id="shrinkBtn" style="padding:16px;text-align:left">🗜️ Kecilkan Gambar + PDF Lama - Jimat Space</button><div style="font-size:12px;color:#666;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">Kecilkan = gambar ke 900px, quality 0.6 + PDF auto buat balik dari gambar kecik tu. PDF asal yang banyak page (lebih 1 page) tak usik, selamat. Buat Export DB dulu sebelum tekan.</div>
 <button class="btn btn-light" id="archiveOldBtn" style="padding:16px;text-align:left">📦 Archive Lama - Export invoice &gt;1 tahun, lepas tu padam dari phone</button>
 <div style="font-size:12px;color:#666;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:8px;text-align:center">Archive = simpan invoice lama dalam file, lepas tu buang dari phone. File tu simpan dalam Files. Nak tengok balik, Import file tu.</div>
@@ -577,6 +582,64 @@ async function rebuildDb(){
     showToast('Rebuild siap — tutup Safari penuh & buka balik');
     try{ render(); updateStorageLabel(); updateRealSizeLabel(true); }catch(e){}
   }catch(e){ if(label) label.innerHTML='⚠️ Rebuild gagal: '+e.message+'<br>Backup tadi dah download — Import file backup tu untuk pulihkan.'; alert('Rebuild gagal: '+e.message+'\n\nBackup tadi dah download. Import file tu untuk pulihkan.'); }
+}
+
+// --- PADAM DB LAMA: padam database lain dalam origin ni, JANGAN sentuh invoiceKedaiDB ---
+async function _getDbStoreNames(dbName){
+  return new Promise((res)=>{
+    try{
+      const req=indexedDB.open(dbName);
+      req.onsuccess=()=>{ try{ const arr=[...req.result.objectStoreNames]; req.result.close(); res(arr); }catch(_){ res([]); } };
+      req.onerror=()=>res([]); req.onblocked=()=>res([]);
+    }catch(e){ res([]); }
+  });
+}
+async function deleteOldDbs(){
+  const label=document.getElementById('oldDbLabel');
+  try{
+    if(label) label.innerHTML='⏳ Senaraikan DB lama...';
+    let dbs=[];
+    try{ if(indexedDB.databases) dbs=await indexedDB.databases(); }catch(e){}
+    if(!dbs || !dbs.length){
+      if(label) label.innerHTML='⚠️ Safari tak dapat senaraikan database (indexedDB.databases tak support).\n\nCuba cara ni:\n1. Tekan Scan Penuh kat atas — kalau dia nampak DB lain, screenshot kat aku nama dia.\n2. Aku akan buatkan butang padam khas untuk nama DB tu.';
+      return;
+    }
+    const oldDbs=dbs.map(d=>d.name).filter(n=>n && n!=='invoiceKedaiDB');
+    if(!oldDbs.length){
+      if(label) label.innerHTML='✅ Takde DB lama. Cuma ada invoiceKedaiDB sahaja.\n\nMaknanya 321MB beza tu BUKAN dari DB lain — dia dari file invoiceKedaiDB sendiri yang dah kembung (fragmentasi). Kena tekan 🔧 Rebuild DB kat atas, bukan padam DB lama.';
+      showToast('Takde DB lama');
+      return;
+    }
+    // Kira saiz setiap DB lama
+    let lines=[]; let totalMB=0;
+    for(const name of oldDbs){
+      const stores=await _getDbStoreNames(name);
+      let b=0, k=0;
+      for(const st of stores){ const m=await _measureStoreSize(name, st); b+=m.bytes; k+=m.keys; }
+      const mb=b/1024/1024; totalMB+=mb;
+      lines.push('• '+name+' — '+stores.join(', ')+' — '+k+' key • '+mb.toFixed(1)+'MB');
+    }
+    const listTxt=lines.join('\n');
+    if(label) label.innerHTML='DB LAMA JUMPA:\n'+listTxt+'\nTotal lama: '+totalMB.toFixed(1)+'MB\n\nDB invoice hidup (invoiceKedaiDB) TAK termasuk dalam ni.';
+    // Confirm — sebut nama satu-satu supaya user tak tersalah padam app lain
+    const ok=confirm('Padam DB LAMA ni?\n\n'+listTxt+'\nTotal: '+totalMB.toFixed(1)+'MB\n\n✅ invoiceKedaiDB (DB invoice hidup) TAK akan dipadam.\n⚠️ Kalau DB lama tu dari app lain yang kau masih guna (bukan invoice), JANGAN padam — tekan Cancel.\n\nDah Export DB invoice dulu? Tekan OK untuk padam DB lama sahaja.');
+    if(!ok){ if(label) label.innerHTML='Dibatalkan. DB lama tak dipadam.\n\n'+listTxt; return; }
+    if(label) label.innerHTML='⏳ Padam DB lama... jangan tutup tab.';
+    let freed=0; let done=[];
+    for(const name of oldDbs){
+      await new Promise((res)=>{
+        try{
+          const del=indexedDB.deleteDatabase(name);
+          del.onsuccess=()=>{ done.push(name); res(); };
+          del.onerror=()=>res(); del.onblocked=()=>{ alert('Safari block padam '+name+' — ada tab lain buka page yang sama. Tutup tab lain tu, cuba lagi.'); res(); };
+          setTimeout(res, 5000);
+        }catch(e){ res(); }
+      });
+    }
+    if(label) label.innerHTML='✅ Siap! Padam DB lama: '+done.join(', ')+'\n\nLepas ni: tutup Safari penuh (swipe up) & buka balik, baru nombor Safari turun. Lepas buka balik, tekan Refresh Storage.';
+    showToast('DB lama dipadam');
+    try{ updateStorageLabel(); }catch(e){}
+  }catch(e){ if(label) label.innerHTML='⚠️ Gagal: '+e.message; }
 }
 // Padam media satu invoice (termasuk pages) — guna bila invoice dipadam, supaya tak jadi sampah
 function deleteInvoiceMedia(x){
@@ -1286,7 +1349,7 @@ document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById
 document.getElementById('copyCsv').onclick=async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('csvText').value); showToast('CSV dah copy'); }catch(e){ document.getElementById('csvText').select(); document.execCommand('copy'); showToast('CSV dah copy'); } };
 document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(filtered());
 document.getElementById('backupReminder').onclick=()=>{ try{ updateLastExportLabel(); updateStorageLabel(); }catch(e){} document.getElementById('settingModal').classList.add('open'); };
-document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); try{ updateStorageLabel(); updateSinceBackup(); startLiveStorage(); try{ const _rb=document.getElementById('refreshLiveBtn'); if(_rb && !_rb.dataset.wired){ _rb.dataset.wired='1'; _rb.onclick=()=>{ updateStorageLabel(); updateSinceBackup(); updateRealSizeLabel(true); showToast('Storage dikira semula'); }; } const _vb=document.getElementById('viewSinceBackupBtn'); if(_vb && !_vb.dataset.wired){ _vb.dataset.wired='1'; _vb.onclick=()=>{ const list=getSinceBackupList(); if(!list.length){ alert('Since Last Backup: 0 invoice. Semua dah backup.'); return; } const t=list.map((x,i)=>(i+1)+'. '+(x.name||'')+' - '+(x.inv||'')+' - '+fmt(x.price||0)).join('\n'); alert('Since Last Backup: '+list.length+' invoice\n\n'+t); }; } const _cb=document.getElementById('cleanOrphanBtn'); if(_cb && !_cb.dataset.wired){ _cb.dataset.wired='1'; _cb.onclick=()=>cleanOrphanIdb(); } const _sb=document.getElementById('scanFullBtn'); if(_sb && !_sb.dataset.wired){ _sb.dataset.wired='1'; _sb.onclick=()=>scanFullStorage(); } const _rb2=document.getElementById('rebuildDbBtn'); if(_rb2 && !_rb2.dataset.wired){ _rb2.dataset.wired='1'; _rb2.onclick=()=>rebuildDb(); } }catch(e){} const _fb=document.getElementById('freeSpaceBtn'); if(_fb && !_fb.dataset.wired){ _fb.dataset.wired='1'; _fb.onclick=()=>{ try{ offloadMedia(true); save(); updateStorageLabel(); showToast('Free Space siap - gambar dipindah ke IndexedDB, invoice text selamat'); }catch(e){ alert('Free Space gagal: '+e.message); } }; }
+document.getElementById('settingBtn').onclick=()=>{ updateLastExportLabel(); try{ updateStorageLabel(); updateSinceBackup(); startLiveStorage(); try{ const _rb=document.getElementById('refreshLiveBtn'); if(_rb && !_rb.dataset.wired){ _rb.dataset.wired='1'; _rb.onclick=()=>{ updateStorageLabel(); updateSinceBackup(); updateRealSizeLabel(true); showToast('Storage dikira semula'); }; } const _vb=document.getElementById('viewSinceBackupBtn'); if(_vb && !_vb.dataset.wired){ _vb.dataset.wired='1'; _vb.onclick=()=>{ const list=getSinceBackupList(); if(!list.length){ alert('Since Last Backup: 0 invoice. Semua dah backup.'); return; } const t=list.map((x,i)=>(i+1)+'. '+(x.name||'')+' - '+(x.inv||'')+' - '+fmt(x.price||0)).join('\n'); alert('Since Last Backup: '+list.length+' invoice\n\n'+t); }; } const _cb=document.getElementById('cleanOrphanBtn'); if(_cb && !_cb.dataset.wired){ _cb.dataset.wired='1'; _cb.onclick=()=>cleanOrphanIdb(); } const _sb=document.getElementById('scanFullBtn'); if(_sb && !_sb.dataset.wired){ _sb.dataset.wired='1'; _sb.onclick=()=>scanFullStorage(); } const _rb2=document.getElementById('rebuildDbBtn'); if(_rb2 && !_rb2.dataset.wired){ _rb2.dataset.wired='1'; _rb2.onclick=()=>rebuildDb(); } const _db=document.getElementById('deleteOldDbBtn'); if(_db && !_db.dataset.wired){ _db.dataset.wired='1'; _db.onclick=()=>deleteOldDbs(); } }catch(e){} const _fb=document.getElementById('freeSpaceBtn'); if(_fb && !_fb.dataset.wired){ _fb.dataset.wired='1'; _fb.onclick=()=>{ try{ offloadMedia(true); save(); updateStorageLabel(); showToast('Free Space siap - gambar dipindah ke IndexedDB, invoice text selamat'); }catch(e){ alert('Free Space gagal: '+e.message); } }; }
 const _ab=document.getElementById('archiveOldBtn'); if(_ab && !_ab.dataset.wired){ _ab.dataset.wired='1'; _ab.onclick=async()=>{ try{ const cutoff=new Date(); cutoff.setFullYear(cutoff.getFullYear()-1); const cutoffStr=cutoff.toISOString().slice(0,10); const old= invoices.filter(x=>x.date && x.date<cutoffStr); if(!old.length){ alert('Takde invoice lebih 1 tahun. Semua masih baru, tak perlu Archive.'); return; } const total=old.reduce((s,x)=>s+signedPrice(x),0); if(!confirm('Archive '+old.length+' invoice lama (sebelum '+cutoffStr+')?\nTotal: '+fmt(total)+'\n\n1. File Archive PENUH (dengan gambar) akan download dulu\n2. Lepas download, invoice tu akan dipadam dari phone\n3. Kalau nak tengok balik, Import file Archive tu.')) return; showToast('Sediakan Archive...'); const full=[]; for(const x of old){ const y={...x}; y.img=await resolveImgData(x.img||''); y.pdf=await resolvePdfData(x.pdf||''); y.paymentImg=await resolveImgData(x.paymentImg||''); y.paymentPdf=await resolvePdfData(x.paymentPdf||''); y.pages=await resolvePagesArray(x.pages||[]); y.paymentPages=await resolvePagesArray(x.paymentPages||[]); full.push(y); } const data={invoices:full,cancelledPVs,customCats,exportedAt:new Date().toISOString(),backupFull:true,archive:true,archiveCutoff:cutoffStr}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-ARCHIVE-sebelum-'+cutoffStr+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); const ids=new Set(old.map(x=>x.id)); invoices=invoices.filter(x=>!ids.has(x.id)); save(); render(); updateStorageLabel(); showToast('Archive siap - '+old.length+' invoice lama dah dipadam dari phone, file Archive dah download'); }catch(e){ alert('Archive gagal: '+e.message); } }; } }catch(e){} document.getElementById('settingModal').classList.add('open'); };
 document.getElementById('settingClose').onclick=document.getElementById('settingBack').onclick=document.getElementById('settingDone').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); try{ stopLiveStorage(); }catch(e){} };
 function fmtLastExport(){ try{ const v=localStorage.getItem('ik_lastExport'); if(!v) return 'Belum pernah Export DB'; const d=new Date(v); const s=d.toLocaleString('ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); const n=localStorage.getItem('ik_lastExportCount')||''; return 'Last Export: '+s+(n?' • '+n+' invoice':''); }catch(e){ return 'Belum pernah Export DB'; } }
