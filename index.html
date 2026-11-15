@@ -162,9 +162,11 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 .add-actions{background:#F1F2F6 !important}
 #addModal.add-v2 #bankPayDateWrap label{color:#6B7280 !important;font-size:14px !important;letter-spacing:0 !important;text-transform:none !important}
 #addModal.add-v2 #bankPayDateWrap input{font-size:15px !important;text-align:right !important}
-/* PIN - invoice baru simpan duduk paling atas, tak payah scroll */
-@keyframes flashSaved{0%{box-shadow:0 0 0 3px #5B21B6}100%{box-shadow:0 0 0 0 transparent}}
-.flash-saved{animation:flashSaved 1.2s ease 2;border-color:#5B21B6 !important;background:#F5F3FF !important}
+/* PIN - invoice baru simpan - style TERANG, kekal sampai tekan tab lain */
+.flash-saved{background:#FEF08A !important;border:3px solid #16A34A !important;box-shadow:0 0 0 3px #FDE047, 0 10px 24px rgba(22,163,74,.35) !important}
+.pin-banner{background:#16A34A;color:#fff;border-radius:14px;padding:12px 14px;font-weight:900;font-size:15px;margin:8px 0;display:flex;gap:8px;align-items:center;justify-content:space-between;box-shadow:0 6px 16px rgba(22,163,74,.35)}
+.pin-banner button{background:#fff;color:#16A34A;border:0;border-radius:999px;padding:6px 12px;font-weight:900;font-size:13px;cursor:pointer;flex-shrink:0}
+.info-pin{background:#16A34A !important;color:#fff !important;font-weight:900 !important;font-size:15px !important}
 
 
 
@@ -180,7 +182,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
 <div id="backupReminder" style="display:block;background:rgb(255, 251, 235);border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;text-align:center;margin:8px 0;cursor:pointer">⚠️ Belum backup hari ni (0 invoice dalam phone) - tekan sini untuk Export</div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
-<div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
+<div id="list"></div>
 </div>
 
 
@@ -193,7 +195,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div id="autoPdfBadge" style="display:none;font-size:11px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:7px 10px;text-align:center;margin:0 0 10px">PDF Auto dah siap</div>
 <div id="pagesStrip" style="display:none;margin:0 0 10px;background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b id="pagesCount" style="font-size:12px">1 page - auto jadi 1 PDF</b><button id="addPageBtn" style="background:#5B21B6;color:#fff;border:0;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px">+ Tambah Page</button></div><div id="pagesThumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px"></div><div style="font-size:11px;color:#666;margin-top:6px">1 invoice boleh banyak pages - semua jadi 1 PDF. Tekan ✕ untuk buang page tu.</div></div>
 <div style="background:#fff;border-radius:16px;padding:6px 14px;margin:0 0 10px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:10px 0"><label style="flex-shrink:0">Tarikh Invoice</label><input id="fDate" type="date" style="text-align:right"></div></div>
-<div style="background:#fff;border-radius:16px;padding:6px 14px;margin:0 0 10px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:0"><label style="flex-shrink:0">Kategori</label><select id="fCat" style="text-align:right"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div></div>
+<div style="background:#fff;border-radius:16px;padding:6px 14px;margin:0 0 10px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:0"><label style="flex-shrink:0">Kategori</label><select id="fCat" style="text-align:right"></select></div></div>
 <div style="display:flex;gap:10px;margin:0 0 10px"><div class="add-cash" style="flex:1;margin:0"><div><label>Cash</label><small>Dah Bayar + PV auto</small></div><input type="checkbox" id="fCash"></div><div class="add-bank" style="flex:1;margin:0"><div><label>Bank Transfer</label><small>Dah Bayar + PV auto</small></div><input type="checkbox" id="fBank"></div></div><div id="bankPayDateWrap" style="display:none;background:#fff;border-radius:16px;padding:12px 14px;margin:0 0 10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><label>Tarikh Payment (Bank)</label><input id="fPayDate" type="date" style="text-align:right"></div></div>
 <div class="add-note" style="background:#fff;border-radius:16px;padding:12px 14px;margin:0 0 10px"><label style="display:block;margin:0 0 6px">Nota / Remark</label><input id="fNote" placeholder="Catatan (optional)"></div>
 <div class="add-actions"><button class="btn btn-light" id="addCancel">Batal</button><button class="btn btn-green" id="addSave">Simpan Invoice</button></div>
@@ -213,7 +215,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- FILTER -->
 <div class="modal" id="filterModal"><div class="sheet"><div class="closeRow"><button id="filterBack">← Kembali</button><b>Filter</b><button id="filterClose">✕ Tutup</button></div>
-<label>Kategori</label><select id="fltCat"><option value="">Semua kategori</option><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select>
+<label>Kategori</label><select id="fltCat"><option value="">Semua kategori</option></select>
 <label>Status</label><select id="fltStatus"><option value="">Semua</option><option value="paid">Dah Bayar</option><option value="unpaid">Belum Bayar</option></select>
 <label>Cara Bayar</label><select id="fltPay"><option value="">Semua</option><option>Cash</option><option>Bank Transfer</option><option>QR / E-Wallet</option><option>Split Payment</option></select>
 <div class="row" style="margin-top:14px"><button class="btn btn-light" id="filterReset" style="flex:1">Reset</button><button class="btn btn-green" id="filterApply" style="flex:1">Tunjuk</button></div></div></div>
@@ -381,7 +383,7 @@ function render(){
   const list=filtered();
   const _tabLabel = tab==='paid' ? ' Dah Bayar' : tab==='unpaid' ? ' Belum Bayar' : '';
   const _total=list.reduce((s,x)=>s+signedPrice(x),0);
-  document.getElementById('infoBar').textContent = pvCountLabel(list)+_tabLabel+' • '+fmt(_total); if(_pinSavedId && !query){ try{ const _pinInv=invoices.find(y=>y.id===_pinSavedId); if(_pinInv) document.getElementById('infoBar').textContent='✓ Baru Disimpan: '+(_pinInv.name||'')+' - '+(_pinInv.inv||'')+' • '+document.getElementById('infoBar').textContent; }catch(e){} }
+  document.getElementById('infoBar').textContent = pvCountLabel(list)+_tabLabel+' • '+fmt(_total); if(_pinSavedId && !query){ try{ const _pinInv=invoices.find(y=>y.id===_pinSavedId); if(_pinInv){ document.getElementById('infoBar').textContent='★ BARU DISIMPAN: '+(_pinInv.name||'')+' - '+(_pinInv.inv||'')+' • '+document.getElementById('infoBar').textContent; document.getElementById('infoBar').classList.add('info-pin'); } else { document.getElementById('infoBar').classList.remove('info-pin'); } }catch(e){} } else { try{ document.getElementById('infoBar').classList.remove('info-pin'); }catch(e){} }
   const box=document.getElementById('list'); box.innerHTML='';
   if(tab==='batal'){
     const _batalTotal=cancelledPVs.reduce((s,c)=>s+Number(c.price||0),0);
@@ -391,7 +393,8 @@ function render(){
     _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
     return;
   }
-  // Dah Bayar - GROUP ikut PV, tajuk = supplier name - SWIPE KIRI UNTUK CANCEL PV (Dah Bayar je)
+  // Dah Bayar
+  if(_pinSavedId && !query && tab!=='batal'){ try{ const _pb=invoices.find(y=>y.id===_pinSavedId); if(_pb){ const _bn=document.createElement('div'); _bn.className='pin-banner'; _bn.innerHTML='<span>★ BARU DISIMPAN<br><span style="font-weight:700;font-size:13px">'+(_pb.name||'')+' • '+(_pb.inv||'')+' • '+fmt(signedPrice(_pb))+'</span></span><button id="pinClearBtn">Tunjuk Semua ✕</button>'; box.appendChild(_bn); const _cb=document.getElementById('pinClearBtn'); if(_cb) _cb.onclick=()=>{ _pinSavedId=''; _pinSavedPv=''; _pinJustSet=false; render(); }; } }catch(e){} } - GROUP ikut PV, tajuk = supplier name - SWIPE KIRI UNTUK CANCEL PV (Dah Bayar je)
   if(tab==='paid'){
     const _bb2=document.getElementById('bulkBar'); if(_bb2) _bb2.remove();
     const _groups={};
