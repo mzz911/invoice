@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -844,8 +844,8 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
 function openImgViewOnlyImg(src,title,meta,ctx){ openImgView(src,title,meta,'',ctx); }
 function openImgViewOnlyPdf(pdf,title,meta,imgSrc,ctx){ _viewImgSrc=imgSrc||''; openImgView(imgSrc||'',title,meta,pdf,ctx); }
 
-function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
-${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages':''}</p><img src="${x.img}" style="width:100%;border-radius:12px;cursor:pointer" id="dInvImg">${x.pdf?`<button class="btn btn-dark" id="dPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Asal</button>`:''}</div>`:''}
+async function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
+${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages':''}</p><img src="${x.img}" style="width:100%;border-radius:12px;cursor:pointer" id="dInvImg">${x.pdf?`<button class="btn btn-dark" id="dPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Asal</button>`:''}${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
 ${x.paid?`<p>Status: Dah Bayar • ${x.payMethod||''}<br>PV: ${x.pv||'-'} • Bayar: ${fmtDate(x.payDate)||'-'}</p>`:''}
 ${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar${(x.paymentPages && x.paymentPages.length>1)?' • '+x.paymentPages.length+' pages':''}</p>${x.paymentImg?`<img src="${x.paymentImg}" style="width:100%;border-radius:12px;cursor:pointer" id="dPayImg">${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">✏️ Edit</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
 <div class="row" style="margin-top:12px"><button class="btn btn-light" id="delBtn" style="flex:1">Padam Invoice</button><button class="btn btn-light" id="editBtn" style="flex:1">Edit</button></div>
@@ -860,6 +860,7 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
      openImgView(x.pages[0],'Gambar Invoice - '+x.name,x.inv+' • '+x.date+' • '+x.pages.length+' pages',{kind:'invoice',id:x.id},{items:_items, idx:0});
    } else openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id});
  }; const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
+ const rpb=b.querySelector('#recoverPagesBtn'); if(rpb) rpb.onclick=async()=>{ rpb.textContent='⏳ Pulihkan...'; rpb.disabled=true; try{ const rec=await supaRecoverPagesFromPdf(x); if(rec && rec.length>1){ x.pages=rec.slice(); if(!x.img) x.img=rec[0]; try{ save(); }catch(e){} showToast('Dipulihkan - '+rec.length+' pages dari PDF Asal'); openDetail(id); } else { rpb.textContent='🔄 Pulihkan Page 2 dari PDF Asal'; rpb.disabled=false; showToast('PDF Asal cuma ada 1 muka / tak dapat baca - cuba Lihat PDF Asal'); } }catch(e){ rpb.textContent='🔄 Pulihkan Page 2 dari PDF Asal'; rpb.disabled=false; } };
  const dp=b.querySelector('#dPayImg'); if(dp) dp.onclick=()=>{
    if(x.paymentPages && x.paymentPages.length>1){
      const _items=x.paymentPages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
@@ -872,12 +873,32 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
  // For add/change pay, we need a handler: when image chosen for pay in detail, save to this invoice
  window._payDetailId = x.id;
  b.querySelector('#delBtn').onclick=()=>{ if(confirm('Padam invoice ni?')){ try{ supaMarkDeleted(id); supaDeleteInvoice(id); }catch(e){} invoices=invoices.filter(y=>y.id!==id); selected.delete(id); save(); render(); document.getElementById('detailModal').classList.remove('open'); } };
- b.querySelector('#editBtn').onclick=async()=>{ document.getElementById('detailModal').classList.remove('open'); document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; rebuildCatList(); document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today();  document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; _editOrigPages=(x.pages && x.pages.length ? x.pages.slice() : []); _editPagesTouched=false; pendingPages=await resolvePagesArray(_editOrigPages.length ? _editOrigPages.slice() : (x.img ? [x.img] : [])); try{ if(pendingPages.length<=1){ const _rec=await supaRecoverPages(x.id, pendingPages); if(_rec && _rec.length>pendingPages.length){ pendingPages=_rec; _editOrigPages=_rec.slice(); try{ showToast('Jumpa '+_rec.length+' pages dalam Storage - dipulihkan'); }catch(e){} } } }catch(e){} _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open'); };;
+ b.querySelector('#editBtn').onclick=async()=>{ document.getElementById('detailModal').classList.remove('open'); document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; rebuildCatList(); document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today();  document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; _editOrigPages=(x.pages && x.pages.length ? x.pages.slice() : []); _editPagesTouched=false; pendingPages=await resolvePagesArray(_editOrigPages.length ? _editOrigPages.slice() : (x.img ? [x.img] : [])); try{ if(pendingPages.length<=1){ const _rec=await supaRecoverPages(x.id, pendingPages); if(_rec && _rec.length>pendingPages.length){ pendingPages=_rec; _editOrigPages=_rec.slice(); try{ showToast('Jumpa '+_rec.length+' pages dalam Storage - dipulihkan'); }catch(e){} } } }catch(e){}
+ try{ if(pendingPages.length<=1 && x.pdf){ const _fromPdf=await supaRecoverPagesFromPdf(x); if(_fromPdf && _fromPdf.length>pendingPages.length){ pendingPages=_fromPdf.slice(); _editOrigPages=_fromPdf.slice(); try{ showToast('Jumpa '+_fromPdf.length+' pages dalam PDF Asal - dipulihkan'); }catch(e){} } } }catch(e){} _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open'); };;
 
  const dp1=b.querySelector('#dlPdfOne'); if(dp1) dp1.onclick=()=>downloadPdfOne(x);
  const payB=b.querySelector('#detailPayBtn'); if(payB) payB.onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); openPay('single',x.id); };
 
- try{ const _di=document.getElementById('dInvImg'); if(_di && x.img && String(supaFixExpiredUrl(x.img)).startsWith('SUPA:')){ (async()=>{ try{ const u=await supaResolveOne(supaFixExpiredUrl(x.img)); if(u && !String(u).startsWith('SUPA:')) _di.src=u; }catch(e){} })(); } const _dp=document.getElementById('dPayImg'); if(_dp && x.paymentImg && String(supaFixExpiredUrl(x.paymentImg)).startsWith('SUPA:')){ (async()=>{ try{ const u=await supaResolveOne(supaFixExpiredUrl(x.paymentImg)); if(u && !String(u).startsWith('SUPA:')) _dp.src=u; }catch(e){} })(); } }catch(e){} document.getElementById('detailModal').classList.add('open');
+ try{ const _di=document.getElementById('dInvImg'); if(_di && x.img && String(supaFixExpiredUrl(x.img)).startsWith('SUPA:')){ (async()=>{ try{ const u=await supaResolveOne(supaFixExpiredUrl(x.img)); if(u && !String(u).startsWith('SUPA:')) _di.src=u; }catch(e){} })(); } const _dp=document.getElementById('dPayImg'); if(_dp && x.paymentImg && String(supaFixExpiredUrl(x.paymentImg)).startsWith('SUPA:')){ (async()=>{ try{ const u=await supaResolveOne(supaFixExpiredUrl(x.paymentImg)); if(u && !String(u).startsWith('SUPA:')) _dp.src=u; }catch(e){} })(); } }catch(e){}
+ // AUTO-PULIH: kalau pages<=1 tapi ada PDF Asal, cuba tarik Page 2+ dari PDF tu terus (sekali je per invoice per session).
+ // YONG HUA IN161038956 ni contohnya: gambar tulis PAGE 1 of 2, tapi pages simpan 1 je sebab dulu upload ambil muka 1 je.
+ // Storage pages_ pun cuma ada pages_0, jadi supaRecoverPages tak jumpa. PDF Asal je yang ada Page 2.
+ try{
+   if((!x.pages || x.pages.length<=1) && x.pdf && !_pdfRecoverTried[x.id]){
+     _pdfRecoverTried[x.id]=true;
+     (async()=>{ try{
+       const rec=await supaRecoverPagesFromPdf(x);
+       if(rec && rec.length>1 && editId===id){
+         x.pages=rec.slice(); if(!x.img) x.img=rec[0];
+         try{ save(); }catch(e){}
+         try{ showToast('Page 2 dipulihkan dari PDF Asal - '+rec.length+' pages'); }catch(e){}
+         // Buka balik Detail supaya gallery + label jadi 2 pages (sekarang pages>1, tak loop)
+         try{ openDetail(id); }catch(e){}
+       }
+     }catch(e){} })();
+   }
+ }catch(e){}
+ document.getElementById('detailModal').classList.add('open');
 }
 function nextPV(dateStr){ let d; if(dateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))){ d=new Date(String(dateStr)+'T00:00:00'); } else { d=new Date(); } if(isNaN(d)) d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); const prefix='PV-'+yy+mm+'-'; let maxv=0; [...invoices.filter(x=>x.pv).map(x=>x.pv), ...cancelledPVs.map(c=>c.pv||'')].forEach(pv=>{ if(String(pv).startsWith(prefix)){ const n=parseInt(String(pv).split('-')[2]||'0'); if(!isNaN(n) && n>maxv) maxv=n; } }); return prefix+String(maxv+1).padStart(3,'0'); }
 let editPVInfo=null, deletePayResit=false;
@@ -1097,7 +1118,8 @@ function removePVAll(pv, payDate){
   }catch(err){ alert('Remove All gagal: '+err.message); console.error(err); return false; }
 }
 async function supaRecoverPages(id, curPages){ try{ if(!supaUser||!supaClient||!id) return null; const prefix=supaUser.id+'/'+id; const {data:list} = await supaClient.storage.from('invoice-images').list(prefix); if(!list||!list.length) return null; const pagesFiles=list.filter(f=>String(f.name||'').startsWith('pages_')).sort((a,b)=>{ const na=parseInt(String(a.name).replace(/\D/g,''))||0, nb=parseInt(String(b.name).replace(/\D/g,''))||0; return na-nb; }); if(!pagesFiles.length) return null; const maxIdx=Math.max(...pagesFiles.map(f=>parseInt(String(f.name).replace(/\D/g,''))||0)); const curLen=(curPages||[]).length; if(maxIdx+1<=curLen) return null; const recovered=[...(curPages||[])]; for(let i=curLen;i<=maxIdx;i++){ const f=pagesFiles.find(x=>parseInt(String(x.name).replace(/\D/g,''))===i); if(f) recovered.push('SUPA:'+prefix+'/'+f.name); } return recovered; }catch(e){ return null; } }
-async function openEditInvoice(id){ const x=invoices.find(y=>y.id===id); if(!x) return; editId=id; try{ document.getElementById('pvModal').classList.remove('open'); }catch(e){} try{ document.getElementById('detailModal').classList.remove('open'); }catch(e){} document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; try{ rebuildCatList(); }catch(e){} document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today(); document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; _editOrigPages=(x.pages && x.pages.length ? x.pages.slice() : []); _editPagesTouched=false; pendingPages=await resolvePagesArray(_editOrigPages.length ? _editOrigPages.slice() : (x.img ? [x.img] : [])); try{ if(pendingPages.length<=1){ const _rec=await supaRecoverPages(x.id, pendingPages); if(_rec && _rec.length>pendingPages.length){ pendingPages=_rec; _editOrigPages=_rec.slice(); try{ showToast('Jumpa '+_rec.length+' pages dalam Storage - dipulihkan'); }catch(e){} } } }catch(e){} _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open'); }
+async function openEditInvoice(id){ const x=invoices.find(y=>y.id===id); if(!x) return; editId=id; try{ document.getElementById('pvModal').classList.remove('open'); }catch(e){} try{ document.getElementById('detailModal').classList.remove('open'); }catch(e){} document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; try{ rebuildCatList(); }catch(e){} document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today(); document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; _editOrigPages=(x.pages && x.pages.length ? x.pages.slice() : []); _editPagesTouched=false; pendingPages=await resolvePagesArray(_editOrigPages.length ? _editOrigPages.slice() : (x.img ? [x.img] : [])); try{ if(pendingPages.length<=1){ const _rec=await supaRecoverPages(x.id, pendingPages); if(_rec && _rec.length>pendingPages.length){ pendingPages=_rec; _editOrigPages=_rec.slice(); try{ showToast('Jumpa '+_rec.length+' pages dalam Storage - dipulihkan'); }catch(e){} } } }catch(e){}
+ try{ if(pendingPages.length<=1 && x.pdf){ const _fromPdf=await supaRecoverPagesFromPdf(x); if(_fromPdf && _fromPdf.length>pendingPages.length){ pendingPages=_fromPdf.slice(); _editOrigPages=_fromPdf.slice(); try{ showToast('Jumpa '+_fromPdf.length+' pages dalam PDF Asal - dipulihkan'); }catch(e){} } } }catch(e){} _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open'); }
 function openPVDetail(pv, payDate){
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if(!items.length) return;
@@ -1293,14 +1315,29 @@ async function pdfToImageFile(file){
   }catch(err){ alert('PDF tak dapat baca: '+(err.message||err)); return null; }
 }
 
-async function pdfAllPagesToDataUrls(pdfDataUrl){
+async function pdfAllPagesToDataUrls(pdfSrc){
   try{
     const ok = await ensurePdfJs();
     if(!ok || !window.pdfjsLib) return null;
-    const base64 = String(pdfDataUrl||'').split(',')[1]||'';
-    if(!base64) return null;
-    const bin = atob(base64); const bytes = new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    let src = pdfSrc||'';
+    // FIX: dulu fungsi ni hanya terima data: URL (atob split(",")[1]). Kalau pdf = SUPA: / https signed URL,
+    // base64 jadi kosong -> return null -> Page 2 tak pernah dipulihkan. Sekarang resolve SUPA: dulu, fetch untuk semua.
+    if(src && String(src).startsWith('SUPA:')){ try{ src = await supaResolveForView(src); }catch(e){} }
+    if(!src || String(src).startsWith('SUPA:')) return null;
+    let bytes = null;
+    try{
+      if(String(src).startsWith('http') || String(src).startsWith('data:')){
+        const resp = await fetch(src);
+        if(!resp.ok) throw new Error('fetch PDF gagal '+resp.status);
+        bytes = new Uint8Array(await resp.arrayBuffer());
+      } else {
+        const base64 = String(src).split(',')[1]||'';
+        if(!base64) return null;
+        const bin = atob(base64); bytes = new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+      }
+    }catch(fe){ return null; }
+    if(!bytes || !bytes.length) return null;
     const pdf = await window.pdfjsLib.getDocument({data: bytes}).promise;
     const out = [];
     for(let pn=1; pn<=pdf.numPages; pn++){
@@ -1309,7 +1346,6 @@ async function pdfAllPagesToDataUrls(pdfDataUrl){
       const cv = document.createElement('canvas'); cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
       const ctx = cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
       await page.render({canvasContext: ctx, viewport: vp}).promise;
-      // Resize max 1600px lebar supaya storage tak bengkak, tapi tulisan masih baca
       const maxW=1600, sc=Math.min(1, maxW/cv.width);
       if(sc<1){
         const cv2=document.createElement('canvas'); cv2.width=Math.round(cv.width*sc); cv2.height=Math.round(cv.height*sc);
@@ -1318,8 +1354,20 @@ async function pdfAllPagesToDataUrls(pdfDataUrl){
       } else {
         out.push(cv.toDataURL('image/jpeg',0.75));
       }
+      await new Promise(r=>setTimeout(r,0));
     }
     return out;
+  }catch(e){ return null; }
+}
+let _pdfRecoverTried = {};
+async function supaRecoverPagesFromPdf(inv){
+  try{
+    if(!inv || !inv.pdf) return null;
+    const curLen = (inv.pages && inv.pages.length) ? inv.pages.length : 0;
+    if(curLen>1) return null;
+    const all = await pdfAllPagesToDataUrls(inv.pdf);
+    if(!all || all.length<=curLen) return null;
+    return all;
   }catch(e){ return null; }
 }
 // Override processFile for payDetail: if target is payDetail, save to that invoice
