@@ -141,8 +141,30 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 #addModal.add-v2 .add-actions{display:flex;gap:10px;margin-top:16px;position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
 #addModal.add-v2 #addCancel{flex:1;border-radius:999px;padding:14px;font-weight:800;color:#6B7280;background:#F3F4F6;box-shadow:none}
 #addModal.add-v2 #addSave{flex:2;border-radius:999px;padding:14px;font-size:16px;font-weight:800}
+/* TAMBAH INVOICE - ikut layout gambar, input kita */
+#addModal.add-v2 .sheet{background:#F1F2F6 !important;padding:0 14px 14px !important}
+#addModal.add-v2 .closeRow{background:#5B21B6 !important;color:#fff !important;padding:14px 14px !important;margin:0 -14px 6px !important;border-radius:0 !important}
+#addModal.add-v2 .closeRow button{color:#fff !important}
+#addModal.add-v2 .closeRow b{color:#fff !important}
+#addModal.add-v2 .add-field label{color:#6B7280 !important;font-size:15px !important;letter-spacing:0 !important;text-transform:none !important;font-weight:500 !important}
+#addModal.add-v2 .add-field input,#addModal.add-v2 .add-field select{font-size:16px !important;font-weight:600 !important;color:#111827 !important;text-align:right !important}
+#addModal.add-v2 .add-price label{color:#6B7280 !important;font-size:15px !important;letter-spacing:0 !important;font-weight:500 !important}
+#addModal.add-v2 .add-price input{font-size:18px !important;font-weight:700 !important;color:#111827 !important;text-align:right !important;border:0 !important;padding:0 !important;background:transparent !important}
+#addModal.add-v2 #thumbBox #thumbIcon{font-size:28px !important}
+#addModal.add-v2 .add-hero-hint{font-size:11px !important;color:#6B7280 !important;font-weight:600 !important}
+#addModal.add-v2 .add-cash,#addModal.add-v2 .add-bank{background:#fff !important;border:0 !important;border-radius:16px !important;padding:12px 14px !important}
+#addModal.add-v2 .add-cash label{color:#111827 !important;font-size:14px !important}
+#addModal.add-v2 .add-cash small{color:#6B7280 !important}
+#addModal.add-v2 .add-bank label{color:#111827 !important;font-size:14px !important}
+#addModal.add-v2 .add-bank small{color:#6B7280 !important}
+#addModal.add-v2 .add-note label{color:#6B7280 !important;font-size:13px !important;letter-spacing:0 !important;text-transform:none !important;font-weight:500 !important}
+#addModal.add-v2 .add-note input{font-size:16px !important;text-align:left !important}
+#addModal.add-v2 .add-actions{background:#F1F2F6 !important}
+#addModal.add-v2 #bankPayDateWrap label{color:#6B7280 !important;font-size:14px !important;letter-spacing:0 !important;text-transform:none !important}
+#addModal.add-v2 #bankPayDateWrap input{font-size:15px !important;text-align:right !important}
 
-</style></head>
+
+</style><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -159,26 +181,19 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 <!-- ADD / EDIT -->
-<div class="modal add-v2" id="addModal"><div class="sheet">
+<div class="modal add-v2 open" id="addModal"><div class="sheet" style="background:#F1F2F6">
 <div class="closeRow"><button id="addBack">← Kembali</button><b id="addTitle">Tambah Invoice</b><button id="addClose">✕ Tutup</button></div>
 <input id="fImg" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgCamera" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"><input id="fImgFiles" type="file" accept="image/*,application/pdf,.pdf,.heic,.heif,.webp" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-<div class="add-hero"><div id="thumbBox" style="width:100%;height:148px;flex-shrink:0;border:2px dashed #C4B5FD;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F8F7FF;overflow:hidden"><span id="thumbIcon" style="font-size:36px">📷</span><span class="add-hero-hint">Tekan untuk ambil gambar resit</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div></div>
-<div id="autoPdfBadge" style="display:none;font-size:11px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:7px 10px;text-align:center;margin:10px 0 2px">PDF Auto dah siap</div>
-<div id="pagesStrip" style="display:none;margin:8px 0 4px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b id="pagesCount" style="font-size:12px">1 page - auto jadi 1 PDF</b><button id="addPageBtn" style="background:#5B21B6;color:#fff;border:0;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px">+ Tambah Page</button></div><div id="pagesThumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px"></div><div style="font-size:11px;color:#666;margin-top:6px">1 invoice boleh banyak pages - semua jadi 1 PDF. Tekan ✕ untuk buang page tu. Gambar dari Camera / Gallery semua auto jadi PDF.</div></div>
-<div class="add-price"><label>JUMLAH - RM</label><input id="fPrice" type="number" step="0.01" placeholder="0.00"></div>
-<div class="add-card">
-<div class="add-field"><label>Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off"></div>
-<div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:8px 0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div>
-<div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:4px 0 8px;cursor:pointer"></div>
-<div class="add-field"><label>No Invoice</label><input id="fInv" placeholder="No Invoice"></div>
-<div class="add-field"><label>Tarikh Invoice</label><input id="fDate" type="date"></div>
-<div class="add-field"><label>Kategori</label><select id="fCat"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div>
-</div>
-<div class="add-cash"><div><label>Cash - Terus Dah Bayar</label><small>Terus tanda Dah Bayar + PV auto</small></div><input type="checkbox" id="fCash"></div><div class="add-bank"><div><label>Bank Transfer - Dah Bayar</label><small>Tanda Dah Bayar + PV auto, isi tarikh payment</small></div><input type="checkbox" id="fBank"></div><div id="bankPayDateWrap" style="display:none"><label>Tarikh Payment (Bank Transfer)</label><input id="fPayDate" type="date"></div>
-<div class="add-note"><label>Nota / Remark</label><input id="fNote" placeholder="Catatan (optional)"></div>
+<div style="background:#fff;border-radius:16px;padding:6px 14px;margin:6px 0 10px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:10px 0"><label style="flex-shrink:0">Nama / Supplier</label><input id="fName" placeholder="Nama Supplier" autocomplete="off" style="text-align:right"></div><div id="supSuggest" style="display:none;background:#fff;border-radius:12px;margin:8px 0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)"></div><div id="supHint" style="font-size:12px;color:#92400e;font-weight:700;display:none;margin:4px 0 8px;cursor:pointer"></div></div>
+<div style="display:flex;gap:10px;align-items:stretch;margin:0 0 10px"><div class="add-hero" style="flex:0 0 110px;margin:0"><div id="thumbBox" style="width:110px;height:140px;flex-shrink:0;border:1px solid #E5E7EB;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#F9FAFB;overflow:hidden"><span id="thumbIcon" style="font-size: 28px; display: block;">📷</span><span class="add-hero-hint" style="display: block;">Ambil Gambar</span><img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover"></div></div><div style="flex:1;display:flex;flex-direction:column;gap:10px"><div class="add-price" style="background:#fff;border-radius:16px;padding:12px 14px;margin:0;text-align:left"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><label style="flex-shrink:0">Jumlah - RM</label><input id="fPrice" type="number" step="0.01" placeholder="0.00" style="text-align:right"></div></div><div style="background:#fff;border-radius:16px;padding:12px 14px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:0"><label style="flex-shrink:0">No Invoice</label><input id="fInv" placeholder="No Invoice" style="text-align:right"></div></div></div></div>
+<div id="autoPdfBadge" style="display:none;font-size:11px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:7px 10px;text-align:center;margin:0 0 10px">PDF Auto dah siap</div>
+<div id="pagesStrip" style="display:none;margin:0 0 10px;background:#fff;border:1px solid #E2E8F0;border-radius:16px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b id="pagesCount" style="font-size:12px">1 page - auto jadi 1 PDF</b><button id="addPageBtn" style="background:#5B21B6;color:#fff;border:0;padding:8px 14px;border-radius:999px;font-weight:700;font-size:12px">+ Tambah Page</button></div><div id="pagesThumbs" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px"></div><div style="font-size:11px;color:#666;margin-top:6px">1 invoice boleh banyak pages - semua jadi 1 PDF. Tekan ✕ untuk buang page tu.</div></div>
+<div style="background:#fff;border-radius:16px;padding:6px 14px;margin:0 0 10px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:10px 0"><label style="flex-shrink:0">Tarikh Invoice</label><input id="fDate" type="date" style="text-align:right"></div></div>
+<div style="background:#fff;border-radius:16px;padding:6px 14px;margin:0 0 10px"><div class="add-field" style="display:flex;justify-content:space-between;align-items:center;gap:10px;border:0;padding:0"><label style="flex-shrink:0">Kategori</label><select id="fCat" style="text-align:right"><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select></div></div>
+<div style="display:flex;gap:10px;margin:0 0 10px"><div class="add-cash" style="flex:1;margin:0"><div><label>Cash</label><small>Dah Bayar + PV auto</small></div><input type="checkbox" id="fCash"></div><div class="add-bank" style="flex:1;margin:0"><div><label>Bank Transfer</label><small>Dah Bayar + PV auto</small></div><input type="checkbox" id="fBank"></div></div><div id="bankPayDateWrap" style="display:none;background:#fff;border-radius:16px;padding:12px 14px;margin:0 0 10px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><label>Tarikh Payment (Bank)</label><input id="fPayDate" type="date" style="text-align:right"></div></div>
+<div class="add-note" style="background:#fff;border-radius:16px;padding:12px 14px;margin:0 0 10px"><label style="display:block;margin:0 0 6px">Nota / Remark</label><input id="fNote" placeholder="Catatan (optional)"></div>
 <div class="add-actions"><button class="btn btn-light" id="addCancel">Batal</button><button class="btn btn-green" id="addSave">Simpan Invoice</button></div>
 </div></div>
-
 <!-- IMG SOURCE -->
 <div class="modal" id="imgSourceModal"><div class="sheet"><div class="closeRow"><button id="srcBack">← Kembali</button><b>Gambar Invoice</b><button id="srcCancel">✕</button></div>
 <div style="display:flex;flex-direction:column;gap:10px"><button class="btn btn-light" id="srcCamera" style="padding:16px;text-align:left">📷 Camera</button><button class="btn btn-light" id="srcGallery" style="padding:16px;text-align:left">🖼️ Gallery</button><button class="btn btn-light" id="srcFiles" style="padding:16px;text-align:left">📁 Files</button><button class="btn btn-light" id="srcScan" style="padding:16px;text-align:left">📄 Scan Document</button></div></div></div>
