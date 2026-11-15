@@ -1034,7 +1034,24 @@ function csvForAccounting(list){
 async function pdfImgForField(imgField){
   if(!imgField) return null;
   try{
-    let src = await resolveImgData(imgField);
+    // FIX DOWNLOAD PDF TAKDE GAMBAR: dulu src = resolveImgData() yang cuma supaFixExpiredUrl,
+    // jadi SUPA: kekal SUPA:, lepas tu check startsWith('data:image') gagal -> return null -> PDF kosong.
+    // Sekarang resolve SUPA: jadi signed URL dulu, lepas tu fetch jadi data: URL supaya canvas tak kena CORS.
+    let src = imgField;
+    try{ src = await supaResolveForView(src); }catch(e){}
+    if(src && String(src).startsWith('IDBIMG:')){
+      const _k = String(src).slice(7);
+      if(typeof _imgCache!=='undefined' && _imgCache[_k]) src = _imgCache[_k];
+    }
+    if(!src) return null;
+    if(String(src).startsWith('http')){
+      try{
+        const resp = await fetch(src);
+        if(!resp.ok) return null;
+        const blob = await resp.blob();
+        src = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(); r.readAsDataURL(blob); });
+      }catch(e){ return null; }
+    }
     if(!src || !String(src).startsWith('data:image')) return null;
     return await new Promise((res)=>{
       const im = new Image();
@@ -1072,24 +1089,27 @@ async function downloadPdfOne(x){
   const { jsPDF } = window.jspdf; const doc=new jsPDF(); let y=12;
   doc.setFontSize(16); doc.text('Invoice Kedai - Payment Voucher',10,y); y+=10;
   doc.setFontSize(11); doc.text(`Supplier: ${x.name}`,10,y); y+=7; doc.text(`No Invoice: ${x.inv}`,10,y); y+=7; doc.text(`Invoice Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}${isCN(x)?' (CN - Credit Note)':''}`,10,y); y+=7; doc.text(`PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}`,10,y); y+=7; doc.text(`Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10;
-  const _hasImg=!!x.img; const _hasResit=!!x.paymentImg;
-  if(_hasImg && _hasResit){
-    if(y>200){ doc.addPage(); y=12; }
-    doc.setFontSize(10); doc.text('Gambar Invoice:',10,y); doc.text('Resit Payment:',105,y); y+=4;
-    const _h1 = await addPdfImgFit(doc, x.img, 10, y, 85, 110);
-    const _h2 = await addPdfImgFit(doc, x.paymentImg, 105, y, 85, 110);
-    y += Math.max(_h1, _h2) + 6;
-  } else if(_hasImg){
-    if(y>200){ doc.addPage(); y=12; }
-    doc.setFontSize(10); doc.text('Gambar Invoice:',10,y); y+=4;
-    const _h = await addPdfImgFit(doc, x.img, 10, y, 170, 180);
-    y += _h + 6;
-    if(!_h) doc.text('Gambar tak dapat load / tiada gambar',10,y);
-  } else if(_hasResit){
-    if(y>200){ doc.addPage(); y=12; }
-    doc.setFontSize(10); doc.text('Resit Payment:',10,y); y+=4;
-    const _h = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180);
-    y += _h + 6;
+  const invPages = (x.pages && x.pages.length ? x.pages : (x.img ? [x.img] : []));
+  const payPages = (x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []));
+  if(invPages.length){
+    for(let i=0;i<invPages.length;i++){
+      if(i>0){ doc.addPage(); y=12; }
+      doc.setFontSize(10); doc.text('Gambar Invoice - Page '+(i+1)+'/'+invPages.length,10,y); y+=4;
+      const _h = await addPdfImgFit(doc, invPages[i], 10, y, 170, 230);
+      if(!_h) doc.text('Gambar tak dapat load',10,y);
+      y += _h + 6;
+    }
+  } else {
+    doc.setFontSize(10); doc.text('Gambar Invoice: Tiada - buka Lihat PDF Asal',10,y); y+=8;
+  }
+  if(payPages.length){
+    for(let i=0;i<payPages.length;i++){
+      doc.addPage(); y=12;
+      doc.setFontSize(10); doc.text('Resit Payment - Page '+(i+1)+'/'+payPages.length,10,y); y+=4;
+      const _h2 = await addPdfImgFit(doc, payPages[i], 10, y, 170, 230);
+      if(!_h2) doc.text('Resit tak dapat load',10,y);
+      y += _h2 + 6;
+    }
   } else if(x.paid){ doc.text('Resit Payment: Tiada',10,y); }
   doc.save((x.pv||'')+'-'+x.inv+'.pdf');
 }
@@ -1171,8 +1191,8 @@ async function downloadPdfPV(pv, payDate){
   });
   y+=3; doc.setFontSize(12); doc.text('Jumlah: RM '+Number(total).toFixed(2),10,y);
   // Jimat pages: gambar invoice + resit susun grid 2 lajur x 4 baris = 8 gambar 1 page, kecik je
-  const _invImgs=items.filter(x=>x.img).map(x=>({label:(x.inv||x.name||'Invoice').slice(0,22),src:x.img}));
-  const _resitImgs=[...new Set(items.map(x=>x.paymentImg).filter(Boolean))].map((r,i)=>({label:'Resit Payment '+(i+1),src:r}));
+  const _invImgs=items.flatMap(x=>{ const _p=(x.pages && x.pages.length ? x.pages : (x.img ? [x.img] : [])); return _p.map((src,pi)=>({label:((x.inv||x.name||'Invoice').slice(0,22)+( _p.length>1 ? ' P'+(pi+1) : '')),src})); });
+  const _resitImgs=[...new Set(items.flatMap(x=>(x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []))).filter(Boolean))].map((r,i)=>({label:'Resit Payment '+(i+1),src:r}));
   const _allImgs=[..._invImgs.map(o=>({...o,kind:'Gambar'})),..._resitImgs.map(o=>({...o,kind:'Resit'}))];
   if(!_allImgs.length){ y+=8; doc.setFontSize(11); doc.text('Resit Payment: Tiada',10,y); }
   else {
@@ -1193,8 +1213,10 @@ async function downloadPdfBulk(list){
   if(!window.jspdf){ alert('jsPDF belum load'); return; }
   const { jsPDF } = window.jspdf; const doc=new jsPDF();
   for(let i=0;i<list.length;i++){ const x=list[i]; if(i>0) doc.addPage(); let y=12; doc.setFontSize(14); doc.text(`${x.name}`,10,y); y+=8; doc.setFontSize(11); doc.text(`No Invoice: ${x.inv}  Date: ${x.date}`,10,y); y+=7; doc.text(`Price: RM ${Number(signedPrice(x)).toFixed(2)}  PV: ${x.pv||'-'}  PV Date: ${x.payDate||'-'}`,10,y); y+=7; doc.text(`Cara Bayar: ${x.payMethod||'-'}  Status: ${x.paid?'Dah Bayar':'Belum Bayar'}`,10,y); y+=10;
-    if(x.img){ doc.text('Gambar Invoice:',10,y); y+=4; const _h = await addPdfImgFit(doc, x.img, 10, y, 170, 180); if(_h) y += _h + 6; else { doc.setFontSize(9); doc.text('Gambar tak dapat load',10,y); y+=8; } if(y>240){ doc.addPage(); y=12; } }
-    if(x.paymentImg){ doc.text('Resit Payment:',10,y); y+=4; const _h2 = await addPdfImgFit(doc, x.paymentImg, 10, y, 170, 180); if(_h2) y += _h2 + 6; else { doc.setFontSize(9); doc.text('Resit tak dapat load',10,y); y+=8; } }
+    const _bp=(x.pages && x.pages.length ? x.pages : (x.img ? [x.img] : []));
+    for(let _bi=0;_bi<_bp.length;_bi++){ if(_bi>0){ doc.addPage(); y=12; } doc.text('Gambar Invoice - Page '+(_bi+1)+'/'+_bp.length+':',10,y); y+=4; const _h = await addPdfImgFit(doc, _bp[_bi], 10, y, 170, 180); if(_h) y += _h + 6; else { doc.setFontSize(9); doc.text('Gambar tak dapat load',10,y); y+=8; } if(y>240){ doc.addPage(); y=12; } }
+    const _bpp=(x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []));
+    for(let _bi=0;_bi<_bpp.length;_bi++){ if(_bi>0 || _bp.length){ doc.addPage(); y=12; } doc.text('Resit Payment - Page '+(_bi+1)+'/'+_bpp.length+':',10,y); y+=4; const _h2 = await addPdfImgFit(doc, _bpp[_bi], 10, y, 170, 180); if(_h2) y += _h2 + 6; else { doc.setFontSize(9); doc.text('Resit tak dapat load',10,y); y+=8; } }
     if(!x.img && !x.paymentImg){ doc.setFontSize(9); doc.text('Tiada gambar',10,y); }
     showToast(`Generating PDF ${i+1}/${list.length}`); }
   doc.save('invoice-kedai-gambar-'+today()+'.pdf');
