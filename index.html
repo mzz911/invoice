@@ -170,7 +170,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -1266,7 +1266,7 @@ function openPVDetail(pv, payDate){
     + ((resitPages.length?resitPages:resits).length?`<div><p style="font-weight:700">Resit Payment${resitPages.length>1?' • '+resitPages.length+' pages':''}</p>`+(resitPages.length?resitPages:resits).map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
     + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
-  b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openInvoiceViewFirst(el.dataset.pvInv); }); // Tekan invoice dalam PV Detail -> VIEW PDF dulu semua pages, Edit dalam viewer baru pergi Edit Invoice
+  b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openDetail(el.dataset.pvInv); }); // FIX HANG Detail PV: tekan invoice -> Detail Invoice dulu (ringan, tak load PDF). Dalam Detail Invoice, tekan gambar baru view PDF. Viewer terus render PDF punca hang.
   b.querySelectorAll('[data-resit]').forEach((el,i)=>{ el.onclick=()=>{
     const _arr=(resitPages.length?resitPages:resits);
     if(_arr.length>1){
