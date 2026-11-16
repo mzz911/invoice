@@ -52,6 +52,18 @@ h1{margin:4px 0 2px;font-size:26px;color:#fff}.sub{color:rgba(255,255,255,.85);f
 .tab{flex:1;border:0;background:transparent;padding:9px 4px;border-radius:999px;font-weight:700;cursor:pointer;color:#6B7280;font-size:13px}.tab.active{background:#5B21B6;color:#fff}
 .group{background:#fff;border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;margin:14px 0 8px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .card{background:#fff;border-radius:16px;padding:12px;display:flex;gap:10px;margin:8px 0;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+#pvBody.pv-onepage .card{padding:6px 10px;margin:3px 0;border-radius:10px}
+#pvBody.pv-onepage .card .meta{font-size:11px;line-height:1.25}
+#pvBody.pv-onepage .card .meta b{font-size:12.5px;line-height:1.2}
+#pvBody.pv-onepage .card .price{font-size:12px}
+#pvBody.pv-onepage .pv-hide-onepage{display:none!important}
+#pvBody.pv-onepage h2{font-size:20px;margin:2px 0 4px}
+#pvBody.pv-onepage p{margin:2px 0}
+#pvBody.pv-onepage .pv-onepage-note{font-size:10px!important}
+#pvBody.pv-onepage-xs .card{padding:4px 8px;margin:2px 0}
+#pvBody.pv-onepage-xs .card .meta{font-size:10px}
+#pvBody.pv-onepage-xs .card .meta b{font-size:11px}
+#pvBody.pv-onepage-xs .card .price{font-size:11px}
 .swipeWrap{position:relative;overflow:hidden;border-radius:16px;margin:8px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .swipeDel{position:absolute;top:0;right:0;bottom:0;width:84px;background:#ff3b30;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;cursor:pointer;z-index:1;border:0;padding:0;font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .swipeInner{position:relative;z-index:2;margin:0 !important;transition:transform .2s ease;touch-action:pan-y;background:#fff;will-change:transform}
@@ -170,7 +182,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -233,7 +245,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +262,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1273,10 +1285,10 @@ function openPVDetail(pv, payDate){
   const resits=[...new Set(items.map(x=>x.paymentImg).filter(Boolean))];
   const resitPages=[...new Set(items.flatMap(x=>(x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []))).filter(Boolean))];
   const b=document.getElementById('pvBody');
-  b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
-    + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
-    + ((resitPages.length?resitPages:resits).length?`<div><p style="font-weight:700">Resit Payment${resitPages.length>1?' • '+resitPages.length+' pages':''}</p>`+(resitPages.length?resitPages:resits).map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p>Resit Payment: Tiada</p><button class="btn btn-light" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
-    + `<button class="btn btn-dark" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
+  b.innerHTML=`<button id="pvOnePageBtn" class="btn btn-light" style="width:100%;margin-bottom:8px">📸 View 1 Page - Screenshot</button><h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
+    + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div class="pv-onepage-note" style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
+    + ((resitPages.length?resitPages:resits).length?`<div class="pv-hide-onepage"><p style="font-weight:700">Resit Payment${resitPages.length>1?' • '+resitPages.length+' pages':''}</p>`+(resitPages.length?resitPages:resits).map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light pv-hide-onepage" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p class="pv-hide-onepage">Resit Payment: Tiada</p><button class="btn btn-light pv-hide-onepage" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
+    + `<button class="btn btn-dark pv-hide-onepage" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
   b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openInvoiceViewFirst(el.dataset.pvInv); }); // Tekan invoice dalam PV Detail -> VIEW PDF dulu semua pages, Edit dalam viewer baru pergi Edit Invoice
   b.querySelectorAll('[data-resit]').forEach((el,i)=>{ el.onclick=()=>{
@@ -1288,6 +1300,7 @@ function openPVDetail(pv, payDate){
   }; });
   const epPV=b.querySelector('#editPVPayBtn'); if(epPV) epPV.onclick=()=>{ openEditPay(pv, payDate); };
   const dp=b.querySelector('#dlPdfPV'); if(dp) dp.onclick=()=>downloadPdfPV(pv,payDate);
+  const _oneBtn=b.querySelector('#pvOnePageBtn'); if(_oneBtn) _oneBtn.onclick=()=>{ const _on=b.classList.toggle('pv-onepage'); _oneBtn.textContent=_on?'← Balik View Biasa':'📸 View 1 Page - Screenshot'; b.classList.remove('pv-onepage-xs'); if(_on){ setTimeout(()=>{ try{ const _h=b.getBoundingClientRect().height; const _avail=window.innerHeight-90; if(_h>_avail) b.classList.add('pv-onepage-xs'); }catch(e){} },50); } try{ document.getElementById('pvModal').scrollTop=0; }catch(e){} };
 
 
   document.getElementById('pvModal').classList.add('open');
