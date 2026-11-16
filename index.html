@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -728,7 +728,70 @@ async function renderPdfPages(pdfSrc){
     }
   }catch(e){
     if(myToken!==_pdfRenderToken) return;
-    box.innerHTML='<p style="padding:20px;color:#c00">PDF tak dapat buka: '+(e.message||e)+'<br><br>Cuba tekan butang Buka dalam Safari kat atas, atau tutup & buka balik.</p>';
+    // FALLBACK 404: PDF asal dah takde dalam cloud (Supabase createSignedUrl sign je, tak check wujud - fetch baru 404).
+    // Tapi pages (gambar) masih ada - tunjuk gambar je, jangan biar skrin merah kosong. Boleh bina semula PDF dari gambar.
+    try{
+      let _pages=[];
+      try{ if(_viewCtx && _viewCtx.id && typeof invoices!=='undefined'){ const _xv=invoices.find(y=>y.id===_viewCtx.id); if(_xv && Array.isArray(_xv.pages) && _xv.pages.length) _pages=_xv.pages.slice(); else if(_xv && _xv.img) _pages=[_xv.img]; } }catch(_e){}
+      if(!_pages.length && _viewGallery && _viewGallery.length) _pages=_viewGallery.map(it=>it.img).filter(Boolean);
+      if(!_pages.length && _viewImgSrc) _pages=[_viewImgSrc];
+      if(_pages.length){
+        box.innerHTML='';
+        const _note=document.createElement('p');
+        _note.style.cssText='padding:14px;color:#92400e;background:#fef3c7;border-radius:10px;font-size:13px;line-height:1.5;margin-bottom:10px';
+        _note.innerHTML='PDF asal tak jumpa dalam cloud (fetch gagal 404) - fail PDF tu dah hilang dari Storage. Nasib baik gambar pages masih ada, jadi tunjuk gambar kat bawah ni. Tekan butang bawah untuk bina semula PDF dari gambar & simpan balik.';
+        box.appendChild(_note);
+        const _btn=document.createElement('button');
+        _btn.textContent='🔄 Bina Semula PDF dari Gambar & Simpan';
+        _btn.style.cssText='width:100%;padding:12px;border:0;border-radius:10px;background:#16a34a;color:#fff;font-weight:800;margin-bottom:12px';
+        _btn.onclick=async()=>{
+          _btn.textContent='⏳ Bina PDF...'; _btn.disabled=true;
+          try{
+            if(!window.jspdf) throw new Error('jsPDF belum load');
+            const { jsPDF }=window.jspdf; const _doc=new jsPDF({unit:'mm',format:'a4'});
+            for(let _i=0;_i<_pages.length;_i++){
+              if(_i>0) _doc.addPage();
+              let _psrc=_pages[_i]; try{ _psrc=await supaResolveForView(_psrc); }catch(_e){}
+              const _im=await new Promise((res)=>{ const _x=new Image(); _x.onload=()=>res(_x); _x.onerror=()=>res(null); _x.src=_psrc; });
+              if(!_im) continue;
+              const _pw=_doc.internal.pageSize.getWidth(), _ph=_doc.internal.pageSize.getHeight(); const _m=6, _aw=_pw-_m*2, _ah=_ph-_m*2; let _w=_aw, _h=Math.round(_aw*_im.height/_im.width); if(_h>_ah){ _h=_ah; _w=Math.round(_ah*_im.width/_im.height); }
+              const _small=await new Promise((r)=>{ const _maxW=900, _sc=Math.min(1,_maxW/_im.width); const _cv=document.createElement('canvas'); _cv.width=Math.max(1,Math.round(_im.width*_sc)); _cv.height=Math.max(1,Math.round(_im.height*_sc)); const _cx=_cv.getContext('2d'); _cx.fillStyle='#fff'; _cx.fillRect(0,0,_cv.width,_cv.height); _cx.drawImage(_im,0,0,_cv.width,_cv.height); r(_cv.toDataURL('image/jpeg',0.68)); });
+              _doc.addImage(_small,'JPEG', _m+Math.round((_aw-_w)/2), _m+Math.round((_ah-_h)/2), _w, _h);
+            }
+            let _newPdf=_doc.output('datauristring');
+            // Cuba upload ke Supabase supaya link SUPA: baru wujud betul-betul, bukan sign kosong
+            try{
+              if(_viewCtx && _viewCtx.id && typeof supaUploadDataUrl==='function' && typeof supaUser!=='undefined' && supaUser){
+                const _up=await supaUploadDataUrl(_newPdf, 'inv_'+_viewCtx.id+'_pdf');
+                if(_up) _newPdf=_up;
+              }
+            }catch(_e){}
+            try{
+              if(_viewCtx && _viewCtx.id && typeof invoices!=='undefined'){
+                const _xv2=invoices.find(y=>y.id===_viewCtx.id);
+                if(_xv2){ _xv2.pdf=_newPdf; if(typeof save==='function') save(); if(typeof supaSyncOne==='function'){ try{ supaSyncOne(_xv2); }catch(_e){} } }
+                _viewPdfSrc=_newPdf;
+              }
+            }catch(_e){}
+            try{ showToast('PDF dibina semula dari '+_pages.length+' pages & disimpan'); }catch(_e){}
+            renderPdfPages(_newPdf);
+          }catch(_e){ _btn.textContent='🔄 Bina Semula PDF dari Gambar & Simpan'; _btn.disabled=false; try{ showToast('Tak dapat bina PDF: '+(_e.message||_e)); }catch(_e2){} }
+        };
+        box.appendChild(_btn);
+        _pages.forEach((_p,_idx)=>{
+          const _wrap=document.createElement('div'); _wrap.style.cssText='position:relative;margin-bottom:10px';
+          const _img=document.createElement('img');
+          _img.style.cssText='width:100%;height:auto;display:block;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15)';
+          _img.alt='Muka '+(_idx+1);
+          (async()=>{ try{ let _u=_p; try{ _u=await supaResolveForView(_u); }catch(_e){} _img.src=_u; }catch(_e){} })();
+          const _lab=document.createElement('div'); _lab.textContent='Muka '+(_idx+1)+' / '+_pages.length+' (dari gambar)';
+          _lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px';
+          _wrap.appendChild(_img); _wrap.appendChild(_lab); box.appendChild(_wrap);
+        });
+        return;
+      }
+    }catch(_e){}
+    box.innerHTML='<p style="padding:20px;color:#c00">PDF tak dapat buka: '+(e.message||e)+'<br><br>PDF asal dah takde dalam cloud (404) & gambar pages pun tak jumpa. Cuba upload balik PDF / gambar tu kat Edit.</p>';
   }
 }
 let _viewImgSrc='', _viewPdfSrc='', _viewCtx=null;
@@ -841,7 +904,7 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
   // Takde toggle: kalau ada PDF tunjuk PDF, kalau takde tunjuk gambar je
   if(pdf){
     const ob=document.getElementById('imgViewPdfOpen');
-    if(ob) ob.onclick=async()=>{ try{ let u=pdf; if(u && String(u).startsWith('SUPA:')){ try{ u=await supaResolveForView(u); }catch(e){} } if(u && String(u).startsWith('http')){ window.open(u,'_blank'); return; } if(u && String(u).startsWith('data:')){ const resp=await fetch(u); const blob=await resp.blob(); const bu=URL.createObjectURL(blob); window.open(bu,'_blank'); setTimeout(()=>URL.revokeObjectURL(bu), 60000); return; } showToast('PDF tak dapat buka'); }catch(e){ showToast('PDF tak dapat buka'); } };
+    if(ob) ob.onclick=async()=>{ try{ let u=pdf; if(u && String(u).startsWith('SUPA:')){ try{ u=await supaResolveForView(u); }catch(e){} } if(u && String(u).startsWith('http')){ try{ const _chk=await fetch(u,{method:'HEAD'}); if(!_chk.ok) throw new Error('fetch gagal '+_chk.status); }catch(_e){ try{ showToast('PDF asal 404 dalam cloud - tunjuk gambar & bina semula kat bawah'); }catch(_e2){} try{ renderPdfPages(_viewPdfSrc||pdf); }catch(_e2){} return; } window.open(u,'_blank'); return; } if(u && String(u).startsWith('data:')){ const resp=await fetch(u); const blob=await resp.blob(); const bu=URL.createObjectURL(blob); window.open(bu,'_blank'); setTimeout(()=>URL.revokeObjectURL(bu), 60000); return; } showToast('PDF tak dapat buka'); }catch(e){ showToast('PDF tak dapat buka'); } };
     // Kalau ada dua-dua, default tunjuk PDF (macam Smart Receipt). Kalau tekan gambar kat Detail, Detail akan pass pdf='' jadi tunjuk gambar je.
     showViewTab('pdf');
   } else {
