@@ -170,7 +170,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -795,6 +795,27 @@ async function renderPdfPages(pdfSrc){
   }
 }
 let _viewImgSrc='', _viewPdfSrc='', _viewCtx=null;
+// VIEW INVOICE TERUS KELUAR SEMUA PAGES: kalau gallery >1 (invoice ada 2-3 pages), tunjuk semua bertindih dalam imgViewPdfPages, bukan satu-satu kena Prev/Next.
+async function renderGalleryAllPages(){
+  const box=document.getElementById('imgViewPdfPages'); if(!box) return;
+  const imgEl=document.getElementById('imgViewImg'), pdfEl=document.getElementById('imgViewPdf'), bar=document.getElementById('imgViewPdfBar'), gbar=document.getElementById('imgViewGalleryBar');
+  if(imgEl) imgEl.style.display='none';
+  if(pdfEl) pdfEl.style.display='block';
+  if(bar) bar.style.display='none';
+  if(gbar) gbar.style.display='none';
+  box.innerHTML='';
+  const items=_viewGallery||[];
+  for(let i=0;i<items.length;i++){
+    const it=items[i]; const _src=it.img||'';
+    const wrap=document.createElement('div'); wrap.style.cssText='position:relative';
+    const im=document.createElement('img'); im.style.cssText='width:100%;height:auto;display:block;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.15)';
+    im.alt='Muka '+(i+1);
+    (async()=>{ try{ let u=_src; try{ u=await supaResolveForView(u); }catch(e){} im.src=u; }catch(e){} })();
+    const lab=document.createElement('div'); lab.textContent='Muka '+(i+1)+' / '+items.length;
+    lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px';
+    wrap.appendChild(im); wrap.appendChild(lab); box.appendChild(wrap);
+  }
+}
 function showViewTab(which){
   const imgEl=document.getElementById('imgViewImg'), pdfEl=document.getElementById('imgViewPdf'), bar=document.getElementById('imgViewPdfBar');
   // Takde toggle dah: upload gambar -> tunjuk gambar, upload PDF -> tunjuk PDF
@@ -860,9 +881,11 @@ function openPVGroupGallery(items, pvLabel){
 async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=ctx; try{ const _vm=document.getElementById('imgViewModal'); if(_vm) _vm.style.zIndex='100'; }catch(e){}
   // Buka modal terus + tunjuk Loading - jangan tunggu resolve SUPA / fetch siap baru buka, nanti user ingat tekan tak jadi.
   try{ document.getElementById('imgViewTitle').textContent=title||'Gambar'; document.getElementById('imgViewMeta').textContent=meta||''; const _b=document.getElementById('imgViewPdfPages'); if(_b && pdfSrc) _b.innerHTML='<p style="padding:20px;color:#666">Loading PDF...</p>'; document.getElementById('imgViewModal').classList.add('open'); }catch(e){}
-  // Gallery: kalau ada gallery, simpan + tunjuk bar. Kalau single, sembunyi bar
+  // Gallery: kalau ada gallery, simpan. Kalau single, sembunyi bar
   if(gallery && gallery.items && gallery.items.length>1){ _viewGallery=gallery.items; _viewGalleryIdx=gallery.idx||0; _viewGalleryPV=gallery.pv||''; }
   else if(!gallery){ _viewGallery=null; _viewGalleryIdx=0; _viewGalleryPV=''; const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }
+  // AUTO-GALLERY: caller list thumbnail tak pass gallery, tapi invoice ni ada pages>1 - bina dari pages supaya viewer terus keluar semua pages
+  try{ if((!gallery || !gallery.items) && ctx && ctx.id && typeof invoices!=='undefined'){ const _xv=invoices.find(y=>y.id===ctx.id); if(_xv && Array.isArray(_xv.pages) && _xv.pages.length>1){ _viewGallery=_xv.pages.map(p=>({img:p, pdf:'', name:_xv.name, inv:_xv.inv, date:_xv.date})); _viewGalleryIdx=0; _viewGalleryPV=''; } } }catch(e){}
   // Kalau PDF simpan kat IndexedDB (marker IDB:), load dulu
   let pdf = pdfSrc || (src && String(src).startsWith('data:application/pdf') ? src : '');
   // FIX HANG: dulu resolve SUPA: pakai .then() tanpa await, lepas tu _viewPdfSrc terus kena timpa balik
@@ -909,11 +932,12 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
     showViewTab('pdf');
   } else {
     if(!imgSrc) return;
-    showViewTab('img');
+    if(_viewGallery && _viewGallery.length>1){ renderGalleryAllPages(); }
+    else showViewTab('img');
   }
   document.getElementById('imgViewModal').classList.add('open');
-  // Kalau gallery, update bar lepas buka (thumbs + counter + prev/next)
-  try{ if(_viewGallery && _viewGallery.length>1) setTimeout(()=>updateGalleryBar(), 30); }catch(e){}
+  // Gallery bar tak perlu dah - semua pages dah keluar bertindih, tak payah Prev/Next
+  try{ const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }catch(e){}
 }
 // Helper untuk Detail: tekan gambar = view gambar je, tekan PDF = view PDF je
 function openImgViewOnlyImg(src,title,meta,ctx){ openImgView(src,title,meta,'',ctx); }
