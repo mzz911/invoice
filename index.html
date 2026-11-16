@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -492,7 +492,7 @@ function render(){
         const _firstItem=g.items.find(x=>x.img)||g.items[0];
         d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?supaImgTag(_firstImg):'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
         // Thumb - tekan gambar view gambar invoice macam Belum Bayar, bukan buka PV
-        const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem && _firstItem.img) openImgView(_firstItem.img,'Gambar Invoice - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.pdf||'',{kind:'invoice',id:_firstItem.id}); else if(_firstItem && _firstItem.pdf) openImgViewOnlyPdf(_firstItem.pdf,'PDF - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.img,{kind:'invoice',id:_firstItem.id}); else { _viewCtx={kind:'invoice',id:_firstItem.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
+        const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); /* FIX HANG: dulu buka SEMUA invoice PV sekali (9 invoice = 9 gambar/PDF besar) -> Safari hang. Sekarang buka invoice PERTAMA je. Nak lain, tekan card PV. */ if(g.items && g.items.length>1){ try{ setTimeout(()=>showToast('PV '+(g.pv||'')+' ada '+g.items.length+' invoice - ni yang pertama je. Nak lain, tekan card PV.'),600); }catch(e){} } if(_firstItem && _firstItem.img) openImgView(_firstItem.img,'Gambar Invoice - '+_firstItem.name+' (1/'+(g.items?g.items.length:1)+' • '+(g.pv||'')+')',_firstItem.inv+' • '+_firstItem.date,_firstItem.pdf||'',{kind:'invoice',id:_firstItem.id}); else if(_firstItem && _firstItem.pdf) openImgViewOnlyPdf(_firstItem.pdf,'PDF - '+_firstItem.name,_firstItem.inv+' • '+_firstItem.date,_firstItem.img,{kind:'invoice',id:_firstItem.id}); else { _viewCtx={kind:'invoice',id:_firstItem.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       } else {
         const x=g.items[0];
         d.innerHTML=`<div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div></div><div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill paid">Dah Bayar</span>${x.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${x.payMethod}</div>`:''}</div>`;
@@ -574,7 +574,7 @@ function render(){
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
       d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?supaImgTag(_firstImg2):'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
-      const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); if(g.items && g.items.length>1){ openPVGroupGallery(g.items, g.pv||''); return; } if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); else { _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
+      const _th2=d.querySelector('[data-thumb]'); if(_th2) _th2.onclick=(e)=>{ e.stopPropagation(); /* FIX HANG: sama macam TH1 - buka pertama je, bukan semua PV sekali */ if(g.items && g.items.length>1){ try{ setTimeout(()=>showToast('PV '+(g.pv||'')+' ada '+g.items.length+' invoice - ni yang pertama je. Nak lain, tekan card PV.'),600); }catch(e){} } if(_firstItem2 && _firstItem2.img) openImgView(_firstItem2.img,'Gambar Invoice - '+_firstItem2.name+' (1/'+(g.items?g.items.length:1)+' • '+(g.pv||'')+')',_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.pdf||'',{kind:'invoice',id:_firstItem2.id}); else if(_firstItem2 && _firstItem2.pdf) openImgViewOnlyPdf(_firstItem2.pdf,'PDF - '+_firstItem2.name,_firstItem2.inv+' • '+_firstItem2.date,_firstItem2.img,{kind:'invoice',id:_firstItem2.id}); else { _viewCtx={kind:'invoice',id:_firstItem2.id}; imgTarget='viewer'; document.getElementById('fImg').click(); } }; // Klik thumbnail PV: kalau 5 invoice, view 5 tu semua (gallery)
       // Click + swipe Cancel PV - sama macam tab Dah Bayar
       let _supAll=false; const _ccAll=d;
       _ccAll.onclick=e=>{ if(_supAll){ _supAll=false; return; } if(_ccAll.dataset.open==='1'){ _closeAll(); return; } openPVDetail(g.pv,g.payDate); };
@@ -830,7 +830,8 @@ async function renderGalleryAllPages(){
   if(bar) bar.style.display='none';
   if(gbar) gbar.style.display='none';
   box.innerHTML='';
-  const items=_viewGallery||[];
+  let items=(_viewGallery||[]).slice();
+  if(items.length>6){ const _more=items.length-6; items=items.slice(0,6); setTimeout(()=>{ try{ showToast('Ada '+_more+' lagi tak load - buka satu-satu dari PV Detail supaya tak hang'); }catch(e){} },800); }
   for(let i=0;i<items.length;i++){
     const it=items[i]; const _src=it.img||'';
     const wrap=document.createElement('div'); wrap.style.cssText='position:relative';
@@ -898,11 +899,11 @@ function showGalleryItem(idx){
   openImgView(it.img||'', 'Gambar Invoice - '+it.name, (it.inv||'')+' • '+it.date, it.pdf||'', {kind:'invoice', id:it.id}, {items:_viewGallery, idx:idx, pv:_viewGalleryPV});
 }
 function openPVGroupGallery(items, pvLabel){
+  // FIX HANG: dulu set _viewGallery = SEMUA invoice PV (9 invoice) -> renderGalleryAllPages load 9 gambar/PDF besar sekali -> Safari hang. Sekarang buka invoice PERTAMA je.
   const _list=(items||[]).filter(x=>x.img||x.pdf).map(x=>({id:x.id, name:x.name, inv:x.inv, date:x.date, img:x.img||'', pdf:x.pdf||''}));
   if(!_list.length) return;
-  if(_list.length===1){ const _it=_list[0]; openImgView(_it.img||'', 'Gambar Invoice - '+_it.name, (_it.inv||'')+' • '+_it.date, _it.pdf||'', {kind:'invoice', id:_it.id}); return; }
-  _viewGallery=_list; _viewGalleryIdx=0; _viewGalleryPV=pvLabel||'';
-  showGalleryItem(0);
+  const _it=_list[0]; openImgView(_it.img||'', 'Gambar Invoice - '+_it.name+' (1/'+_list.length+' • '+(pvLabel||'')+')', (_it.inv||'')+' • '+_it.date, _it.pdf||'', {kind:'invoice', id:_it.id});
+  if(_list.length>1){ try{ setTimeout(()=>showToast('PV '+(pvLabel||'')+' ada '+_list.length+' invoice - ni yang pertama je. Nak lain, tekan card PV.'),600); }catch(e){} }
 }
 async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
   try{ if(pdfSrc && typeof pdfSrc==='object' && ctx && typeof ctx==='object' && ctx.items && !gallery){ gallery=ctx; ctx=pdfSrc; pdfSrc=''; } }catch(e){}
