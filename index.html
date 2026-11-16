@@ -801,7 +801,8 @@ async function renderGalleryAllPages(){
   const imgEl=document.getElementById('imgViewImg'), pdfEl=document.getElementById('imgViewPdf'), bar=document.getElementById('imgViewPdfBar'), gbar=document.getElementById('imgViewGalleryBar');
   if(imgEl) imgEl.style.display='none';
   if(pdfEl) pdfEl.style.display='block';
-  if(bar) bar.style.display='none';
+  // Kalau ada PDF, biar bar Buka PDF Penuh nampak jugak - user boleh pilih. Kalau takde PDF, sembunyi.
+  if(bar) bar.style.display=(_viewPdfSrc ? 'flex' : 'none');
   if(gbar) gbar.style.display='none';
   box.innerHTML='';
   const items=_viewGallery||[];
@@ -878,7 +879,9 @@ function openPVGroupGallery(items, pvLabel){
   _viewGallery=_list; _viewGalleryIdx=0; _viewGalleryPV=pvLabel||'';
   showGalleryItem(0);
 }
-async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=ctx; try{ const _vm=document.getElementById('imgViewModal'); if(_vm) _vm.style.zIndex='100'; }catch(e){}
+async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
+  try{ if(pdfSrc && typeof pdfSrc==='object' && ctx && typeof ctx==='object' && ctx.items && !gallery){ gallery=ctx; ctx=pdfSrc; pdfSrc=''; } }catch(e){}
+  if(ctx) _viewCtx=ctx; try{ const _vm=document.getElementById('imgViewModal'); if(_vm) _vm.style.zIndex='100'; }catch(e){}
   // Buka modal terus + tunjuk Loading - jangan tunggu resolve SUPA / fetch siap baru buka, nanti user ingat tekan tak jadi.
   try{ document.getElementById('imgViewTitle').textContent=title||'Gambar'; document.getElementById('imgViewMeta').textContent=meta||''; const _b=document.getElementById('imgViewPdfPages'); if(_b && pdfSrc) _b.innerHTML='<p style="padding:20px;color:#666">Loading PDF...</p>'; document.getElementById('imgViewModal').classList.add('open'); }catch(e){}
   // Gallery: kalau ada gallery, simpan. Kalau single, sembunyi bar
@@ -928,8 +931,9 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ if(ctx) _viewCtx=
   if(pdf){
     const ob=document.getElementById('imgViewPdfOpen');
     if(ob) ob.onclick=async()=>{ try{ let u=pdf; if(u && String(u).startsWith('SUPA:')){ try{ u=await supaResolveForView(u); }catch(e){} } if(u && String(u).startsWith('http')){ try{ const _chk=await fetch(u,{method:'HEAD'}); if(!_chk.ok) throw new Error('fetch gagal '+_chk.status); }catch(_e){ try{ showToast('PDF asal 404 dalam cloud - tunjuk gambar & bina semula kat bawah'); }catch(_e2){} try{ renderPdfPages(_viewPdfSrc||pdf); }catch(_e2){} return; } window.open(u,'_blank'); return; } if(u && String(u).startsWith('data:')){ const resp=await fetch(u); const blob=await resp.blob(); const bu=URL.createObjectURL(blob); window.open(bu,'_blank'); setTimeout(()=>URL.revokeObjectURL(bu), 60000); return; } showToast('PDF tak dapat buka'); }catch(e){ showToast('PDF tak dapat buka'); } };
-    // Kalau ada dua-dua, default tunjuk PDF (macam Smart Receipt). Kalau tekan gambar kat Detail, Detail akan pass pdf='' jadi tunjuk gambar je.
-    showViewTab('pdf');
+    // Kalau ada dua-dua DAN gallery>1, utamakan gallery (pages gambar) - sebab PDF auto kadang dah jadi 1 muka je (timpa PDF asal), tapi pages gambar masih 2. User tekan gambar nak tengok pages, bukan PDF 1 muka.
+    if(_viewGallery && _viewGallery.length>1){ renderGalleryAllPages(); }
+    else showViewTab('pdf');
   } else {
     if(!imgSrc) return;
     if(_viewGallery && _viewGallery.length>1){ renderGalleryAllPages(); }
@@ -956,14 +960,14 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
    // Sekarang kalau pages>1, hantar SEMUA pages jadi gallery - boleh Prev/Next / swipe.
    if(x.pages && x.pages.length>1){
      const _items=x.pages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
-     openImgView(x.pages[0],'Gambar Invoice - '+x.name,x.inv+' • '+x.date+' • '+x.pages.length+' pages',{kind:'invoice',id:x.id},{items:_items, idx:0});
+     openImgView(x.pages[0],'Gambar Invoice - '+x.name,x.inv+' • '+x.date+' • '+x.pages.length+' pages',x.pdf||'',{kind:'invoice',id:x.id},{items:_items, idx:0});
    } else openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id});
  }; const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
  const rpb=b.querySelector('#recoverPagesBtn'); if(rpb) rpb.onclick=async()=>{ rpb.textContent='⏳ Pulihkan...'; rpb.disabled=true; try{ const rec=await supaRecoverPagesFromPdf(x); if(rec && rec.length>1){ x.pages=rec.slice(); if(!x.img) x.img=rec[0]; try{ save(); }catch(e){} showToast('Dipulihkan - '+rec.length+' pages dari PDF Asal'); openDetail(id); } else { rpb.textContent='🔄 Pulihkan Page 2 dari PDF Asal'; rpb.disabled=false; showToast('PDF Asal cuma ada 1 muka / tak dapat baca - cuba Lihat PDF Asal'); } }catch(e){ rpb.textContent='🔄 Pulihkan Page 2 dari PDF Asal'; rpb.disabled=false; } };
  const dp=b.querySelector('#dPayImg'); if(dp) dp.onclick=()=>{
    if(x.paymentPages && x.paymentPages.length>1){
      const _items=x.paymentPages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
-     openImgView(x.paymentPages[0],'Resit Payment - '+x.name,x.pv||' • '+x.paymentPages.length+' pages',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate},{items:_items, idx:0});
+     openImgView(x.paymentPages[0],'Resit Payment - '+x.name,x.pv||' • '+x.paymentPages.length+' pages',x.paymentPdf||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate},{items:_items, idx:0});
    } else openImgViewOnlyImg(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
  };
  const vp=b.querySelector('#viewPayBtn'); if(vp) vp.onclick=()=>openImgView(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',x.paymentPdf||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate}); const dppb=b.querySelector('#dPayPdfBtn'); if(dppb) dppb.onclick=()=>openImgViewOnlyPdf(x.paymentPdf,'PDF Resit - '+x.name,x.pv||'',x.paymentImg,{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
@@ -1240,7 +1244,7 @@ function openPVDetail(pv, payDate){
     const _arr=(resitPages.length?resitPages:resits);
     if(_arr.length>1){
       const _items=_arr.map(p=>({img:p, pdf:'', name:pv, inv:pv, date:payDate}));
-      openImgView(_arr[i],'Resit Payment - '+pv,pv+' • '+_arr.length+' pages',{kind:'paymentPV',pv,payDate},{items:_items, idx:i});
+      openImgView(_arr[i],'Resit Payment - '+pv,pv+' • '+_arr.length+' pages','',{kind:'paymentPV',pv,payDate},{items:_items, idx:i});
     } else openImgView(_arr[i],'Resit Payment - '+pv,pv,'',{kind:'paymentPV',pv,payDate});
   }; });
   const epPV=b.querySelector('#editPVPayBtn'); if(epPV) epPV.onclick=()=>{ openEditPay(pv, payDate); };
