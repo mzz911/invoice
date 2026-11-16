@@ -961,6 +961,8 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
     else showViewTab('pdf');
   } else {
     if(!imgSrc){
+      // Kalau gallery/pages ada (img kosong tapi pages ada - macam No.2 kalau img tak simpan), render gallery dulu, jangan tunjuk kosong
+      if(_viewGallery && _viewGallery.length>0){ renderGalleryAllPages(); document.getElementById('imgViewModal').classList.add('open'); try{ const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }catch(e){} return; }
       // TAKDE GAMBAR: jangan return kosong - tunjuk placeholder + butang Upload, supaya boleh upload dari Viewer terus
       try{
         const _box=document.getElementById('imgViewPdfPages');
@@ -982,7 +984,7 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
 // Helper untuk Detail: tekan gambar = view gambar je, tekan PDF = view PDF je
 function openImgViewOnlyImg(src,title,meta,ctx){ openImgView(src,title,meta,'',ctx); }
 function openImgViewOnlyPdf(pdf,title,meta,imgSrc,ctx){ _viewImgSrc=imgSrc||''; openImgView(imgSrc||'',title,meta,pdf,ctx); }
-function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_xiv) return; const _has=_xiv.img||_xiv.pdf||(_xiv.pages && _xiv.pages.length); openImgView(_xiv.img||'', 'Gambar Invoice - '+_xiv.name, (_xiv.inv||'')+' • '+_xiv.date+((_xiv.pages && _xiv.pages.length>1)?' • '+_xiv.pages.length+' pages':'')+(_has?'':' • Tiada gambar lagi - tekan Upload'), _xiv.pdf||'', {kind:'invoice', id:_xiv.id}); } // TAKDE GAMBAR PUN BUKA VIEWER: supaya boleh Upload dari Viewer terus, jangan lompat ke Detail
+function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_xiv) return; const _firstImg=_xiv.img||(_xiv.pages && _xiv.pages[0])||''; const _has=_firstImg||_xiv.pdf||(_xiv.pages && _xiv.pages.length); openImgView(_firstImg, 'Gambar Invoice - '+_xiv.name, (_xiv.inv||'')+' • '+_xiv.date+((_xiv.pages && _xiv.pages.length>1)?' • '+_xiv.pages.length+' pages':'')+(_has?'':' • Tiada gambar lagi - tekan Upload'), _xiv.pdf||'', {kind:'invoice', id:_xiv.id}); } // No.2 (ada gambar) -> Viewer + gambar dia. Takde gambar pun -> Viewer + Upload. Fallback pages[0] kalau img kosong tapi pages ada.
 
 async function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
 ${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages':''}</p><img src="${x.img}" style="width:100%;border-radius:12px;cursor:pointer" id="dInvImg">${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
