@@ -170,7 +170,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -960,7 +960,18 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
     if(_viewGallery && _viewGallery.length>1){ renderGalleryAllPages(); }
     else showViewTab('pdf');
   } else {
-    if(!imgSrc) return;
+    if(!imgSrc){
+      // TAKDE GAMBAR: jangan return kosong - tunjuk placeholder + butang Upload, supaya boleh upload dari Viewer terus
+      try{
+        const _box=document.getElementById('imgViewPdfPages');
+        if(_box){ _box.innerHTML='<div style="padding:28px 16px;text-align:center"><p style="font-size:15px;font-weight:700;margin:0 0 6px">Tiada gambar lagi</p><p style="font-size:13px;color:#666;margin:0 0 14px">Invoice ni belum ada gambar / PDF.<br>Tekan Upload kat bawah untuk tambah gambar.</p><button id="emptyUploadBtn" style="border:0;background:#4C1D95;color:#fff;border-radius:999px;padding:12px 22px;font-weight:700;font-size:15px">📷 Upload Gambar</button></div>'; const _btn=document.getElementById('emptyUploadBtn'); if(_btn) _btn.onclick=()=>{ imgTarget='viewer'; document.getElementById('fImg').click(); }; }
+        const _ie=document.getElementById('imgViewImg'); if(_ie) _ie.style.display='none';
+        const _pe=document.getElementById('imgViewPdf'); if(_pe) _pe.style.display='block';
+      }catch(e){}
+      document.getElementById('imgViewModal').classList.add('open');
+      try{ const _gb=document.getElementById('imgViewGalleryBar'); if(_gb) _gb.style.display='none'; }catch(e){}
+      return;
+    }
     if(_viewGallery && _viewGallery.length>1){ renderGalleryAllPages(); }
     else showViewTab('img');
   }
@@ -971,7 +982,7 @@ async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
 // Helper untuk Detail: tekan gambar = view gambar je, tekan PDF = view PDF je
 function openImgViewOnlyImg(src,title,meta,ctx){ openImgView(src,title,meta,'',ctx); }
 function openImgViewOnlyPdf(pdf,title,meta,imgSrc,ctx){ _viewImgSrc=imgSrc||''; openImgView(imgSrc||'',title,meta,pdf,ctx); }
-function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_xiv) return; if(!_xiv.img && !_xiv.pdf && !(_xiv.pages && _xiv.pages.length)){ openDetail(id); return; } openImgView(_xiv.img||'', 'Gambar Invoice - '+_xiv.name, (_xiv.inv||'')+' • '+_xiv.date+((_xiv.pages && _xiv.pages.length>1)?' • '+_xiv.pages.length+' pages':''), _xiv.pdf||'', {kind:'invoice', id:_xiv.id}); } // Detail Invoice samakan macam PV Detail: tekan -> VIEW PDF dulu all pages, Edit dalam viewer baru pergi Edit Invoice
+function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_xiv) return; const _has=_xiv.img||_xiv.pdf||(_xiv.pages && _xiv.pages.length); openImgView(_xiv.img||'', 'Gambar Invoice - '+_xiv.name, (_xiv.inv||'')+' • '+_xiv.date+((_xiv.pages && _xiv.pages.length>1)?' • '+_xiv.pages.length+' pages':'')+(_has?'':' • Tiada gambar lagi - tekan Upload'), _xiv.pdf||'', {kind:'invoice', id:_xiv.id}); } // TAKDE GAMBAR PUN BUKA VIEWER: supaya boleh Upload dari Viewer terus, jangan lompat ke Detail
 
 async function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
 ${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages':''}</p><img src="${x.img}" style="width:100%;border-radius:12px;cursor:pointer" id="dInvImg">${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
