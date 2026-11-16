@@ -233,7 +233,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -250,7 +250,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1761,12 +1761,12 @@ function warpPerspective(dataUrl, quadPct, cb){
 function showCropEditor(dataUrl, target, isScan){
   const existing=document.getElementById('cropModal'); if(existing) existing.remove();
   const m=document.createElement('div'); m.id='cropModal'; m.className='modal open';
-  m.innerHTML = `<div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><div style="display:flex;gap:8px"><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
+  m.innerHTML = `<style>#cropModal,#cropModal *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important} #cropModal ::selection{background:transparent!important} #cropModal img{-webkit-user-drag:none!important}</style><div class="sheet" style="text-align:center;padding:0;background:#000;color:#fff;border-radius:0;max-width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent"><div id="cropHeader" class="closeRow" style="margin:0;background:#000;color:#fff;padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center"><button id="cropCancel" style="background:transparent;color:#fff;border:0;font-size:18px">✕</button><div style="display:flex;gap:8px"><button id="cropUse" style="background:#000;color:#fff;border:1px solid rgba(255,255,255,0.4);padding:8px 18px;border-radius:999px;font-weight:600;font-size:15px">Next</button></div></div>
   <div id="editStage" style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
   <div id="cropViewport" style="position:relative;width:100%;flex:1;min-height:0;overflow:hidden;background:#000;border-radius:0;touch-action:pan-x pan-y;display:flex;justify-content:center;align-items:center;padding:8px;box-sizing:border-box">
   <div id="zoomSpacer" style="position:relative;margin:auto;display:flex;justify-content:center;align-items:flex-start">
   <div id="cropWrap" style="position:relative;flex:0 0 auto;background:#000;border-radius:0;overflow:hidden;touch-action:none;transform-origin:0 0">
-    <img id="cropImg" src="${dataUrl}" style="width:100%;height:auto;display:block;border-radius:0">
+    <img id="cropImg" src="${dataUrl}" draggable="false" style="width:100%;height:auto;display:block;border-radius:0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none;-webkit-tap-highlight-color:transparent">
     <svg id="dimSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"><path id="dimPath" d="" fill="rgba(0,0,0,0.55)" fill-rule="evenodd"></path></svg>
     <svg id="quadSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2"><polygon id="quadPoly" points="" fill="rgba(168,85,247,0.02)" stroke="#c026d3" stroke-width="1" vector-effect="non-scaling-stroke" opacity="1"></polygon></svg>
     <div data-quad="0" style="position:absolute;width:32px;height:32px;background:#fff;border:2px solid rgba(255,255,255,0.95);border-radius:50%;transform:translate(-50%,-50%);z-index:3;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1.5px rgba(168,85,247,0.9);cursor:grab"></div>
@@ -1792,6 +1792,8 @@ function showCropEditor(dataUrl, target, isScan){
   </div>
   </div>`;
   document.body.appendChild(m);
+  // NO HIGHLIGHT: Safari iPhone suka select text/gambar bila tarik bulat crop -> keluar highlight biru + dot biru kat Next macam screenshot. Block terus.
+  try{ m.addEventListener('selectstart', e=>e.preventDefault()); m.addEventListener('contextmenu', e=>e.preventDefault()); m.addEventListener('dragstart', e=>e.preventDefault()); const _ci=m.querySelector('#cropImg'); if(_ci){ _ci.addEventListener('dragstart', e=>e.preventDefault()); _ci.addEventListener('contextmenu', e=>e.preventDefault()); } }catch(e){}
   let cur=dataUrl; let orig=dataUrl; let reviewOrig=dataUrl;
   let quad=[{x:6,y:6},{x:94,y:6},{x:94,y:94},{x:6,y:94}];
   let fitW=0, fitH=0; let zoom=1;
@@ -1862,7 +1864,7 @@ function showCropEditor(dataUrl, target, isScan){
   let _grabOffX=0, _grabOffY=0;
   // Hujung jari = 36px atas tengah jari. Kalau tak tolak ni, bulat ikut tengah jari, bila lepas nampak lari dari bucu.
   const TIP_OFFSET_Y=0; // 0 - bulat ikut tengah jari tepat, jangan tolak atas, nanti terkeluar dari bucu
-  function quadPointerDown(e, idx){
+  function quadPointerDown(e, idx){ try{ const _sel=window.getSelection&&window.getSelection(); if(_sel) _sel.removeAllRanges(); }catch(e){}
     draggingIdx=idx;
     const r=wrap.getBoundingClientRect();
     // Grab offset + hujung jari: bulat ikut hujung jari, bukan tengah jari
