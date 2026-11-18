@@ -182,7 +182,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -234,7 +234,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- REPORT -->
 <div class="modal" id="reportModal"><div class="sheet"><div class="closeRow"><button id="reportBack">← Kembali</button><b>Report</b><button id="reportClose">✕ Tutup</button></div>
-<div id="reportSummary" style="font-weight:700;margin:8px 0"></div><div id="reportPreview" style="overflow:auto;max-height:220px"></div>
+<div id="reportSummary" style="font-weight:700;margin:8px 0"></div><div id="reportScopeBar" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px"><button data-scope="current" style="border:0;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">👁️ View Semasa</button><button data-scope="all" style="border:0;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">Semua</button><button data-scope="paid" style="border:0;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">Dah Bayar</button><button data-scope="unpaid" style="border:0;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">Belum Bayar</button><button data-scope="batal" style="border:0;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">PV Batal</button></div><div id="reportPreview" style="overflow:auto;max-height:220px"></div>
 <div class="row" style="margin-top:12px"><button class="btn btn-green" id="dlCsv" style="flex:1">⬇️ Download CSV</button><button class="btn btn-light" id="copyCsv" style="flex:1">📋 Copy CSV</button></div>
 <button class="btn btn-dark" id="dlCsvAcc" style="width:100%;margin-top:8px">📊 Download CSV Accounting</button>
 <button class="btn btn-dark" id="dlPdf" style="width:100%;margin-top:8px">⬇️ Download PDF</button>
@@ -245,7 +245,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -262,7 +262,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1413,12 +1413,62 @@ document.getElementById('filterBtn').onclick=()=>document.getElementById('filter
 document.getElementById('filterClose').onclick=document.getElementById('filterBack').onclick=()=>document.getElementById('filterModal').classList.remove('open');
 document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getElementById('fltCat').value; filters.status=document.getElementById('fltStatus').value; filters.pay=document.getElementById('fltPay').value; document.getElementById('filterModal').classList.remove('open'); render(); };
 document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
-document.getElementById('reportBtn').onclick=()=>{ const list=filtered(); const total=list.reduce((s,x)=>s+signedPrice(x),0); document.getElementById('reportSummary').textContent=list.length+' invoice • '+fmt(total)+' • '; const csv=csvFor(list); document.getElementById('csvText').value=csv; document.getElementById('reportPreview').innerHTML=`<table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th>Tarikh</th><th>Supplier</th><th>PV</th><th>Harga</th></tr>${list.slice(0,20).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.pv||'-'}</td><td>${fmt(signedPrice(x))}</td></tr>`).join('')}</table>`; document.getElementById('reportModal').classList.add('open'); };
+// REPORT IKUT VIEW SEMASA: dulu Report tak tunjuk skop & tab PV Batal return [] (filtered() kosong untuk batal) - user ingat Report selalu generate semua.
+// Sekarang: default = View Semasa (tab + cari + filter yang tengah aktif). Boleh tukar skop dalam Report tanpa tutup modal. Download semua pakai list yang dah freeze masa buka Report, bukan filtered() baru.
+function reportListForScope(scope){
+  const q=(query||'').toLowerCase();
+  const _matchQ=x=>!q||((x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q));
+  const _matchF=x=>{ if(filters.cat && x.cat!==filters.cat) return false; if(filters.status && (filters.status==='paid' ? !x.paid : x.paid)) return false; if(filters.pay && x.payMethod!==filters.pay) return false; return true; };
+  if(scope==='batal'){
+    let list=(cancelledPVs||[]).map(c=>({date:c.date, inv:c.inv, name:c.name, cat:'', payMethod:'', paid:false, payDate:c.date, pv:c.pv, price:Math.abs(Number(c.price||0)), note:'PV Batal', _isBatal:true}));
+    if(q) list=list.filter(x=>((x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)));
+    return list;
+  }
+  if(scope==='current'){
+    if(tab==='batal') return reportListForScope('batal');
+    return filtered();
+  }
+  let list=[...invoices];
+  if(q) list=list.filter(_matchQ);
+  list=list.filter(_matchF);
+  if(scope==='paid') list=list.filter(x=>x.paid);
+  if(scope==='unpaid') list=list.filter(x=>!x.paid);
+  return list;
+}
+function reportScopeSlug(scope){
+  if(scope==='current') return tab==='all'?'semua':tab==='paid'?'dah-bayar':tab==='unpaid'?'belum-bayar':tab==='batal'?'pv-batal':'semua';
+  if(scope==='all') return 'semua';
+  if(scope==='paid') return 'dah-bayar';
+  if(scope==='unpaid') return 'belum-bayar';
+  if(scope==='batal') return 'pv-batal';
+  return 'semua';
+}
+function renderReport(scope){
+  window._reportScope=scope||'current';
+  const list=reportListForScope(window._reportScope);
+  window._reportList=list;
+  const total=list.reduce((s,x)=>s+signedPrice(x),0);
+  const _tabLabel=tab==='all'?'Semua':tab==='paid'?'Dah Bayar':tab==='unpaid'?'Belum Bayar':tab==='batal'?'PV Batal':'Semua';
+  const _scopeLabel=window._reportScope==='current' ? _tabLabel+' (View Semasa)' : window._reportScope==='all'?'Semua':window._reportScope==='paid'?'Dah Bayar':window._reportScope==='unpaid'?'Belum Bayar':window._reportScope==='batal'?'PV Batal':'Semua';
+  let _extra='';
+  if(query) _extra+=' • Cari: "'+query+'"';
+  if(filters.cat) _extra+=' • Kategori: '+filters.cat;
+  if(filters.status) _extra+=' • Status: '+(filters.status==='paid'?'Dah Bayar':'Belum Bayar');
+  if(filters.pay) _extra+=' • Bayar: '+filters.pay;
+  document.getElementById('reportSummary').textContent='Skop: '+_scopeLabel+' • '+list.length+' invoice • '+fmt(total)+_extra;
+  const csv=csvFor(list);
+  document.getElementById('csvText').value=csv;
+  document.getElementById('reportPreview').innerHTML=`<table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th>Tarikh</th><th>Supplier</th><th>PV</th><th>Harga</th></tr>${list.slice(0,20).map(x=>`<tr><td>${x.date}</td><td>${x.name}</td><td>${x.pv||'-'}</td><td>${fmt(signedPrice(x))}</td></tr>`).join('')}</table>`+(list.length>20?`<p style="font-size:11px;color:#666;margin:6px 0 0">+ ${list.length-20} lagi dalam CSV / PDF</p>`:'')+(list.length===0?`<p style="font-size:12px;color:#666;margin:8px 0">Tiada invoice dalam skop ni</p>`:'');
+  try{ document.querySelectorAll('#reportScopeBar [data-scope]').forEach(b=>{ const _on=b.dataset.scope===window._reportScope; b.style.background=_on?'#4C1D95':'#F1F5F9'; b.style.color=_on?'#fff':'#334155'; }); }catch(e){}
+  document.getElementById('reportModal').classList.add('open');
+}
+document.getElementById('reportBtn').onclick=()=>{ renderReport('current'); };
+try{ document.querySelectorAll('#reportScopeBar [data-scope]').forEach(b=>{ b.onclick=()=>renderReport(b.dataset.scope); }); }catch(e){}
 document.getElementById('reportClose').onclick=document.getElementById('reportBack').onclick=document.getElementById('reportDone').onclick=()=>document.getElementById('reportModal').classList.remove('open');
-document.getElementById('dlCsvAcc').onclick=()=>{ const csv=csvForAccounting(filtered()); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-accounting-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV Accounting download'); };
-document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV download'); };
+document.getElementById('dlCsvAcc').onclick=()=>{ const _list=(window._reportList||filtered()); const csv=csvForAccounting(_list); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-accounting-'+reportScopeSlug(window._reportScope||'current')+'-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV Accounting download - '+_list.length+' invoice'); };
+document.getElementById('dlCsv').onclick=()=>{ const csv=document.getElementById('csvText').value; const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-'+reportScopeSlug(window._reportScope||'current')+'-'+today()+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); showToast('CSV download - '+(window._reportList||[]).length+' invoice'); };
 document.getElementById('copyCsv').onclick=async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('csvText').value); showToast('CSV dah copy'); }catch(e){ document.getElementById('csvText').select(); document.execCommand('copy'); showToast('CSV dah copy'); } };
-document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(filtered());
+document.getElementById('dlPdf').onclick=()=>downloadPdfBulk(window._reportList||filtered());
 
 document.getElementById('settingBtn').onclick=()=>{ try{ document.getElementById('settingModal').classList.add('open'); }catch(e){ alert('Setting gagal buka: '+e); } }; document.getElementById('settingBtn').addEventListener('click', ()=>{ try{ document.getElementById('settingModal').classList.add('open'); }catch(e){} });
 document.getElementById('settingClose').onclick=document.getElementById('settingBack').onclick=document.getElementById('settingDone').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); };
