@@ -245,7 +245,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -262,7 +262,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1131,7 +1131,8 @@ async function openEditPay(pv, payDate){
   renderPayInvList();
   document.getElementById('payModal').classList.add('open');
 }
-function renderPayAmounts(){ const checked=[...document.querySelectorAll('.pm:checked')].map(c=>c.value); const box=document.getElementById('payAmounts'); if(!checked.length){ box.innerHTML=''; return; } const total=payTarget.map(id=>invoices.find(x=>x.id===id)).reduce((s,x)=>s+signedPrice(x),0); const _old={}; document.querySelectorAll('[data-amt]').forEach(inp=>{ _old[inp.dataset.amt]=inp.value; }); box.innerHTML='<label>Amount</label>'+checked.map((m,i)=>{ let v=_old[m]; if(v===undefined||v===''){ v = (checked.length===1||i===0) ? Number(total).toFixed(2) : '0.00'; } return `<label>${m}</label><input data-amt="${m}" type="number" step="0.01" value="${v}">`; }).join(''); }
+function updatePayBalanceHint(){ try{ const _hint=document.getElementById('payBalanceHint'); if(!_hint) return; if(typeof payMode!=='undefined' && payMode==='editPV'){ _hint.innerHTML=''; return; } const _total=(typeof payTarget!=='undefined'&&payTarget?payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0):0); let _paid=0; document.querySelectorAll('[data-amt]').forEach(inp=>{ _paid+=parseFloat(inp.value||'0')||0; }); _paid=Math.round(_paid*100)/100; const _diff=Math.round((_total-_paid)*100)/100; if(Math.abs(_diff)<=0.01){ _hint.innerHTML='<span style="color:#15803D">✓ Cukup - '+fmt(_paid)+' / '+fmt(_total)+'</span>'; } else if(_diff>0){ _hint.innerHTML='⚠️ Bayar tak cukup - Baki <b>'+fmt(_diff)+'</b> akan auto jadi list baru (tarikh PV) - Belum Bayar'; } else { _hint.innerHTML='⚠️ Terlebih bayar - Lebihan <b>'+fmt(_diff)+'</b> (-ve) akan auto jadi list baru - Belum Bayar'; } }catch(e){} }
+function renderPayAmounts(){ const checked=[...document.querySelectorAll('.pm:checked')].map(c=>c.value); const box=document.getElementById('payAmounts'); if(!checked.length){ box.innerHTML=''; return; } const total=payTarget.map(id=>invoices.find(x=>x.id===id)).reduce((s,x)=>s+signedPrice(x),0); const _old={}; document.querySelectorAll('[data-amt]').forEach(inp=>{ _old[inp.dataset.amt]=inp.value; }); box.innerHTML='<label>Amount</label>'+checked.map((m,i)=>{ let v=_old[m]; if(v===undefined||v===''){ v = (checked.length===1||i===0) ? Number(total).toFixed(2) : '0.00'; } return `<label>${m}</label><input data-amt="${m}" type="number" step="0.01" value="${v}">`; }).join('')+'<div id="payBalanceHint" style="font-size:12px;font-weight:700;color:#92400e;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:8px 10px;margin-top:8px;line-height:1.4"></div>'; box.querySelectorAll('[data-amt]').forEach(inp=>{ inp.oninput=updatePayBalanceHint; }); updatePayBalanceHint(); }
 function csvFor(list){
   const head='Tarikh Invoice,No Invoice,Supplier,Kategori,Cara Bayar,Split,Status,Tarikh Bayar,PV,Harga,Nota';
   const rows=list.map(x=>{
@@ -1722,22 +1723,29 @@ document.getElementById('payConfirm').onclick=()=>{
   if(!checked.length){ alert('Pilih cara bayar dulu'); return; }
   const items=payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
   const total=items.reduce((s,x)=>s+signedPrice(x),0);
-  let payMethod='', split=null;
-  if(checked.length===1){ payMethod=checked[0]; }
-  else { payMethod='Split Payment'; split={}; let sum=0; for(const m of checked){ const v=parseFloat(document.querySelector(`[data-amt="${m}"]`)?.value||'0'); split[m]=v; sum+=v; } if(Math.abs(sum-total)>0.01){ alert(`Total split ${fmt(sum)} tak sama dengan total invoice ${fmt(total)}`); return; } }
+  let payMethod='', split=null, paid=total;
+  if(payMode==='editPV'){ if(checked.length===1){ payMethod=checked[0]; } else { payMethod='Split Payment'; split={}; let sum=0; for(const m of checked){ const v=parseFloat(document.querySelector(`[data-amt="${m}"]`)?.value||'0'); split[m]=v; sum+=v; } if(Math.abs(sum-total)>0.01){ alert(`Total split ${fmt(sum)} tak sama dengan total invoice ${fmt(total)}`); return; } paid=sum; } }
+  else { if(checked.length===1){ payMethod=checked[0]; const _v=parseFloat(document.querySelector(`[data-amt="${checked[0]}"]`)?.value||''); paid=isNaN(_v)?total:_v; } else { payMethod='Split Payment'; split={}; let sum=0; for(const m of checked){ const v=parseFloat(document.querySelector(`[data-amt="${m}"]`)?.value||'0'); split[m]=v; sum+=v; } paid=sum; } paid=Math.round(paid*100)/100; if(!(paid>0)){ alert('Amount mesti lebih dari 0'); return; } }
   // Kalau Edit, kekalkan PV lama, jangan buat PV baru
   let pv, pd;
   if(payMode==='editPV' && editPVInfo){ pv=editPVInfo.pv; pd=document.getElementById('payDateInput')?.value||editPVInfo.payDate; }
   else { pd=document.getElementById('payDateInput')?.value||today(); pv=nextPV(pd); }
+  // AUTO BAKI: bayar tak cukup -> baki +ve jadi list baru. Terlebih bayar -> lebihan -ve jadi list baru. Tarikh list baru = tarikh PV.
+  const _diffBal = (payMode==='editPV' ? 0 : Math.round((total-paid)*100)/100);
+  const _isBal = (payMode!=='editPV' && Math.abs(_diffBal)>0.01);
+  if(_isBal){ const _msg = _diffBal>0 ? `Bayar ${fmt(paid)} tak cukup. Total ${fmt(total)}.\nBaki ${fmt(_diffBal)} akan auto jadi list baru - tarikh ${fmtDate(pd)} - Belum Bayar.\nTeruskan?` : `Bayar ${fmt(paid)} terlebih. Total ${fmt(total)}.\nLebihan ${fmt(_diffBal)} (-ve) akan auto jadi list baru - tarikh ${fmtDate(pd)}.\nTeruskan?`; if(!confirm(_msg)) return; const _lastBal=items[items.length-1]; if(_lastBal) _lastBal.price=Math.round((Number(_lastBal.price||0)-_diffBal)*100)/100; }
   items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null;
     // Gambar Invoice dalam Bayar/Edit Bayar - pending macam Resit
     if(deleteInvImgs[x.id]){ if(x.pdf && String(x.pdf).startsWith('IDB:')) idbDeletePdf(String(x.pdf).slice(4)); x.img=''; x.pdf=''; x.pages=[]; }
     else { if(pendingInvImgs[x.id]) x.img=pendingInvImgs[x.id]; if(pendingInvPages[x.id] && pendingInvPages[x.id].length) x.pages=pendingInvPages[x.id].slice(); if(pendingInvPdfs[x.id]){ let _pp2=pendingInvPdfs[x.id]; if(_pp2.length>500*1024){ const _k2='inv_'+x.id; idbSavePdf(_k2,_pp2); _pp2='IDB:'+_k2; } x.pdf=_pp2; } else if(pendingInvImgs[x.id] && pendingInvPdfs[x.id]===''){ x.pdf=''; } }
     if(deletePayResit){ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); x.paymentImg=''; x.paymentPdf=''; x.paymentPages=[]; }
     else { if(pendingPayPages.length){ x.paymentImg=pendingPayPages[0]; x.paymentPages=pendingPayPages.slice(); } else if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } } });
+  // Cipta list BAKI / LEBIHAN - tarikh = tarikh PV, Belum Bayar
+  let _balMsg='';
+  if(_isBal){ try{ const _first=items[0]; const _sameSup=items.every(x=>x.name===_first.name); const _balName=_sameSup?_first.name:('BAKI - '+pv); const _balInv=(items.length===1 ? ((_first.inv||'')+' BAKI') : ('BAKI '+pv)); const _balNote=_diffBal>0 ? `Baki ${pv} - asal ${fmt(total)} bayar ${fmt(paid)}` : `Lebihan bayar ${pv} - asal ${fmt(total)} bayar ${fmt(paid)}`; invoices.unshift({id:String(Date.now()+1)+Math.floor(Math.random()*1000),_editedAt:Date.now(),name:_balName,inv:_balInv,price:Math.round(_diffBal*100)/100,date:pd,cat:_first.cat||'stock',note:_balNote,img:'',pdf:'',pages:[],hasPdf:false,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:'',paymentPages:[]}); const _last2=items[items.length-1]; if(_last2){ const _add=_diffBal>0 ? `Asal ${fmt(total)} - bayar ${fmt(paid)}, baki ${fmt(_diffBal)} jadi list baru` : `Asal ${fmt(total)} - bayar ${fmt(paid)}, lebihan ${fmt(_diffBal)} jadi list baru`; _last2.note=_last2.note ? (_last2.note+' • '+_add) : _add; } _balMsg=_diffBal>0 ? ` - Baki ${fmt(_diffBal)} auto jadi list baru` : ` - Lebihan ${fmt(_diffBal)} auto jadi list baru`; }catch(e){} }
   selected.clear(); save(); document.getElementById('payModal').classList.remove('open');
   if(payMode==='editPV'){ showToast(`Edit Bayar siap - ${pv}`); gotoTab('paid'); if(editPVInfo) setTimeout(()=>openPVDetail(pv, pd), 300); }
-  else { showToast(`Bayar siap - ${pv} - ${items.length} invoice`); gotoTab('paid'); }
+  else { showToast(`Bayar siap - ${pv} - ${items.length} invoice${_balMsg}`); gotoTab('paid'); }
 };
 
 // ===== EDIT SCAN =====
