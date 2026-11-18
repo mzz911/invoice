@@ -182,7 +182,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -524,7 +524,7 @@ function render(){
         } else {
           const x=g.items[0];
           if(!confirm('Batal bayar '+x.name+' - '+x.inv+'?\n\nInvoice ni akan jadi Belum Bayar.')) return;
-          delDone=true; try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.split=null; save(); render(); showToast('Bayar dibatalkan - '+x.inv+' jadi Belum Bayar');
+          delDone=true; try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} try{ if(x._balOrigPrice!=null){ x.price=Number(x._balOrigPrice); } delete x._balOrigPrice; delete x._balPV; delete x._balDiff; if(x.note && String(x.note).includes('jadi list baru')){ x.note=String(x.note).replace(/\s*•\s*Asal [^•]*jadi list baru\s*$/,'').replace(/^Asal [^•]*jadi list baru\s*(•\s*)?/,'').trim(); } }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.paymentPages=[]; x.split=null; save(); render(); showToast('Bayar dibatalkan - '+x.inv+' jadi Belum Bayar');
         }
       }
       function doRemoveAll(){
@@ -853,6 +853,8 @@ async function renderGalleryAllPages(){
     lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px';
     wrap.appendChild(im); wrap.appendChild(lab); box.appendChild(wrap);
   }
+  // Kalau viewer dibuka dari Muka 3 (tekan Muka 3 dalam Detail), scroll terus ke Muka 3 - jangan biar kat Muka 1 je
+  try{ if(_viewGalleryIdx>0){ setTimeout(()=>{ try{ const _ch=box.children[_viewGalleryIdx]; if(_ch) _ch.scrollIntoView({block:'start', behavior:'auto'}); }catch(e){} },120); } }catch(e){}
 }
 function showViewTab(which){
   const imgEl=document.getElementById('imgViewImg'), pdfEl=document.getElementById('imgViewPdf'), bar=document.getElementById('imgViewPdfBar');
@@ -999,28 +1001,45 @@ function openImgViewOnlyPdf(pdf,title,meta,imgSrc,ctx){ _viewImgSrc=imgSrc||''; 
 function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_xiv) return; const _firstImg=_xiv.img||(_xiv.pages && _xiv.pages[0])||''; const _has=_firstImg||_xiv.pdf||(_xiv.pages && _xiv.pages.length); openImgView(_firstImg, 'Gambar Invoice - '+_xiv.name, (_xiv.inv||'')+' • '+_xiv.date+((_xiv.pages && _xiv.pages.length>1)?' • '+_xiv.pages.length+' pages':'')+(_has?'':' • Tiada gambar lagi - tekan Upload'), _xiv.pdf||'', {kind:'invoice', id:_xiv.id}); } // No.2 (ada gambar) -> Viewer + gambar dia. Takde gambar pun -> Viewer + Upload. Fallback pages[0] kalau img kosong tapi pages ada.
 
 async function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
-${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages':''}</p><img src="${x.img}" style="width:100%;border-radius:12px;cursor:pointer" id="dInvImg">${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
+${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages • Scroll bawah - semua muka ada':''}</p><div id="dInvPages"></div>${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
 ${x.paid?`<p>Status: Dah Bayar • ${x.payMethod||''}<br>PV: ${x.pv||'-'} • Bayar: ${fmtDate(x.payDate)||'-'}</p>`:''}
-${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar${(x.paymentPages && x.paymentPages.length>1)?' • '+x.paymentPages.length+' pages':''}</p>${x.paymentImg?`<img src="${x.paymentImg}" style="width:100%;border-radius:12px;cursor:pointer" id="dPayImg">${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">✏️ Edit</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
+${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar${(x.paymentPages && x.paymentPages.length>1)?' • '+x.paymentPages.length+' pages':''}</p>${x.paymentImg?`<div id="dPayPages"></div>${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">✏️ Edit</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
 <button class="btn btn-light" id="editBtn" style="width:100%;margin-top:12px">Edit</button>
 <button class="btn btn-dark" id="dlPdfOne" style="width:100%;margin-top:8px">⬇️ Download PDF - Invoice + Resit Payment</button>
 ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;margin-top:8px">Bayar Invoice Ni</button>`: `<p style="font-size:12px;color:#666;text-align:center;margin-top:10px">Untuk batal PV, swipe kiri kad PV kat tab Dah Bayar</p>`}
 `;
- const di=b.querySelector('#dInvImg'); if(di) di.onclick=()=>{
-   // FIX BANYAK PAGE TAK BOLEH BUKA: dulu hantar x.img (muka 1) je ke viewer, muka 2/3 takde jalan nak tengok.
-   // Sekarang kalau pages>1, hantar SEMUA pages jadi gallery - boleh Prev/Next / swipe.
-   if(x.pages && x.pages.length>1){
-     const _items=x.pages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
-     openImgView(x.pages[0],'Gambar Invoice - '+x.name,x.inv+' • '+x.date+' • '+x.pages.length+' pages',x.pdf||'',{kind:'invoice',id:x.id},{items:_items, idx:0});
-   } else openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id});
- }; const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
+ // DETAIL TUNJUK SEMUA MUKA: dulu Detail tunjuk muka 1 je, user ingat page lain takde. Sekarang Detail sendiri tunjuk semua pages bertindih, scroll je. Tekan mana-mana muka -> Viewer buka kat muka tu.
+ const _dPagesBox=b.querySelector('#dInvPages');
+ if(_dPagesBox){
+   const _allPages=(x.pages && x.pages.length ? x.pages.slice() : [x.img]);
+   _dPagesBox.innerHTML='';
+   _allPages.forEach((pg,pi)=>{
+     const _f=supaFixExpiredUrl(pg); const _isSupa=String(_f).startsWith('SUPA:');
+     const _w=document.createElement('div'); _w.style.cssText='position:relative;margin-bottom:8px';
+     const _im=document.createElement('img'); _im.style.cssText='width:100%;border-radius:12px;cursor:pointer;display:block;background:#fff'; _im.dataset.dpage=String(pi); if(pi===0) _im.id='dInvImg'; _im.loading=pi===0?'eager':'lazy';
+     if(_isSupa){ _im.dataset.supa=_f; _im.src=''; (async()=>{ try{ const u=await supaResolveOne(_f); if(u && !String(u).startsWith('SUPA:')) _im.src=u; }catch(e){} })(); } else _im.src=pg;
+     _im.onclick=()=>{ const _items=_allPages.map(pp=>({img:pp, pdf:'', name:x.name, inv:x.inv, date:x.date})); if(_allPages.length>1) openImgView(_allPages[pi],'Gambar Invoice - '+x.name,x.inv+' • '+x.date+' • Muka '+(pi+1)+' / '+_allPages.length,x.pdf||'',{kind:'invoice',id:x.id},{items:_items, idx:pi}); else openImgViewOnlyImg(x.img,'Gambar Invoice - '+x.name,x.inv+' • '+x.date,{kind:'invoice',id:x.id}); };
+     const _lab=document.createElement('span'); _lab.textContent='Muka '+(pi+1)+' / '+_allPages.length; _lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;pointer-events:none';
+     _w.appendChild(_im); if(_allPages.length>1) _w.appendChild(_lab); _dPagesBox.appendChild(_w);
+   });
+ }
+ const di=b.querySelector('#dInvImg'); const dpb=b.querySelector('#dPdfBtn'); if(dpb) dpb.onclick=()=>openImgViewOnlyPdf(x.pdf,'PDF - '+x.name,x.inv+' • '+x.date,x.img,{kind:'invoice',id:x.id});
  const rpb=b.querySelector('#recoverPagesBtn'); if(rpb) rpb.onclick=async()=>{ rpb.textContent='⏳ Pulihkan...'; rpb.disabled=true; try{ const rec=await supaRecoverPagesFromPdf(x); if(rec && rec.length>1){ x.pages=rec.slice(); if(!x.img) x.img=rec[0]; try{ save(); }catch(e){} showToast('Dipulihkan - '+rec.length+' pages dari PDF Asal'); openDetail(id); } else { rpb.textContent='🔄 Pulihkan Page 2 dari PDF Asal'; rpb.disabled=false; showToast('PDF Asal cuma ada 1 muka / tak dapat baca - cuba Lihat PDF Asal'); } }catch(e){ rpb.textContent='🔄 Pulihkan Page 2 dari PDF Asal'; rpb.disabled=false; } };
- const dp=b.querySelector('#dPayImg'); if(dp) dp.onclick=()=>{
-   if(x.paymentPages && x.paymentPages.length>1){
-     const _items=x.paymentPages.map(p=>({img:p, pdf:'', name:x.name, inv:x.inv, date:x.date}));
-     openImgView(x.paymentPages[0],'Resit Payment - '+x.name,x.pv||' • '+x.paymentPages.length+' pages',x.paymentPdf||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate},{items:_items, idx:0});
-   } else openImgViewOnlyImg(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
- };
+ const _dPayBox=b.querySelector('#dPayPages');
+ if(_dPayBox){
+   const _allPay=(x.paymentPages && x.paymentPages.length ? x.paymentPages.slice() : (x.paymentImg ? [x.paymentImg] : []));
+   _dPayBox.innerHTML='';
+   _allPay.forEach((pg,pi)=>{
+     const _f=supaFixExpiredUrl(pg); const _isSupa=String(_f).startsWith('SUPA:');
+     const _w=document.createElement('div'); _w.style.cssText='position:relative;margin-bottom:8px';
+     const _im=document.createElement('img'); _im.style.cssText='width:100%;border-radius:12px;cursor:pointer;display:block;background:#fff'; _im.dataset.dpage=String(pi); if(pi===0) _im.id='dPayImg'; _im.loading=pi===0?'eager':'lazy';
+     if(_isSupa){ _im.dataset.supa=_f; _im.src=''; (async()=>{ try{ const u=await supaResolveOne(_f); if(u && !String(u).startsWith('SUPA:')) _im.src=u; }catch(e){} })(); } else _im.src=pg;
+     _im.onclick=()=>{ const _items=_allPay.map(pp=>({img:pp, pdf:'', name:x.name, inv:x.inv, date:x.date})); if(_allPay.length>1) openImgView(_allPay[pi],'Resit Payment - '+x.name,x.pv||' • Muka '+(pi+1)+' / '+_allPay.length,x.paymentPdf||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate},{items:_items, idx:pi}); else openImgViewOnlyImg(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate}); };
+     const _lab=document.createElement('span'); _lab.textContent='Muka '+(pi+1)+' / '+_allPay.length; _lab.style.cssText='position:absolute;top:6px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;pointer-events:none';
+     _w.appendChild(_im); if(_allPay.length>1) _w.appendChild(_lab); _dPayBox.appendChild(_w);
+   });
+ }
+ const dp=b.querySelector('#dPayImg');
  const vp=b.querySelector('#viewPayBtn'); if(vp) vp.onclick=()=>openImgView(x.paymentImg,'Resit Payment - '+x.name,x.pv||'',x.paymentPdf||'',{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate}); const dppb=b.querySelector('#dPayPdfBtn'); if(dppb) dppb.onclick=()=>openImgViewOnlyPdf(x.paymentPdf,'PDF Resit - '+x.name,x.pv||'',x.paymentImg,{kind:'payment',id:x.id,pv:x.pv,payDate:x.payDate});
  const ap=b.querySelector('#addPayBtn'); if(ap) ap.onclick=()=>{ imgTarget='pay'; document.getElementById('fImg').click(); }; // NATIVE
  const cp=b.querySelector('#changePayBtn'); if(cp) cp.onclick=()=>{ if(x.paid && x.pv) openEditPay(x.pv, x.payDate); else { imgTarget='pay'; document.getElementById('fImg').click(); } };
@@ -1251,8 +1270,38 @@ function cancelPV(pv, payDate){
   if(!items.length){ alert('PV '+pv+' tak jumpa / dah batal'); return false; }
   const total=items.reduce((s,x)=>s+_sp(x),0);
   cancelledPVs.unshift({pv,date:payDate,inv:items.map(x=>x.inv||'').join(' • '),name:items.length>1?pvCountLabel(items):items[0].name,price:total});
+  // CANCEL + BAKI: cari list BAKI / LEBIHAN auto untuk PV ni - yang Belum Bayar je. Kalau dah dibayar, jangan padam.
+  let _balItems=[];
+  try{
+    const _itemInvs=new Set(items.map(x=>String(x.inv||'')));
+    _balItems=invoices.filter(x=>!x.paid && x.id && !items.some(it=>it.id===x.id) && (
+      (x.balForPV && String(x.balForPV)===String(pv)) ||
+      (String(x.inv||'')===('BAKI '+pv)) ||
+      (String(x.inv||'')===('LEBIHAN '+pv)) ||
+      (String(x.note||'').includes(pv) && (String(x.note||'').startsWith('Baki ')||String(x.note||'').startsWith('Lebihan bayar '))) ||
+      ((String(x.inv||'').endsWith(' BAKI')||String(x.inv||'').endsWith(' LEBIHAN')) && _itemInvs.has(String(x.inv||'').replace(/ (BAKI|LEBIHAN)$/,'')) && String(x.date||'')===String(payDate))
+    ));
+  }catch(e){ _balItems=[]; }
+  const _balSum=_balItems.reduce((s,x)=>s+_sp(x),0);
+  // Pulang harga asal: item yang kena adjust masa bayar tu (harga dah jadi 140, asal 145)
+  items.forEach(x=>{
+    try{
+      if(x._balOrigPrice!=null && String(x._balPV)===String(pv)){ x.price=Number(x._balOrigPrice); }
+      else if(_balItems.length && String(x.note||'').includes('jadi list baru') && String(x.note||'').includes(pv)){ x.price=Math.round((Number(x.price||0)+_balSum)*100)/100; }
+      // Bersihkan nota "Asal ... jadi list baru" yang ditambah masa bayar
+      if(x.note && String(x.note).includes('jadi list baru')){ x.note=String(x.note).replace(/\s*•\s*Asal [^•]*jadi list baru\s*$/,'').replace(/^Asal [^•]*jadi list baru\s*(•\s*)?/,'').trim(); if(!x.note) x.note=''; }
+      delete x._balOrigPrice; delete x._balPV; delete x._balDiff;
+      x._editedAt=Date.now();
+    }catch(e){}
+  });
+  // Auto padam list BAKI tu
+  if(_balItems.length){
+    const _balIds=new Set(_balItems.map(x=>x.id));
+    _balItems.forEach(b=>{ try{ if(typeof supaMarkDeleted==='function') supaMarkDeleted(b.id); }catch(e){} try{ if(typeof supaDeleteInvoice==='function') supaDeleteInvoice(b.id); }catch(e){} try{ selected.delete(b.id); }catch(e){} });
+    invoices=invoices.filter(x=>!_balIds.has(x.id));
+  }
   // Cancel payment: invoice jadi Belum Bayar balik, resit payment dibuang (termasuk dalam IDB)
-  items.forEach(x=>{ try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.split=null; });
+  items.forEach(x=>{ try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.paymentPages=[]; x.split=null; });
   save(); render();
   return true;
   }catch(err){ alert('Batal PV gagal: '+err.message); console.error(err); return false; }
@@ -1733,7 +1782,7 @@ document.getElementById('payConfirm').onclick=()=>{
   // AUTO BAKI: bayar tak cukup -> baki +ve jadi list baru. Terlebih bayar -> lebihan -ve jadi list baru. Tarikh list baru = tarikh PV.
   const _diffBal = (payMode==='editPV' ? 0 : Math.round((total-paid)*100)/100);
   const _isBal = (payMode!=='editPV' && Math.abs(_diffBal)>0.01);
-  if(_isBal){ const _msg = _diffBal>0 ? `Bayar ${fmt(paid)} tak cukup. Total ${fmt(total)}.\nBaki ${fmt(_diffBal)} akan auto jadi list baru - tarikh ${fmtDate(pd)} - Belum Bayar.\nTeruskan?` : `Bayar ${fmt(paid)} terlebih. Total ${fmt(total)}.\nLebihan ${fmt(_diffBal)} (-ve) akan auto jadi list baru - tarikh ${fmtDate(pd)}.\nTeruskan?`; if(!confirm(_msg)) return; const _lastBal=items[items.length-1]; if(_lastBal) _lastBal.price=Math.round((Number(_lastBal.price||0)-_diffBal)*100)/100; }
+  if(_isBal){ const _msg = _diffBal>0 ? `Bayar ${fmt(paid)} tak cukup. Total ${fmt(total)}.\nBaki ${fmt(_diffBal)} akan auto jadi list baru - tarikh ${fmtDate(pd)} - Belum Bayar.\nTeruskan?` : `Bayar ${fmt(paid)} terlebih. Total ${fmt(total)}.\nLebihan ${fmt(_diffBal)} (-ve) akan auto jadi list baru - tarikh ${fmtDate(pd)}.\nTeruskan?`; if(!confirm(_msg)) return; const _lastBal=items[items.length-1]; if(_lastBal){ _lastBal._balOrigPrice=Number(_lastBal.price||0); _lastBal._balPV=pv; _lastBal._balDiff=_diffBal; _lastBal._editedAt=Date.now(); _lastBal.price=Math.round((Number(_lastBal.price||0)-_diffBal)*100)/100; } }
   items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null;
     // Gambar Invoice dalam Bayar/Edit Bayar - pending macam Resit
     if(deleteInvImgs[x.id]){ if(x.pdf && String(x.pdf).startsWith('IDB:')) idbDeletePdf(String(x.pdf).slice(4)); x.img=''; x.pdf=''; x.pages=[]; }
@@ -1742,7 +1791,7 @@ document.getElementById('payConfirm').onclick=()=>{
     else { if(pendingPayPages.length){ x.paymentImg=pendingPayPages[0]; x.paymentPages=pendingPayPages.slice(); } else if(pendingPayImg) x.paymentImg=pendingPayImg; if(pendingPayPdf){ let _pp=pendingPayPdf; if(_pp.length>500*1024){ const _k='pay_'+x.id; idbSavePdf(_k,_pp); _pp='IDB:'+_k; } x.paymentPdf=_pp; } } });
   // Cipta list BAKI / LEBIHAN - tarikh = tarikh PV, Belum Bayar
   let _balMsg='';
-  if(_isBal){ try{ const _first=items[0]; const _sameSup=items.every(x=>x.name===_first.name); const _balName=_sameSup?_first.name:('BAKI - '+pv); const _balInv=(items.length===1 ? ((_first.inv||'')+' BAKI') : ('BAKI '+pv)); const _balNote=_diffBal>0 ? `Baki ${pv} - asal ${fmt(total)} bayar ${fmt(paid)}` : `Lebihan bayar ${pv} - asal ${fmt(total)} bayar ${fmt(paid)}`; invoices.unshift({id:String(Date.now()+1)+Math.floor(Math.random()*1000),_editedAt:Date.now(),name:_balName,inv:_balInv,price:Math.round(_diffBal*100)/100,date:pd,cat:_first.cat||'stock',note:_balNote,img:'',pdf:'',pages:[],hasPdf:false,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:'',paymentPages:[]}); const _last2=items[items.length-1]; if(_last2){ const _add=_diffBal>0 ? `Asal ${fmt(total)} - bayar ${fmt(paid)}, baki ${fmt(_diffBal)} jadi list baru` : `Asal ${fmt(total)} - bayar ${fmt(paid)}, lebihan ${fmt(_diffBal)} jadi list baru`; _last2.note=_last2.note ? (_last2.note+' • '+_add) : _add; } _balMsg=_diffBal>0 ? ` - Baki ${fmt(_diffBal)} auto jadi list baru` : ` - Lebihan ${fmt(_diffBal)} auto jadi list baru`; }catch(e){} }
+  if(_isBal){ try{ const _first=items[0]; const _sameSup=items.every(x=>x.name===_first.name); const _balName=_sameSup?_first.name:(_diffBal>0 ? ('BAKI - '+pv) : ('LEBIHAN - '+pv)); const _balInv=(items.length===1 ? ((_first.inv||'')+(_diffBal>0 ? ' BAKI' : ' LEBIHAN')) : (_diffBal>0 ? ('BAKI '+pv) : ('LEBIHAN '+pv))); const _balNote=_diffBal>0 ? `Baki ${pv} - asal ${fmt(total)} bayar ${fmt(paid)}` : `Lebihan bayar ${pv} - asal ${fmt(total)} bayar ${fmt(paid)}`; invoices.unshift({id:String(Date.now()+1)+Math.floor(Math.random()*1000),_editedAt:Date.now(),name:_balName,inv:_balInv,price:Math.round(_diffBal*100)/100,date:pd,cat:_first.cat||'stock',note:_balNote,img:'',pdf:'',pages:[],hasPdf:false,paid:false,pv:'',payDate:'',payMethod:'',paymentImg:'',paymentPdf:'',paymentPages:[],balForPV:pv,balDiff:Math.round(_diffBal*100)/100,balOrigTotal:total,balOrigPaid:paid}); const _last2=items[items.length-1]; if(_last2){ const _add=_diffBal>0 ? `Asal ${fmt(total)} - bayar ${fmt(paid)}, baki ${fmt(_diffBal)} jadi list baru` : `Asal ${fmt(total)} - bayar ${fmt(paid)}, lebihan ${fmt(_diffBal)} jadi list baru`; _last2.note=_last2.note ? (_last2.note+' • '+_add) : _add; } _balMsg=_diffBal>0 ? ` - Baki ${fmt(_diffBal)} auto jadi list baru` : ` - Lebihan ${fmt(_diffBal)} auto jadi list baru`; }catch(e){} }
   selected.clear(); save(); document.getElementById('payModal').classList.remove('open');
   if(payMode==='editPV'){ showToast(`Edit Bayar siap - ${pv}`); gotoTab('paid'); if(editPVInfo) setTimeout(()=>openPVDetail(pv, pd), 300); }
   else { showToast(`Bayar siap - ${pv} - ${items.length} invoice${_balMsg}`); gotoTab('paid'); }
