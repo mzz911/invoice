@@ -190,7 +190,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
+</head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -254,7 +254,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -271,7 +271,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -547,15 +547,6 @@ function showToast(t){ const el=document.getElementById('toast'); el.textContent
 function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ const cur=sel.value; sel.innerHTML=allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur&&allCats().includes(cur))sel.value=cur; } const f=document.getElementById('fltCat'); if(f){ const cur=f.value; f.innerHTML='<option value="">Semua kategori</option>'+allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur)f.value=cur; } }
 function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.holdId||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='hold') list=list.filter(x=>!x.paid && x.onHold); if(tab==='batal'){ return []; } return list; }
 let _pinSavedId=''; let _pinSavedPv=''; let _pinJustSet=false;
-// Auto-scroll ke kad kuning lepas simpan — bukan ke atas, bukan ke bawah buta-buta.
-// Cari .flash-saved kat mana pun dia duduk (atas / tengah / bawah list), scroll ke tengah screen.
-function ikScrollToSaved(){
-  try{
-    const _try=()=>{ try{ const el=document.querySelector('#list .flash-saved'); if(!el) return false; el.scrollIntoView({behavior:'smooth', block:'center'}); return true; }catch(e){ return false; } };
-    // Cuba terus + retry sebab gambar / layout lambat sikit lepas render
-    [80,300,600,1000].forEach(_d=>setTimeout(()=>{ _try(); }, _d));
-  }catch(e){}
-}
 function gotoTab(name){ tab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name)); selected.clear(); render(); }
 
 // PILL CARA BAYAR - dulu semua cara bayar pakai pill kuning sama (pill cash) / tulisan kelabu kecik, Cash dgn Bank nampak sama. Sekarang: Cash = kuning + 💵, Bank = biru + 🏦, QR = ungu + 📱, Split = oren + 🔀. Kad kekal putih, cuma pill je beza warna.
@@ -687,7 +678,7 @@ function render(){
       cc.addEventListener('mouseup', e=>{ if(!mDown) return; mDown=false; if(Math.abs(e.clientX-mx)>10) suppressClick=true; setTimeout(()=>suppressClick=false,80); cc.style.transition='transform .2s ease'; const cur=parseFloat((cc.style.transform||'').replace(/[^0-9\-\.]/g,''))||0; if(cur<-(g.pv?100:50)){ cc.style.transform='translateX(-'+_swW+'px)'; opened=true; cc.dataset.open='1'; closeOthers(); cc.style.transform='translateX(-'+_swW+'px)'; } else { closeSwipe(); } });
       box.appendChild(wrap);
     });
-    if(_pinJustSet){ _pinJustSet=false; try{ ikScrollToSaved(); }catch(e){} }
+    if(_pinJustSet){ _pinJustSet=false; [80,300,600].forEach(_d=>setTimeout(()=>{ try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){} }, _d)); }
     return;
   }
   // Semua: Group Dah Bayar ikut PV, sort group by tarikh payment (terbaru dulu). Belum Bayar sort by tarikh invoice (terbaru dulu). Semua campur ikut tarikh - terbaru dulu.
@@ -780,7 +771,7 @@ function render(){
     box.appendChild(c);
   });
   // bulk bar
-  let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-light" id="bulkHold" style="background:#FEF3C7;color:#92400E;padding:10px 12px;font-size:13px">⏸️ On Hold</button><button class="btn btn-green" id="bulkPay" style="padding:10px 12px;font-size:13px">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; document.getElementById('bulkHold').onclick=()=>{ document.getElementById('bulkBar')?.remove(); makeHoldFromSelected(); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove(); if(_pinJustSet){ _pinJustSet=false; try{ ikScrollToSaved(); }catch(e){} }
+  let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-light" id="bulkHold" style="background:#FEF3C7;color:#92400E;padding:10px 12px;font-size:13px">⏸️ On Hold</button><button class="btn btn-green" id="bulkPay" style="padding:10px 12px;font-size:13px">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; document.getElementById('bulkHold').onclick=()=>{ document.getElementById('bulkBar')?.remove(); makeHoldFromSelected(); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove(); if(_pinJustSet){ _pinJustSet=false; [80,300,600].forEach(_d=>setTimeout(()=>{ try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){} }, _d)); }
 }
 // ===== AUTO PDF + MULTI-PAGE (dari code ni) - gambar (Camera/Gallery) -> PDF, 1 invoice = banyak pages, NATIVE iPhone kekal =====
 let _lastAutoPdfFor=''; let _pendingPdfIsOriginal=false;
