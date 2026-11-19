@@ -52,6 +52,12 @@ h1{margin:4px 0 2px;font-size:26px;color:#fff}.sub{color:rgba(255,255,255,.85);f
 .tab{flex:1;border:0;background:transparent;padding:9px 4px;border-radius:999px;font-weight:700;cursor:pointer;color:#6B7280;font-size:13px}.tab.active{background:#5B21B6;color:#fff}
 .group{background:#fff;border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;margin:14px 0 8px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .card{background:#fff;border-radius:16px;padding:12px;display:flex;gap:10px;margin:8px 0;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+/* WARNA STATUS LIST: Dah Bayar = hijau, Belum Bayar = merah, PV Batal = kelabu. .card.card-paid (2 class) kalahkan .swipeInner punya background putih, tapi flash-saved (!important) masih menang kalau invoice baru simpan. */
+.card.card-paid{background:#F0FDF4;border-left:5px solid #16A34A}
+.card.card-unpaid{background:#FEF2F2;border-left:5px solid #DC2626}
+.card.card-batal{background:#F3F4F6;border-left:5px solid #6B7280}
+.card.card-paid .price{color:#15803D}
+.card.card-unpaid .price{color:#B91C1C}
 #pvBody.pv-onepage .card{padding:6px 10px;margin:3px 0;border-radius:10px}
 #pvBody.pv-onepage .card .meta{font-size:11px;line-height:1.25}
 #pvBody.pv-onepage .card .meta b{font-size:12.5px;line-height:1.2}
@@ -182,7 +188,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -266,6 +272,10 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
+<div style="font-size:12px;font-weight:700;color:#334155;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px;text-align:center;margin-top:4px">💾 Backup / Restore DB<br><span style="font-weight:400;color:#64748B">Download DB simpan semua invoice + PV Batal + kategori dalam 1 fail JSON. Upload DB untuk pulihkan balik.</span></div>
+<button class="btn btn-light" id="dbDownloadBtn" style="padding:14px;text-align:left">⬇️ Download DB (Backup JSON)</button>
+<button class="btn btn-light" id="dbUploadBtn" style="padding:14px;text-align:left">⬆️ Upload DB (Restore JSON)</button>
+<input id="dbUploadFile" type="file" accept=".json,application/json" style="display:none">
 </div>
 <button class="btn btn-light" id="settingDone" style="width:100%;margin-top:8px">Tutup</button></div></div>
 
@@ -463,7 +473,7 @@ function render(){
     document.getElementById('infoBar').textContent = cancelledPVs.length+' PV Batal • '+fmt(_batalTotal);
     if(!cancelledPVs.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada PV Batal</p>';
     const _batalSorted=[...cancelledPVs].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); let _batalLastDay='';
-    _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
+    _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card card-batal'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
     return;
   }
   // Banner BARU DISIMPAN + Tunjuk Semua dibuang ikut cakap user - card yang baru simpan still naik atas + highlight kuning je, takde banner hijau dah // GROUP ikut PV, tajuk = supplier name - SWIPE KIRI UNTUK CANCEL PV (Dah Bayar je)
@@ -494,7 +504,7 @@ function render(){
         delBtn=document.createElement('button'); delBtn.type='button'; delBtn.className='swipeDel'; delBtn.style.width='100px'; delBtn.style.background='#dc2626'; delBtn.style.fontSize='13px'; delBtn.textContent='Batal Bayar';
         wrap.appendChild(delBtn);
       }
-      const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.pv=g.pv||''; inner.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) inner.classList.add('flash-saved');
+      const inner=document.createElement('div'); inner.className='card swipeInner card-paid'; inner.dataset.pv=g.pv||''; inner.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) inner.classList.add('flash-saved');
       wrap.appendChild(inner);
       const d=inner;
       if(g.pv){
@@ -582,7 +592,7 @@ function render(){
       const _remAll=document.createElement('button'); _remAll.type='button'; _remAll.style.cssText='flex:1;background:#dc2626;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _remAll.textContent='Remove All';
       const _delAll=document.createElement('button'); _delAll.type='button'; _delAll.style.cssText='flex:1;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;cursor:pointer;border:0;padding:0 4px;font-family:inherit;line-height:1.2'; _delAll.textContent='Cancel PV';
       _actsAll.appendChild(_remAll); _actsAll.appendChild(_delAll); _wrapAll.appendChild(_actsAll);
-      const d=document.createElement('div'); d.className='card swipeInner'; d.dataset.pv=g.pv||''; d.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) d.classList.add('flash-saved');
+      const d=document.createElement('div'); d.className='card swipeInner card-paid'; d.dataset.pv=g.pv||''; d.dataset.ids=(g.items||[]).map(x=>x.id).join(','); if(_pinSavedId && (g.items||[]).some(x=>x.id===_pinSavedId)) d.classList.add('flash-saved');
       _wrapAll.appendChild(d);
       const _firstImg2=g.items.find(x=>x.img)?.img||''; const _firstItem2=g.items.find(x=>x.img)||g.items[0];
       d.innerHTML=`<div class="thumb" data-thumb>${_firstImg2?supaImgTag(_firstImg2):'📷'}</div><div class="meta"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}</div><div class="right"><div class="price">${fmt(gtotal)}</div><span class="pill paid">${pvCountLabel(g.items)}</span>${g.payMethod?`<div style="font-size:11px;color:#666;margin-top:2px">${g.payMethod}</div>`:''}${g.pv?`<div style="font-size:11px;font-weight:700;color:#333;margin-top:2px">${g.pv}</div>`:''}${g.payDate?`<div style="font-size:11px;color:#666">${fmtDate(g.payDate)}</div>`:''}${hasResit?`<div>🧾</div>`:''}</div>`;
@@ -612,7 +622,7 @@ function render(){
     const c=document.createElement('div'); c.className='swipeWrap';
     const _isPaidSingle = !!(x.paid && !x.pv);
     const del=document.createElement('button'); del.type='button'; del.className='swipeDel'; del.textContent=_isPaidSingle?'Batal Bayar':'Delete'; if(_isPaidSingle){ del.style.width='100px'; del.style.background='#dc2626'; del.style.fontSize='13px'; }
-    const inner=document.createElement('div'); inner.className='card swipeInner'; inner.dataset.invId=x.id; inner.dataset.pv=x.pv||''; if(_pinSavedId && x.id===_pinSavedId) inner.classList.add('flash-saved');
+    const inner=document.createElement('div'); inner.className='card swipeInner '+(x.paid?'card-paid':'card-unpaid'); inner.dataset.invId=x.id; inner.dataset.pv=x.pv||''; if(_pinSavedId && x.id===_pinSavedId) inner.classList.add('flash-saved');
     c.appendChild(del); c.appendChild(inner);
     const cc=inner;
     const splitTxt = x.payMethod==='Split Payment' && x.split ? 'Split: '+Object.entries(x.split).filter(([k,v])=>v>0).map(([k,v])=>`${k.replace('Bank Transfer','Bank').replace('QR / E-Wallet','QR')} ${Number(v)}`).join(' • ') : '';
@@ -1485,6 +1495,14 @@ document.getElementById('openDrive').onclick=()=>window.open('https://drive.goog
 
 async function _compressOneImg(dataUrl, maxW, quality){ return new Promise((res)=>{ if(!dataUrl || !String(dataUrl).startsWith('data:image')){ res(dataUrl||''); return; } const im=new Image(); im.onload=()=>{ try{ const sc=Math.min(1, maxW/im.width); if(sc>=1 && String(dataUrl).length<300*1024){ res(dataUrl); return; } const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(im.width*sc)); cv.height=Math.max(1,Math.round(im.height*sc)); const cx=cv.getContext('2d'); cx.drawImage(im,0,0,cv.width,cv.height); res(cv.toDataURL('image/jpeg', quality)); }catch(e){ res(dataUrl); } }; im.onerror=()=>res(dataUrl); im.src=dataUrl; }); }
 async function _imgToSmallPdf(imgDataUrl){ try{ if(!window.jspdf) return ''; const img=await new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('img')); im.src=imgDataUrl; }); const { jsPDF }=window.jspdf; const portrait=img.height>=img.width; const doc=new jsPDF({orientation:portrait?'portrait':'landscape',unit:'mm',format:'a4'}); const pw=doc.internal.pageSize.getWidth(), ph=doc.internal.pageSize.getHeight(); const mm=8, aw=pw-mm*2, ah=ph-mm*2; let w=aw, h=Math.round(aw*img.height/img.width); if(h>ah){ h=ah; w=Math.round(ah*img.width/img.height); } const x=mm+Math.round((aw-w)/2), y=mm+Math.round((ah-h)/2); const small=await new Promise((res)=>{ const maxW=900, sc=Math.min(1,maxW/img.width); const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(img.width*sc)); cv.height=Math.max(1,Math.round(img.height*sc)); const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(img,0,0,cv.width,cv.height); res(cv.toDataURL('image/jpeg',0.6)); }); doc.addImage(small,'JPEG',x,y,w,h); return doc.output('datauristring'); }catch(e){ return ''; } }
+// DOWNLOAD / UPLOAD DB - dulu butang ni memang takde dalam file ni (Setting cuma ada Sync / Logout / Kategori / Tukar Nama), sebab tu user tak jumpa. Sekarang tambah balik.
+// Download: export semua data mentah (invoices + PV Batal + kategori) jadi 1 fail JSON. Gambar kekal SUPA: - bila restore, gambar tarik balik dari Supabase macam biasa.
+// Upload: baca fail JSON, sahkan, confirm 2x, lepas tu GANTI semua data sekarang + save() (auto-sync ke Supabase lepas 3 saat kalau online).
+function downloadDB(){ try{ const data={app:'invoice-kedai', version:1, exportedAt:new Date().toISOString(), invoices:invoices, cancelledPVs:cancelledPVs, customCats:customCats, hiddenCats:hiddenCats}; const blob=new Blob([JSON.stringify(data)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='invoice-kedai-db-'+today()+'.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); showToast('DB dah download - '+invoices.length+' invoice'); }catch(e){ alert('Download DB gagal: '+(e.message||e)); } }
+function uploadDBFile(file){ if(!file) return; const _r=new FileReader(); _r.onload=()=>{ try{ const data=JSON.parse(_r.result); const list=Array.isArray(data)?data:(data&&data.invoices)||null; if(!list||!Array.isArray(list)) throw new Error('Fail ni bukan DB Invoice Kedai'); const _batal=Array.isArray(data&&data.cancelledPVs)?data.cancelledPVs:(Array.isArray(data&&data.cancelled)?data.cancelled:[]); const _cats=Array.isArray(data&&data.customCats)?data.customCats:[]; const _hidden=Array.isArray(data&&data.hiddenCats)?data.hiddenCats:[]; if(!confirm('Upload DB akan GANTI semua data sekarang ('+invoices.length+' invoice) dengan data dalam fail ('+list.length+' invoice). Teruskan?')) return; if(!confirm('Betul nak ganti? Data lama akan hilang kalau takde backup.')) return; invoices=list; cancelledPVs=_batal; customCats=_cats; hiddenCats=_hidden; try{ selected.clear(); }catch(e){} try{ save(); }catch(e){} try{ render(); }catch(e){} showToast('DB dah pulih - '+invoices.length+' invoice'); try{ document.getElementById('settingModal').classList.remove('open'); }catch(e){} }catch(e){ alert('Upload DB gagal: '+(e.message||e)); } }; _r.readAsText(file); }
+document.getElementById('dbDownloadBtn').onclick=()=>downloadDB();
+document.getElementById('dbUploadBtn').onclick=()=>{ const _f=document.getElementById('dbUploadFile'); if(_f) _f.click(); };
+document.getElementById('dbUploadFile').onchange=(e)=>{ try{ uploadDBFile(e.target.files[0]); }catch(err){ alert('Upload DB gagal: '+err); } e.target.value=''; };
 document.getElementById('settingCatBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); renderCatManager(); document.getElementById('catModal').classList.add('open'); };
 document.getElementById('renameSupplierBtn').onclick=()=>{ document.getElementById('settingModal').classList.remove('open'); openRenameSupplier(); document.getElementById('renameSupplierModal').classList.add('open'); };
 document.getElementById('renameClose').onclick=document.getElementById('renameBack').onclick=document.getElementById('renameDone').onclick=()=>document.getElementById('renameSupplierModal').classList.remove('open');
