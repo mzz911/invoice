@@ -71,7 +71,7 @@ h1{margin:4px 0 2px;font-size:26px;color:#fff}.sub{color:rgba(255,255,255,.85);f
 .thumb img{width:100%;height:100%;object-fit:cover}
 .meta{flex:1;min-width:0;font-size:12px;line-height:1.35}.meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;line-height:1.3}
 .right{text-align:right;flex-shrink:0;font-size:12px;line-height:1.35}.price{font-weight:800;font-size:15px;line-height:1.3}
-.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;margin:1px 0;line-height:1.3}.paid{background:#dcfce7;color:#14532d}.unpaid{background:#fee2e2;color:#991b1b}.pv{background:#ede9fe;color:#4C1D95}.cash{background:#fef9c3;color:#854d0e}.pay-cash{background:#FEF9C3;color:#854D0E;border:1px solid #FDE68A}.pay-bank{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}.pay-qr{background:#EDE9FE;color:#4C1D95;border:1px solid #DDD6FE}.pay-split{background:#FFEDD5;color:#9A3412;border:1px solid #FED7AA}
+.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;margin:1px 0;line-height:1.3}.paid{background:#dcfce7;color:#14532d}.unpaid{background:#fee2e2;color:#991b1b}.pv{background:#ede9fe;color:#4C1D95}.cash{background:#fef9c3;color:#854d0e}.pay-cash{background:#FEF9C3;color:#854D0E;border:1px solid #FDE68A}.pay-bank{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}.pay-qr{background:#EDE9FE;color:#4C1D95;border:1px solid #DDD6FE}.pay-split{background:#FFEDD5;color:#9A3412;border:1px solid #FED7AA}.hold{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
 .bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #E5E7EB;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:40}
 .bottom .btn{width:100%;padding:15px;font-size:16px;background:linear-gradient(135deg,#4C1D95,#6D28D9)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50;overflow:auto} #imgViewModal{z-index:100 !important}
@@ -191,7 +191,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="row"><div class="search">🔍 <input id="q" placeholder="Taip je - list auto ikut..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="clearSearch" style="display:none;border:0;background:#E5E7EB;color:#374151;border-radius:50%;width:30px;height:30px;min-width:30px;font-size:15px;font-weight:800;line-height:1;cursor:pointer;padding:0;flex-shrink:0">✕</button></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
 <div class="row"><button class="btn btn-light" id="reportBtn" style="flex:1">📊 Report</button><button class="btn btn-light" id="settingBtn" style="flex:1">⚙️ Setting</button></div>
-<div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="batal">PV Batal</button></div>
+<div class="tabs"><button class="tab active" data-tab="all">Semua</button><button class="tab" data-tab="paid">Dah Bayar</button><button class="tab" data-tab="unpaid">Belum Bayar</button><button class="tab" data-tab="hold">⏸️ On Hold</button><button class="tab" data-tab="batal">PV Batal</button></div>
 <button class="btn btn-green" id="addBtnTop" style="width:100%;margin:8px 0;padding:14px;font-size:15px;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.12)">＋ Tambah Invoice</button>
 
 <div id="list"><p style="text-align:center;color:#666">Tiada invoice</p></div>
@@ -245,7 +245,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -262,7 +262,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -450,7 +450,7 @@ function migrateCN(){ let changed=false; invoices.forEach(x=>{ if(isCN(x) && Num
 function today(){ return new Date().toISOString().slice(0,10); }
 function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2200); }
 function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ const cur=sel.value; sel.innerHTML=allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur&&allCats().includes(cur))sel.value=cur; } const f=document.getElementById('fltCat'); if(f){ const cur=f.value; f.innerHTML='<option value="">Semua kategori</option>'+allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur)f.value=cur; } }
-function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='batal'){ return []; } return list; }
+function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.holdId||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='hold') list=list.filter(x=>!x.paid && x.onHold); if(tab==='batal'){ return []; } return list; }
 let _pinSavedId=''; let _pinSavedPv=''; let _pinJustSet=false;
 function gotoTab(name){ tab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name)); selected.clear(); render(); }
 
@@ -460,7 +460,7 @@ function render(){
   
   rebuildCatList();
   const list=filtered();
-  const _tabLabel = tab==='paid' ? ' Dah Bayar' : tab==='unpaid' ? ' Belum Bayar' : '';
+  const _tabLabel = tab==='paid' ? ' Dah Bayar' : tab==='unpaid' ? ' Belum Bayar' : tab==='hold' ? ' PV On Hold' : '';
   const _total=list.reduce((s,x)=>s+signedPrice(x),0);
   document.getElementById('infoBar').textContent = pvCountLabel(list)+_tabLabel+' • '+fmt(_total); try{ document.getElementById('infoBar').classList.remove('info-pin'); }catch(e){} // Banner BARU DISIMPAN kat atas dibuang ikut cakap user - infoBar kekal info biasa je
   const box=document.getElementById('list'); box.innerHTML='';
@@ -470,6 +470,34 @@ function render(){
     if(!cancelledPVs.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada PV Batal</p>';
     const _batalSorted=[...cancelledPVs].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); let _batalLastDay='';
     _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
+    return;
+  }
+  // TAB ON HOLD: group ikut holdId - kad ada 2 butang: Bayar Hold Ni (jadi PV betul + Dah Bayar) + Batal Hold (jadi Belum Bayar biasa)
+  if(tab==='hold'){
+    const _bbH=document.getElementById('bulkBar'); if(_bbH) _bbH.remove();
+    const _holds=list.filter(x=>!x.paid && x.onHold);
+    const _htotal=_holds.reduce((a,x)=>a+signedPrice(x),0);
+    document.getElementById('infoBar').textContent = _holds.length+' invoice On Hold • '+fmt(_htotal)+' • Perlu bayar segera';
+    if(!_holds.length){ box.innerHTML='<p style="text-align:center;color:#666">Tiada PV On Hold<br><span style="font-size:12px">Tick invoice Belum Bayar, lepas tu tekan ⏸️ On Hold</span></p>'; return; }
+    const _hg={}; _holds.forEach(x=>{ const k=x.holdId||('HOLD-'+x.id); if(!_hg[k]) _hg[k]={holdId:x.holdId||'', holdDate:x.holdDate||x.date||'', items:[]}; _hg[k].items.push(x); });
+    Object.values(_hg).forEach(g=>g.items.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.inv||'').localeCompare(b.inv||'')));
+    const _hlist=Object.values(_hg).sort((a,b)=>(b.holdDate||'').localeCompare(a.holdDate||'')||(b.holdId||'').localeCompare(a.holdId||''));
+    _hlist.forEach(g=>{
+      const gtotal=g.items.reduce((a,x)=>a+signedPrice(x),0);
+      const _names=[...new Set(g.items.map(x=>x.name).filter(Boolean))];
+      const _supTitle=_names.length<=1 ? (_names[0]||'Tanpa Nama') : _names[0]+' + '+(_names.length-1)+' lagi';
+      const _invList=g.items.map(x=>`<div style="font-size:11px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">• ${x.inv||'-'} • ${fmtDate(x.date)} • ${fmt(signedPrice(x))}${isCN(x)?' (CN)':''}</div>`).join('');
+      const _firstImg=g.items.find(x=>x.img)?.img||'';
+      const d=document.createElement('div'); d.className='card';
+      d.innerHTML=`<div class="thumb" data-thumb>${_firstImg?supaImgTag(_firstImg):'📷'}</div><div class="meta" style="flex:1"><b>${_supTitle}</b>${_names.length>1?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_names.join(' • ')}</div>`:''}${_invList}<div style="margin-top:4px"><span class="pill hold">⏸️ ON HOLD • ${g.holdId||''}</span></div><div style="font-size:11px;color:#666;margin-top:2px">On Hold: ${fmtDate(g.holdDate)}</div></div><div class="right"><div class="price">${fmt(gtotal)}</div><div style="font-size:11px;color:#666">${g.items.length} invoice</div></div>`;
+      const _btnRow=document.createElement('div'); _btnRow.style.cssText='display:flex;gap:8px;width:100%;margin-top:8px';
+      const _payBtn=document.createElement('button'); _payBtn.type='button'; _payBtn.className='btn btn-green'; _payBtn.style.cssText='flex:1;padding:12px;font-size:14px'; _payBtn.textContent='💰 Bayar Hold Ni';
+      const _cancelBtn=document.createElement('button'); _cancelBtn.type='button'; _cancelBtn.className='btn btn-light'; _cancelBtn.style.cssText='flex:1;padding:12px;font-size:14px'; _cancelBtn.textContent='Batal Hold';
+      _payBtn.onclick=(e)=>{ e.stopPropagation(); selected=new Set(g.items.map(x=>x.id)); openPay('bulk'); };
+      _cancelBtn.onclick=(e)=>{ e.stopPropagation(); cancelHoldGroup(g.holdId); };
+      const _wrap=document.createElement('div'); _wrap.style.cssText='display:flex;flex-direction:column;width:100%'; _wrap.appendChild(d); _btnRow.appendChild(_payBtn); _btnRow.appendChild(_cancelBtn); _wrap.appendChild(_btnRow); box.appendChild(_wrap);
+      const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(g.items[0]) openDetail(g.items[0].id); };
+    });
     return;
   }
   // Banner BARU DISIMPAN + Tunjuk Semua dibuang ikut cakap user - card yang baru simpan still naik atas + highlight kuning je, takde banner hijau dah // GROUP ikut PV, tajuk = supplier name - SWIPE KIRI UNTUK CANCEL PV (Dah Bayar je)
@@ -625,7 +653,7 @@ function render(){
     cc.innerHTML=`<input type="checkbox" ${selected.has(x.id)?'checked':''} style="width:22px;height:22px;margin-top:2px">
     <div class="thumb" data-thumb>${x.img?supaImgTag(x.img):'📷'}</div>
     <div class="meta"><b>${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||'INV-'} • ${x.cat||''}</div>${x.note?`<div style="font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📝 ${x.note}</div>`:''}${splitTxt?`<div style="font-weight:600">${splitTxt}</div>`:''}${x.payMethod?payPillHTML(x.payMethod):''}</div>
-    <div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill ${x.paid?'paid':'unpaid'}">${x.paid?'Dah Bayar':'Belum Bayar'}</span>${x.paid&&x.pv?`<div><span class="pill pv">${x.pv}</span></div><div style="font-size:11px;color:#666">Bayar: ${fmtDate(x.payDate)}</div>`:''}${x.paymentImg?`<div>🧾</div>`:''}</div>`;
+    <div class="right"><div class="price">${fmt(signedPrice(x))}</div><span class="pill ${x.paid?'paid':'unpaid'}">${x.paid?'Dah Bayar':'Belum Bayar'}</span>${(!x.paid&&x.onHold)?`<div><span class="pill hold">⏸️ ON HOLD</span></div><div style="font-size:11px;font-weight:700;color:#92400E">${x.holdId||''}</div>`:''}${x.paid&&x.pv?`<div><span class="pill pv">${x.pv}</span></div><div style="font-size:11px;color:#666">Bayar: ${fmtDate(x.payDate)}</div>`:''}${x.paymentImg?`<div>🧾</div>`:''}</div>`;
     cc.querySelector('input').onchange=e=>{ if(e.target.checked)selected.add(x.id); else selected.delete(x.id); render(); };
     const th=cc.querySelector('[data-thumb]'); th.onclick=e=>{ e.stopPropagation(); openDetail(x.id); }; // Thumb single -> Detail Invoice macam tekan card, bukan viewer - flow macam Detail PV
     let suppressClick=false; cc.onclick=e=>{ if(e.target.tagName==='INPUT')return; if(suppressClick){ suppressClick=false; return; } if(cc.dataset.open==='1'){ closeSwipe(); return; } openDetail(x.id); };
@@ -648,7 +676,7 @@ function render(){
     box.appendChild(c);
   });
   // bulk bar
-  let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-green" id="bulkPay">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove(); if(_pinJustSet){ _pinJustSet=false; [80,300,600].forEach(_d=>setTimeout(()=>{ try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){} }, _d)); }
+  let bar=document.getElementById('bulkBar'); if(selected.size){ if(!bar){ bar=document.createElement('div'); bar.id='bulkBar'; bar.style.cssText='position:fixed;left:12px;right:12px;bottom:78px;background:#111;color:#fff;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;z-index:60'; bar.innerHTML='<span id="bulkTxt" style="flex:1"></span><button class="btn btn-light" id="bulkHold" style="background:#FEF3C7;color:#92400E;padding:10px 12px;font-size:13px">⏸️ On Hold</button><button class="btn btn-green" id="bulkPay" style="padding:10px 12px;font-size:13px">Next →</button>'; document.body.appendChild(bar); document.getElementById('bulkPay').onclick=()=>{ document.getElementById('bulkBar')?.remove(); openPay('bulk'); }; document.getElementById('bulkHold').onclick=()=>{ document.getElementById('bulkBar')?.remove(); makeHoldFromSelected(); }; } const _bt=[...selected].map(id=>invoices.find(x=>x.id===id)).filter(Boolean).reduce((s,x)=>s+signedPrice(x),0); document.getElementById('bulkTxt').textContent=selected.size+' dipilih • '+fmt(_bt); } else if(bar) bar.remove(); if(_pinJustSet){ _pinJustSet=false; [80,300,600].forEach(_d=>setTimeout(()=>{ try{ window.scrollTo(0,0); document.documentElement.scrollTop=0; document.body.scrollTop=0; }catch(e){} }, _d)); }
 }
 // ===== AUTO PDF + MULTI-PAGE (dari code ni) - gambar (Camera/Gallery) -> PDF, 1 invoice = banyak pages, NATIVE iPhone kekal =====
 let _lastAutoPdfFor=''; let _pendingPdfIsOriginal=false;
@@ -1009,10 +1037,13 @@ function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_
 async function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
 ${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages • Scroll bawah - semua muka ada':''}</p><div id="dInvPages"></div>${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
 ${x.paid?`<p>Status: Dah Bayar • ${x.payMethod||''}<br>PV: ${x.pv||'-'} • Bayar: ${fmtDate(x.payDate)||'-'}</p>`:''}
+${(!x.paid&&x.onHold)?`<p style="font-weight:700;color:#92400E">⏸️ PV On Hold • ${x.holdId||''} • On Hold: ${fmtDate(x.holdDate)||'-'}<br><span style="font-weight:400;color:#666;font-size:12px">Perlu bayar segera - belum dibayar lagi</span></p>`:''}
 ${x.paid?`<div><p style="font-weight:700">Resit Payment / Bukti Bayar${(x.paymentPages && x.paymentPages.length>1)?' • '+x.paymentPages.length+' pages':''}</p>${x.paymentImg?`<div id="dPayPages"></div>${x.paymentPdf?`<button class="btn btn-dark" id="dPayPdfBtn" style="width:100%;margin-top:8px">📄 Lihat PDF Resit Asal</button>`:''}<div class="row"><button class="btn btn-light" id="viewPayBtn" style="flex:1">👁️ View Resit Payment</button><button class="btn btn-light" id="changePayBtn" style="flex:1">✏️ Edit</button></div>`: `<button class="btn btn-light" id="addPayBtn" style="width:100%">＋ Tambah Resit Payment</button>`}</div>`:''}
 <button class="btn btn-light" id="editBtn" style="width:100%;margin-top:12px">Edit</button>
 <button class="btn btn-dark" id="dlPdfOne" style="width:100%;margin-top:8px">⬇️ Download PDF - Invoice + Resit Payment</button>
 ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;margin-top:8px">Bayar Invoice Ni</button>`: `<p style="font-size:12px;color:#666;text-align:center;margin-top:10px">Untuk batal PV, swipe kiri kad PV kat tab Dah Bayar</p>`}
+${(!x.paid&&!x.onHold)?`<button class="btn btn-light" id="detailHoldBtn" style="width:100%;margin-top:8px;background:#FEF3C7;color:#92400E">⏸️ Jadikan PV On Hold</button>`:''}
+${(!x.paid&&x.onHold)?`<button class="btn btn-light" id="detailUnholdBtn" style="width:100%;margin-top:8px">Batalkan On Hold</button>`:''}
 `;
  // DETAIL TUNJUK SEMUA MUKA: dulu Detail tunjuk muka 1 je, user ingat page lain takde. Sekarang Detail sendiri tunjuk semua pages bertindih, scroll je. Tekan mana-mana muka -> Viewer buka kat muka tu.
  const _dPagesBox=b.querySelector('#dInvPages');
@@ -1058,6 +1089,8 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
 
  const dp1=b.querySelector('#dlPdfOne'); if(dp1) dp1.onclick=()=>downloadPdfOne(x);
  const payB=b.querySelector('#detailPayBtn'); if(payB) payB.onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); openPay('single',x.id); };
+ const holdB=b.querySelector('#detailHoldBtn'); if(holdB) holdB.onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); makeHoldFromIds([x.id]); };
+ const unholdB=b.querySelector('#detailUnholdBtn'); if(unholdB) unholdB.onclick=()=>{ document.getElementById('detailModal').classList.remove('open'); cancelHoldGroup(x.holdId); };
 
  try{ const _di=document.getElementById('dInvImg'); if(_di && x.img && String(supaFixExpiredUrl(x.img)).startsWith('SUPA:')){ (async()=>{ try{ const u=await supaResolveOne(supaFixExpiredUrl(x.img)); if(u && !String(u).startsWith('SUPA:')) _di.src=u; }catch(e){} })(); } const _dp=document.getElementById('dPayImg'); if(_dp && x.paymentImg && String(supaFixExpiredUrl(x.paymentImg)).startsWith('SUPA:')){ (async()=>{ try{ const u=await supaResolveOne(supaFixExpiredUrl(x.paymentImg)); if(u && !String(u).startsWith('SUPA:')) _dp.src=u; }catch(e){} })(); } }catch(e){}
  // JANGAN auto-pulih bila buka Detail - render PDF kat background ni yang buat Safari crash.
@@ -1065,6 +1098,12 @@ ${!x.paid?`<button class="btn btn-green" id="detailPayBtn" style="width:100%;mar
  document.getElementById('detailModal').classList.add('open');
 }
 function nextPV(dateStr){ let d; if(dateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))){ d=new Date(String(dateStr)+'T00:00:00'); } else { d=new Date(); } if(isNaN(d)) d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); const prefix='PV-'+yy+mm+'-'; let maxv=0; [...invoices.filter(x=>x.pv).map(x=>x.pv), ...cancelledPVs.map(c=>c.pv||'')].forEach(pv=>{ if(String(pv).startsWith(prefix)){ const n=parseInt(String(pv).split('-')[2]||'0'); if(!isNaN(n) && n>maxv) maxv=n; } }); return prefix+String(maxv+1).padStart(3,'0'); }
+function nextHoldId(dateStr){ let d; if(dateStr && /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))){ d=new Date(String(dateStr)+'T00:00:00'); } else { d=new Date(); } if(isNaN(d)) d=new Date(); const yy=String(d.getFullYear()).slice(2), mm=String(d.getMonth()+1).padStart(2,'0'); const prefix='HOLD-'+yy+mm+'-'; let maxv=0; invoices.filter(x=>x.holdId).map(x=>x.holdId).forEach(h=>{ if(String(h).startsWith(prefix)){ const n=parseInt(String(h).split('-')[2]||'0'); if(!isNaN(n) && n>maxv) maxv=n; } }); return prefix+String(maxv+1).padStart(3,'0'); }
+// PV ON HOLD: tick invoice Belum Bayar -> kumpul jadi 1 PV On Hold, tapi MASIH Belum Bayar (paid=false, pv=''). Tanda je payment ni perlu dibuat segera. Bila betul nak bayar, tekan Bayar kat tab On Hold - masa tu baru jadi PV betul + Dah Bayar.
+function makeHoldFromIds(ids){ const items=(ids||[]).map(id=>invoices.find(x=>x.id===id)).filter(Boolean); const unpaid=items.filter(x=>!x.paid); if(!unpaid.length){ alert('On Hold hanya untuk invoice Belum Bayar.'); return null; } if(unpaid.length<items.length){ if(!confirm((items.length-unpaid.length)+' invoice dah bayar - akan dikecualikan. Teruskan On Hold untuk '+unpaid.length+' invoice Belum Bayar?')) return null; } const hid=nextHoldId(today()); const hd=today(); unpaid.forEach(x=>{ x.onHold=true; x.holdId=hid; x.holdDate=hd; x._editedAt=Date.now(); }); selected.clear(); save(); showToast('PV On Hold - '+hid+' - '+unpaid.length+' invoice - perlu bayar segera'); gotoTab('hold'); return hid; }
+function makeHoldFromSelected(){ return makeHoldFromIds([...selected]); }
+function cancelHoldGroup(holdId){ const items=invoices.filter(x=>!x.paid && x.onHold && String(x.holdId||'')===String(holdId)); if(!items.length) return; if(!confirm('Batalkan On Hold '+holdId+'?\n\n'+items.length+' invoice akan jadi Belum Bayar biasa (keluar dari On Hold).')) return; items.forEach(x=>{ x.onHold=false; x.holdId=''; x.holdDate=''; x._editedAt=Date.now(); }); save(); render(); showToast('On Hold dibatalkan - '+holdId); }
+function clearHoldFor(items){ (items||[]).forEach(x=>{ x.onHold=false; x.holdId=''; x.holdDate=''; }); }
 let editPVInfo=null, deletePayResit=false;
 function updatePayThumbDelete(show){
   const d=document.getElementById('payThumbDelete'); if(d) d.style.display=show?'block':'none';
@@ -1308,7 +1347,7 @@ function cancelPV(pv, payDate){
     invoices=invoices.filter(x=>!_balIds.has(x.id));
   }
   // Cancel payment: invoice jadi Belum Bayar balik, resit payment dibuang (termasuk dalam IDB)
-  items.forEach(x=>{ try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.paymentPages=[]; x.split=null; });
+  items.forEach(x=>{ try{ if(x.paymentImg && String(x.paymentImg).startsWith('IDBIMG:')) idbDeletePdf(String(x.paymentImg).slice(7)); }catch(e){} try{ if(x.paymentPdf && String(x.paymentPdf).startsWith('IDB:')) idbDeletePdf(String(x.paymentPdf).slice(4)); }catch(e){} x.paid=false; x.pv=''; x.payDate=''; x.payMethod=''; x.paymentImg=''; x.paymentPdf=''; x.paymentPages=[]; x.split=null; x.onHold=false; x.holdId=''; x.holdDate=''; });
   save(); render();
   return true;
   }catch(err){ alert('Batal PV gagal: '+err.message); console.error(err); return false; }
@@ -1526,7 +1565,7 @@ document.getElementById('addSave').onclick=()=>{ let _raw=document.getElementByI
     let _pdfField = pendingPdf!=='' ? pendingPdf : (pendingImg && pendingImg!==x.img ? '' : (x.pdf||''));
     // Kalau PDF baru besar, pindah ke IndexedDB
     if(_pdfField && String(_pdfField).startsWith('data:') && _pdfField.length>500*1024){ const _k='inv_'+x.id; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
-    const _pagesToSave=(!_editPagesTouched && _editOrigPages.length>pendingPages.length) ? _editOrigPages.slice() : pendingPages.slice(); Object.assign(x,{name,inv,price,date,cat,note,img:(_pagesToSave[0]||pendingImg||x.img), pdf:_pdfField, hasPdf:!!_pdfField, pages:_pagesToSave, _editedAt:Date.now()}); if(x.paid && x.payMethod==='Cash' && isCash){ x.payDate=date; } if(x.paid && x.payMethod==='Bank Transfer' && isBank){ x.payDate=bankPayDate; } if(x.paid && (isCash||isBank) && x.payMethod!==payMethodToUse){ x.payMethod=payMethodToUse; x.payDate=payDateToUse; } if(!x.paid && (isCash||isBank)){ const _pv=nextPV(payDateToUse); Object.assign(x,{paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:''}); becamePaid=true; becamePaidMethod=payMethodToUse; }
+    const _pagesToSave=(!_editPagesTouched && _editOrigPages.length>pendingPages.length) ? _editOrigPages.slice() : pendingPages.slice(); Object.assign(x,{name,inv,price,date,cat,note,img:(_pagesToSave[0]||pendingImg||x.img), pdf:_pdfField, hasPdf:!!_pdfField, pages:_pagesToSave, _editedAt:Date.now()}); if(x.paid && x.payMethod==='Cash' && isCash){ x.payDate=date; } if(x.paid && x.payMethod==='Bank Transfer' && isBank){ x.payDate=bankPayDate; } if(x.paid && (isCash||isBank) && x.payMethod!==payMethodToUse){ x.payMethod=payMethodToUse; x.payDate=payDateToUse; } if(!x.paid && (isCash||isBank)){ const _pv=nextPV(payDateToUse); Object.assign(x,{paid:true,pv:_pv,payDate:payDateToUse,payMethod:payMethodToUse,split:null,paymentImg:'',paymentPdf:'',onHold:false,holdId:'',holdDate:''}); becamePaid=true; becamePaidMethod=payMethodToUse; }
   } else { const _newId=Date.now().toString(); _savedIdCapture=_newId;
   let _pdfField=pendingPdf||'';
   if(_pdfField && _pdfField.length>500*1024){ const _k='inv_'+_newId; idbSavePdf(_k, _pdfField); _pdfField='IDB:'+_k; }
@@ -1864,7 +1903,7 @@ document.getElementById('payConfirm').onclick=()=>{
   const _diffBal = (payMode==='editPV' ? 0 : Math.round((total-paid)*100)/100);
   const _isBal = (payMode!=='editPV' && Math.abs(_diffBal)>0.01);
   if(_isBal){ const _msg = _diffBal>0 ? `Bayar ${fmt(paid)} tak cukup. Total ${fmt(total)}.\nBaki ${fmt(_diffBal)} akan auto jadi list baru - tarikh ${fmtDate(pd)} - Belum Bayar.\nTeruskan?` : `Bayar ${fmt(paid)} terlebih. Total ${fmt(total)}.\nLebihan ${fmt(_diffBal)} (-ve) akan auto jadi list baru - tarikh ${fmtDate(pd)}.\nTeruskan?`; if(!confirm(_msg)) return; const _lastBal=items[items.length-1]; if(_lastBal){ _lastBal._balOrigPrice=Number(_lastBal.price||0); _lastBal._balPV=pv; _lastBal._balDiff=_diffBal; _lastBal._editedAt=Date.now(); _lastBal.price=Math.round((Number(_lastBal.price||0)-_diffBal)*100)/100; } }
-  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; if(split) x.split=split; else x.split=null;
+  items.forEach(x=>{ x.paid=true; x.pv=pv; x.payDate=pd; x.payMethod=payMethod; x.onHold=false; x.holdId=''; x.holdDate=''; if(split) x.split=split; else x.split=null;
     // Gambar Invoice dalam Bayar/Edit Bayar - pending macam Resit
     if(deleteInvImgs[x.id]){ if(x.pdf && String(x.pdf).startsWith('IDB:')) idbDeletePdf(String(x.pdf).slice(4)); x.img=''; x.pdf=''; x.pages=[]; }
     else { if(pendingInvImgs[x.id]) x.img=pendingInvImgs[x.id]; if(pendingInvPages[x.id] && pendingInvPages[x.id].length) x.pages=pendingInvPages[x.id].slice(); if(pendingInvPdfs[x.id]){ let _pp2=pendingInvPdfs[x.id]; if(_pp2.length>500*1024){ const _k2='inv_'+x.id; idbSavePdf(_k2,_pp2); _pp2='IDB:'+_k2; } x.pdf=_pp2; } else if(pendingInvImgs[x.id] && pendingInvPdfs[x.id]===''){ x.pdf=''; } }
