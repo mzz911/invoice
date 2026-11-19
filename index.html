@@ -41,6 +41,14 @@
 .wrap{max-width:720px;margin:0 auto;padding:14px}
 header{margin:-14px -14px 12px;padding:22px 14px 18px;background:linear-gradient(135deg,#4C1D95,#6D28D9 55%,#7C3AED);border-radius:0 0 22px 22px;color:#fff;box-shadow:0 4px 16px rgba(76,29,149,.25)}
 h1{margin:4px 0 2px;font-size:26px;color:#fff}.sub{color:rgba(255,255,255,.85);font-size:13px}
+#syncBar{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:10px 12px;margin:10px 0 6px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+#syncBar .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;background:#9CA3AF}
+#syncBar.sync-pending .dot{background:#9CA3AF}
+#syncBar.sync-syncing .dot{background:#F59E0B;animation:syncPulse 1s infinite}
+#syncBar.sync-synced .dot{background:#16A34A}
+#syncBar.sync-error .dot{background:#DC2626}
+#syncBar .syncTime{margin-left:auto;font-weight:400;color:#64748B;font-size:11px;white-space:nowrap}
+@keyframes syncPulse{0%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.25)}100%{opacity:1;transform:scale(1)}}
 .info{background:#fff;border-radius:16px;padding:12px 14px;font-weight:800;color:#4C1D95;margin:14px 0 10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .row{display:flex;gap:8px;align-items:center;margin:6px 0}
 .search{flex:1;display:flex;align-items:center;background:#fff;border:0;border-radius:16px;padding:12px;gap:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -187,6 +195,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
 
+<div id="syncBar" class="sync-pending" data-bound="1"><span class="dot" id="syncDot"></span><span id="syncText">● Belum sync — 1 belum naik ke cloud</span><span class="syncTime" id="syncTime">Tekan untuk sync</span></div>
 <div class="info" id="infoBar">0 invoice • RM0.00</div>
 <div class="row"><div class="search">🔍 <input id="q" placeholder="Taip je - list auto ikut..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"><button id="clearSearch" style="display:none;border:0;background:#E5E7EB;color:#374151;border-radius:50%;width:30px;height:30px;min-width:30px;font-size:15px;font-weight:800;line-height:1;cursor:pointer;padding:0;flex-shrink:0">✕</button></div><button class="btn btn-green" id="filterBtn">Filter <span id="filterCount"></span></button></div>
 <div id="searchSuggest" style="display:none;background:#fff;border:1px solid #ddd;border-radius:10px;margin:-2px 0 8px;overflow:hidden;position:relative;z-index:20"></div>
@@ -387,7 +396,7 @@ async function supaResolveForView(val){
   return val;
 }
 async function supaResolveInvoice(inv){ try{ const out={...inv}; const map={}; const fields=['img','paymentImg','pdf','paymentPdf']; for(const f of fields){ if(inv[f] && String(inv[f]).startsWith('SUPA:')){ map[f]=inv[f]; out[f]=await supaResolveOne(inv[f]); } } for(const arr of ['pages','paymentPages']){ if(Array.isArray(inv[arr])){ const narr=[]; const nmap=[]; for(let i=0;i<inv[arr].length;i++){ const v=inv[arr][i]; if(v&&String(v).startsWith('SUPA:')){ nmap[i]=v; narr[i]=await supaResolveOne(v); } else narr[i]=v; } out[arr]=narr; if(nmap.length) map[arr]=nmap; } } if(Object.keys(map).length) supaPathsMap[inv.id]=map; return out; }catch(e){ return inv; } }
-async function supaLoadFromCloud(){ try{ if(!supaUser||!supaClient) return false; supaSetStatus('☁️ Tarik invoice dari cloud...'); const {data, error} = await supaClient.from('invoices').select('id,data').order('updated_at',{ascending:false}).limit(2000); if(error) throw error; if(!data||!data.length){ supaSetStatus('☁️ Cloud kosong — data dalam phone akan naik ke cloud bila Sync.'); return false; } const _deleted=new Set(supaGetDeletedIds()); const cloud=[]; for(const row of data){ try{ const inv=row.data||{}; if(!inv.id) inv.id=row.id; if(_deleted.has(inv.id)){ try{ supaClient.from('invoices').delete().eq('id', inv.id); }catch(e){} continue; } supaNormalizeInv(inv); cloud.push(inv); }catch(e){} } /* MERGE, bukan timpa terus: kalau phone ada edit baru yang belum sempat naik (refresh dalam 3 saat), phone menang - cloud tak boleh timpa balik jadi asal */ if(cloud.length){ const _localBefore=[...(invoices||[])]; const _localById={}; _localBefore.forEach(x=>{ if(x && x.id) _localById[x.id]=x; }); const _merged=[]; const _seen=new Set(); cloud.forEach(cInv=>{ _seen.add(cInv.id); const _loc=_localById[cInv.id]; if(_loc && !_deleted.has(cInv.id)){ try{ const _hLoc=supaHashInv(_loc), _hCloud=supaHashInv(cInv); if(_hLoc!==_hCloud){ _merged.push(_loc); return; } }catch(e){} } _merged.push(cInv); }); _localBefore.forEach(lInv=>{ if(lInv && lInv.id && !_seen.has(lInv.id) && !_deleted.has(lInv.id)) _merged.push(lInv); }); invoices=_merged; try{ localStorage.setItem('ik_invoices', JSON.stringify(invoices)); }catch(e){} try{ render(); }catch(e){} try{ supaLazyThumbs(); }catch(e){} try{ cloud.forEach(inv=>{ const _loc=_localById[inv.id]; if(!_loc || supaHashInv(_loc)===supaHashInv(inv)) _supaHashMap[inv.id]=supaHashInv(inv); }); _supaSaveHashMap(); }catch(e){} supaSetStatus('☁️ Cloud: '+cloud.length+' invoice • phone dah sync'); try{ setTimeout(()=>{ if(supaUser) supaSyncChangedOnly(false); }, 500); }catch(e){} return true; } return false; }catch(e){ supaSetStatus('☁️ Cloud gagal tarik: '+(e.message||e)+' — pakai data phone dulu'); return false; } }
+async function supaLoadFromCloud(){ try{ if(!supaUser||!supaClient) return false; try{ ikSetSyncing('● Tarik dari cloud...'); }catch(e){} supaSetStatus('☁️ Tarik invoice dari cloud...'); const {data, error} = await supaClient.from('invoices').select('id,data').order('updated_at',{ascending:false}).limit(2000); if(error) throw error; if(!data||!data.length){ supaSetStatus('☁️ Cloud kosong — data dalam phone akan naik ke cloud bila Sync.'); try{ const _pn=ikCountPending(); if(_pn>0) ikSetSyncPending(_pn); }catch(e){} return false; } const _deleted=new Set(supaGetDeletedIds()); const cloud=[]; for(const row of data){ try{ const inv=row.data||{}; if(!inv.id) inv.id=row.id; if(_deleted.has(inv.id)){ try{ supaClient.from('invoices').delete().eq('id', inv.id); }catch(e){} continue; } supaNormalizeInv(inv); cloud.push(inv); }catch(e){} } if(cloud.length){ const _localBefore=[...(invoices||[])]; const _localById={}; _localBefore.forEach(x=>{ if(x && x.id) _localById[x.id]=x; }); const _merged=[]; const _seen=new Set(); cloud.forEach(cInv=>{ _seen.add(cInv.id); const _loc=_localById[cInv.id]; if(_loc && !_deleted.has(cInv.id)){ try{ const _hLoc=supaHashInv(_loc), _hCloud=supaHashInv(cInv); if(_hLoc!==_hCloud){ _merged.push(_loc); return; } }catch(e){} } _merged.push(cInv); }); _localBefore.forEach(lInv=>{ if(lInv && lInv.id && !_seen.has(lInv.id) && !_deleted.has(lInv.id)) _merged.push(lInv); }); invoices=_merged; try{ localStorage.setItem('ik_invoices', JSON.stringify(invoices)); }catch(e){ try{ ikSetSyncError('Simpan phone gagal'); }catch(e2){} } try{ render(); }catch(e){} try{ supaLazyThumbs(); }catch(e){} try{ cloud.forEach(inv=>{ const _loc=_localById[inv.id]; if(!_loc || supaHashInv(_loc)===supaHashInv(inv)) _supaHashMap[inv.id]=supaHashInv(inv); }); _supaSaveHashMap(); }catch(e){} supaSetStatus('☁️ Cloud: '+cloud.length+' invoice • phone dah sync'); try{ const _pn2=ikCountPending(); if(_pn2>0) ikSetSyncPending(_pn2); else ikSetSynced(); }catch(e){} try{ setTimeout(()=>{ if(supaUser) supaSyncChangedOnly(false); }, 500); }catch(e){} return true; } return false; }catch(e){ supaSetStatus('☁️ Cloud gagal tarik: '+(e.message||e)+' — pakai data phone dulu'); try{ ikSetSyncError('Tarik cloud gagal'); }catch(e2){} return false; } }
 function supaGetDeletedIds(){ try{ return JSON.parse(localStorage.getItem('ik_deleted_ids')||'[]'); }catch(e){ return []; } }
 function supaMarkDeleted(id){ try{ const a=supaGetDeletedIds(); if(id && !a.includes(id)){ a.push(id); localStorage.setItem('ik_deleted_ids', JSON.stringify(a.slice(-500))); } }catch(e){} try{ delete _supaHashMap[id]; }catch(e){} }
 async function supaDeleteInvoice(id){ if(!id) return; supaMarkDeleted(id); try{ if(!supaUser||!supaClient) return; await supaClient.from('invoices').delete().eq('id', id); try{ const prefix=supaUser.id+'/'+id; const {data:list} = await supaClient.storage.from('invoice-images').list(prefix); if(list && list.length){ const paths=list.map(f=>prefix+'/'+f.name); await supaClient.storage.from('invoice-images').remove(paths); } }catch(e){} }catch(e){} }
@@ -403,8 +412,9 @@ function supaHashInv(inv){ try{ const o=[inv.id,inv.name,inv.inv,inv.date,inv.pr
 function _supaSaveHashMap(){ try{ localStorage.setItem('ik_supa_hash', JSON.stringify(_supaHashMap)); localStorage.setItem('ik_supa_cancelled_hash', _supaCancelledHash||''); }catch(e){} }
 async function supaSyncChangedOnly(showToastFlag){
   if(supaSyncing) return 0;
-  if(!supaUser){ const u=await supaCheckSession(); if(!u) return 0; }
+  if(!supaUser){ const u=await supaCheckSession(); if(!u){ try{ ikSetSyncPending(); }catch(e){} return 0; } }
   supaSyncing=true;
+  try{ ikSetSyncing(); }catch(e){}
   try{
     let changed=0, fail=0;
     for(const inv of (invoices||[])){
@@ -417,28 +427,113 @@ async function supaSyncChangedOnly(showToastFlag){
         changed++;
       }catch(e){ fail++; }
     }
-    /* PV Batal berubah je baru naik */
     try{
       const ch=_supaHashStr(JSON.stringify(cancelledPVs||[]));
       if(ch!==_supaCancelledHash){
-        try{ const {error:e2}=await supaClient.from('app_meta').upsert({key:'cancelledPVs', owner_id:supaUser.id, data:{items:cancelledPVs||[]}, updated_at:new Date().toISOString()}, {onConflict:'key'}); if(!e2) _supaCancelledHash=ch; }catch(e){}
+        try{ const {error:e2}=await supaClient.from('app_meta').upsert({key:'cancelledPVs', owner_id:supaUser.id, data:{items:cancelledPVs||[]}, updated_at:new Date().toISOString()}, {onConflict:'key'}); if(!e2) _supaCancelledHash=ch; else fail++; }catch(e){ fail++; }
       }
     }catch(e){}
     _supaSaveHashMap();
-    if(changed>0){
-      supaSetStatus('☁️ Auto-sync: '+changed+' invoice berubah je naik'+(fail?(' • '+fail+' gagal'):''));
+    try{ localStorage.setItem('ik_invoices', JSON.stringify(invoices)); }catch(e){}
+    if(fail>0){
+      supaSetStatus('☁️ Auto-sync: '+changed+' naik • '+fail+' gagal');
+      try{ if(showToastFlag!==false && typeof showToast==='function') showToast('Sync: '+changed+' naik, '+fail+' gagal — tekan bar atas untuk cuba lagi'); }catch(e){}
+      try{ ikSetSyncError(fail+' gagal naik'); }catch(e){}
+    } else if(changed>0){
+      supaSetStatus('☁️ Auto-sync: '+changed+' invoice berubah je naik');
       try{ if(showToastFlag!==false && typeof showToast==='function') showToast('Auto-sync: '+changed+' invoice naik'); }catch(e){}
-      try{ localStorage.setItem('ik_invoices', JSON.stringify(invoices)); }catch(e){}
+      try{ ikSetSynced(); }catch(e){}
+    } else {
+      try{ if(ikCountPending()===0) ikSetSynced(); else ikSetSyncPending(); }catch(e){}
     }
     return changed;
-  }catch(e){ return 0; } finally{ supaSyncing=false; }
+  }catch(e){ try{ ikSetSyncError(e.message||e); }catch(e2){} return 0; } finally{ supaSyncing=false; }
 }
-async function supaSyncAll(showToastFlag){ if(supaSyncing) return; if(!supaUser){ const u=await supaCheckSession(); if(!u){ supaShowLogin('Login dulu untuk sync ke Supabase.'); return; } } supaSyncing=true; try{ supaSetStatus('☁️ Sync: naikkan '+(invoices||[]).length+' invoice... jangan tutup tab'); let ok=0, fail=0; for(let i=0;i<(invoices||[]).length;i++){ try{ await supaSyncOneInvoice(invoices[i]); ok++; if(i%10===0) supaSetStatus('☁️ Sync: '+ok+'/'+invoices.length+' siap...'); }catch(e){ fail++; } } try{ (invoices||[]).forEach(inv=>{ _supaHashMap[inv.id]=supaHashInv(inv); }); _supaCancelledHash=_supaHashStr(JSON.stringify(cancelledPVs||[])); _supaSaveHashMap(); }catch(e){} supaSetStatus('☁️ Sync siap: '+ok+' ok'+(fail?(' • '+fail+' gagal'):'')+' • '+invoices.length+' invoice di cloud'); try{ if(showToastFlag!==false && typeof showToast==='function') showToast('Sync Supabase siap — '+ok+' invoice naik'); }catch(e){} }catch(e){ supaSetStatus('☁️ Sync gagal: '+(e.message||e)); } finally{ supaSyncing=false; } }
+async function supaSyncAll(showToastFlag){ if(supaSyncing) return; if(!supaUser){ const u=await supaCheckSession(); if(!u){ supaShowLogin('Login dulu untuk sync ke Supabase.'); return; } } supaSyncing=true; try{ try{ ikSetSyncing('● Tengah sync semua ke cloud...'); }catch(e){} supaSetStatus('☁️ Sync: naikkan '+(invoices||[]).length+' invoice... jangan tutup tab'); let ok=0, fail=0; const _okIds=new Set(); for(let i=0;i<(invoices||[]).length;i++){ try{ await supaSyncOneInvoice(invoices[i]); ok++; _okIds.add(invoices[i].id); if(i%10===0){ supaSetStatus('☁️ Sync: '+ok+'/'+invoices.length+' siap...'); try{ ikSetSyncing('● Tengah sync... '+ok+'/'+invoices.length); }catch(e){} } }catch(e){ fail++; } } try{ (invoices||[]).forEach(inv=>{ if(_okIds.has(inv.id)) _supaHashMap[inv.id]=supaHashInv(inv); }); _supaCancelledHash=_supaHashStr(JSON.stringify(cancelledPVs||[])); _supaSaveHashMap(); }catch(e){} if(fail>0){ supaSetStatus('☁️ Sync siap: '+ok+' ok • '+fail+' gagal • '+invoices.length+' invoice di cloud'); try{ ikSetSyncError(fail+' gagal naik'); }catch(e){} } else { supaSetStatus('☁️ Sync siap: '+ok+' ok • '+invoices.length+' invoice di cloud'); try{ ikSetSynced(); }catch(e){} } try{ if(showToastFlag!==false && typeof showToast==='function') showToast('Sync Supabase siap — '+ok+' invoice naik'+(fail?(' • '+fail+' gagal') : '')); }catch(e){} }catch(e){ supaSetStatus('☁️ Sync gagal: '+(e.message||e)); try{ ikSetSyncError(e.message||e); }catch(e2){} } finally{ supaSyncing=false; } }
+
+// Sync indicator: auto-sync bila online balik / tab sorok (jangan tunggu 3s je)
+window.addEventListener('online', ()=>{ try{ if(typeof supaUser!=='undefined' && supaUser && ikCountPending()>0) supaSyncChangedOnly(false); else ikInitSyncBar(); }catch(e){} });
+window.addEventListener('offline', ()=>{ try{ ikSetSyncOffline(); }catch(e){} });
+document.addEventListener('visibilitychange', ()=>{ try{ if(document.hidden && typeof supaUser!=='undefined' && supaUser && navigator.onLine && ikCountPending()>0){ try{ clearTimeout(_supaSaveTimer); }catch(e){} supaSyncChangedOnly(false); } }catch(e){} });
+window.addEventListener('beforeunload', (e)=>{ try{ const _n=ikCountPending(); const _baru = Date.now()-(_ikSyncState.lastLocalSaveAt||0) < 5000; if(_n>0 && _baru){ e.preventDefault(); e.returnValue='Ada '+_n+' invoice belum sync ke cloud. Tunggu sampai hijau dulu?'; return e.returnValue; } }catch(e){} });
+document.addEventListener('DOMContentLoaded', ()=>{ try{ setTimeout(ikInitSyncBar, 300); }catch(e){} });
 // Auto-hook: lepas login & lepas load, cuba sync senyap
 document.addEventListener('DOMContentLoaded', async ()=>{ try{ const b=document.getElementById('supaLoginBtn'); if(b) b.onclick=supaDoLogin; try{ const _pw=document.getElementById('supaPass'); if(_pw) _pw.addEventListener('keydown',e=>{ if(e.key==='Enter') supaDoLogin(); }); const _em=document.getElementById('supaEmail'); if(_em) _em.addEventListener('keydown',e=>{ if(e.key==='Enter') supaDoLogin(); }); }catch(e){} const ob=document.getElementById('supaOfflineBtn'); if(ob) ob.onclick=()=>{ try{ supaHideLogin(); }catch(e){} }; const sb=document.getElementById('supaSyncBtn'); if(sb) sb.onclick=()=>supaSyncAll(true); const lo=document.getElementById('supaLogoutBtn'); if(lo) lo.onclick=async()=>{ try{ await supaClient.auth.signOut(); supaUser=null; try{ supaShowLogin('Logout — login balik untuk teruskan.'); }catch(e){} supaSetStatus('☁️ Supabase: logout — data phone kekal'); }catch(e){} }; const u=await supaCheckSession(); if(u){ try{ const hasCloud=await supaLoadFromCloud(); if(!hasCloud){ /* phone ada data, biar user tekan Sync bila ready */ } }catch(e){} } else { try{ const _hasStored2 = !!localStorage.getItem('ik-supabase-auth') || Object.keys(localStorage).some(k=>k.startsWith('sb-') && k.includes('auth-token')); if(_hasStored2){ supaSetStatus('☁️ Session masih ada, cuba sambung balik...'); const _u2 = await supaCheckSession(); if(_u2){ try{ await supaLoadFromCloud(); }catch(e){} } else { supaShowLogin('Login untuk teruskan.'); } } else { supaShowLogin('Login untuk teruskan.'); } }catch(e){ supaShowLogin('Login untuk teruskan.'); } } }catch(e){} });
 // Patch save() supaya auto-sync lepas save (debounce 3s, kalau login & online)
 let _supaSaveTimer=null; const _origSaveForSupa = null;
-function save(){ try{ if(typeof supaUser!=='undefined' && supaUser && typeof navigator!=='undefined' && navigator.onLine){ try{ clearTimeout(_supaSaveTimer); }catch(e){} _supaSaveTimer=setTimeout(()=>{ try{ if(supaUser) supaSyncChangedOnly(false); }catch(e){} }, 3000); } }catch(e){} try{ localStorage.setItem('ik_meta', JSON.stringify({ts:Date.now(), count:invoices.length})); }catch(e){} try{ localStorage.setItem('ik_invoices', JSON.stringify(invoices)); }catch(e){} try{ localStorage.setItem('ik_cancelled', JSON.stringify(cancelledPVs)); }catch(e){} try{ localStorage.setItem('ik_cats', JSON.stringify(customCats)); }catch(e){} try{ localStorage.setItem('ik_cats_hidden', JSON.stringify(hiddenCats)); }catch(e){} }
+// ===== SYNC INDICATOR — atas screen, nampak terus =====
+// Kelabu = belum sync, Oren = tengah sync, Hijau = dah sync + masa, Merah = gagal
+let _ikSyncState = {status:'pending', pending:0, lastSyncAt:0, lastError:'', lastLocalSaveAt:0};
+try{ const _ss = JSON.parse(localStorage.getItem('ik_sync_state')||'{}'); if(_ss && typeof _ss==='object') _ikSyncState = {..._ikSyncState, ..._ss}; }catch(e){}
+function ikFmtSyncTime(ts){ try{ if(!ts) return ''; const d=new Date(ts); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0'); }catch(e){ return ''; } }
+function ikSaveSyncState(){ try{ localStorage.setItem('ik_sync_state', JSON.stringify(_ikSyncState)); }catch(e){} }
+function ikCountPending(){ try{ if(typeof _supaHashMap==='undefined' || typeof supaHashInv!=='function') return _ikSyncState.pending||0; let n=0; for(const inv of (invoices||[])){ try{ if(_supaHashMap[inv.id]!==supaHashInv(inv)) n++; }catch(e){ n++; } } try{ if(typeof _supaCancelledHash!=='undefined' && typeof _supaHashStr==='function'){ const ch=_supaHashStr(JSON.stringify(cancelledPVs||[])); if(ch!==_supaCancelledHash) n++; } }catch(e){} return n; }catch(e){ return _ikSyncState.pending||0; } }
+function ikUpdateSyncBar(status, text, timeText){
+  try{
+    _ikSyncState.status = status||_ikSyncState.status;
+    if(typeof text==='string') _ikSyncState._lastText = text;
+    ikSaveSyncState();
+    const bar=document.getElementById('syncBar'); if(!bar) return;
+    bar.className = 'sync-'+(status||'pending');
+    const txt=document.getElementById('syncText'); if(txt) txt.textContent=text||'';
+    const tm=document.getElementById('syncTime'); if(tm) tm.textContent=timeText!==undefined?timeText:( _ikSyncState.lastSyncAt ? 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt) : '');
+  }catch(e){}
+}
+function ikSetSyncPending(pending){
+  try{
+    const n = (typeof pending==='number') ? pending : ikCountPending();
+    _ikSyncState.pending=n;
+    if(n>0){ _ikSyncState.lastError=''; ikUpdateSyncBar('pending', '● Belum sync — '+n+' belum naik ke cloud', _ikSyncState.lastSyncAt ? 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt) : 'Tekan untuk sync'); }
+    else if(_ikSyncState.lastSyncAt){ ikUpdateSyncBar('synced', '● Dah sync ke cloud', 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt)); }
+    else { ikUpdateSyncBar('pending', '● Belum sync — tekan untuk sync', ''); }
+  }catch(e){}
+}
+function ikSetSyncing(label){
+  try{ _ikSyncState.status='syncing'; ikUpdateSyncBar('syncing', label||'● Tengah sync ke cloud...', _ikSyncState.lastSyncAt ? 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt) : ''); }catch(e){}
+}
+function ikSetSynced(){
+  try{ _ikSyncState.status='synced'; _ikSyncState.pending=0; _ikSyncState.lastSyncAt=Date.now(); _ikSyncState.lastError=''; ikUpdateSyncBar('synced', '● Dah sync ke cloud', 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt)); }catch(e){}
+}
+function ikSetSyncError(msg){
+  try{ _ikSyncState.status='error'; _ikSyncState.lastError=msg||'Gagal'; const n=ikCountPending(); _ikSyncState.pending=n; ikUpdateSyncBar('error', '● Sync gagal — '+(msg||'tekan untuk cuba lagi'), _ikSyncState.lastSyncAt ? 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt) : 'Tekan untuk cuba lagi'); }catch(e){}
+}
+function ikSetSyncOffline(){
+  try{ const n=ikCountPending(); _ikSyncState.pending=n; ikUpdateSyncBar('pending', n>0 ? '● Offline — '+n+' belum naik (simpan dalam phone je)' : '● Offline — simpan dalam phone je', _ikSyncState.lastSyncAt ? 'Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt) : ''); }catch(e){}
+}
+function ikInitSyncBar(){
+  try{
+    const bar=document.getElementById('syncBar'); if(bar && !bar.dataset.bound){ bar.dataset.bound='1'; bar.addEventListener('click', ()=>{ try{ if(typeof supaSyncing!=='undefined' && supaSyncing){ try{ showToast('Tengah sync... tunggu hijau'); }catch(e){} return; } if(!navigator.onLine){ try{ showToast('Offline — tunggu internet, lepas tu tekan sini lagi'); }catch(e){} return; } if(typeof supaUser==='undefined' || !supaUser){ try{ supaShowLogin('Login dulu untuk sync ke cloud.'); }catch(e){} return; } try{ supaSyncChangedOnly(true); }catch(e){} }catch(e){} }); }
+    const n=ikCountPending();
+    if(typeof supaUser==='undefined' || !supaUser){ if(n>0) ikSetSyncPending(n); else ikUpdateSyncBar('pending','● Belum login — simpan dalam phone je','Tekan untuk login / sync'); }
+    else if(n>0) ikSetSyncPending(n);
+    else if(_ikSyncState.lastSyncAt) ikUpdateSyncBar('synced','● Dah sync ke cloud','Last sync '+ikFmtSyncTime(_ikSyncState.lastSyncAt));
+    else ikUpdateSyncBar('pending','● Belum sync — tekan untuk sync','');
+  }catch(e){}
+}
+function save(){
+  let _localFail=false;
+  try{
+    if(typeof supaUser!=='undefined' && supaUser && typeof navigator!=='undefined' && navigator.onLine){
+      try{ clearTimeout(_supaSaveTimer); }catch(e){}
+      try{ ikSetSyncPending(); }catch(e){}
+      _supaSaveTimer=setTimeout(()=>{ try{ if(supaUser) supaSyncChangedOnly(false); }catch(e){} }, 3000);
+    } else {
+      try{ if(typeof navigator!=='undefined' && !navigator.onLine) ikSetSyncOffline(); else ikSetSyncPending(); }catch(e){}
+    }
+  }catch(e){}
+  try{ _ikSyncState.lastLocalSaveAt=Date.now(); }catch(e){}
+  try{ localStorage.setItem('ik_meta', JSON.stringify({ts:Date.now(), count:invoices.length})); }catch(e){ _localFail=true; }
+  try{ localStorage.setItem('ik_invoices', JSON.stringify(invoices)); }catch(e){ _localFail=true; }
+  try{ localStorage.setItem('ik_cancelled', JSON.stringify(cancelledPVs)); }catch(e){ _localFail=true; }
+  try{ localStorage.setItem('ik_cats', JSON.stringify(customCats)); }catch(e){}
+  try{ localStorage.setItem('ik_cats_hidden', JSON.stringify(hiddenCats)); }catch(e){}
+  try{ ikSaveSyncState(); }catch(e){}
+  if(_localFail){
+    try{ ikUpdateSyncBar('error','● Simpan phone GAGAL — storage penuh, cuba sync sekarang','Tekan untuk sync'); }catch(e){}
+    try{ showToast('Simpan phone GAGAL — storage penuh. Jangan tutup tab, tekan bar sync atas.'); }catch(e){}
+    try{ if(typeof supaUser!=='undefined' && supaUser && navigator.onLine){ clearTimeout(_supaSaveTimer); _supaSaveTimer=setTimeout(()=>{ try{ supaSyncChangedOnly(false); }catch(e){} }, 500); } }catch(e){}
+  }
+}
 
 function fmt(n){ return 'RM'+Number(n||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtDate(d){ if(!d) return ''; const parts=String(d).split('-'); if(parts.length!==3) return d; return parts[2]+'/'+parts[1]+'/'+parts[0].slice(2); }
