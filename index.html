@@ -232,7 +232,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="detailModal"><div class="sheet"><div class="closeRow"><button id="detailBack">← Kembali</button><b>Detail Invoice</b><button id="detailClose">✕ Tutup</button></div><div id="detailBody"></div></div></div>
 
 <!-- PV DETAIL -->
-<div class="modal" id="pvModal"><div class="sheet"><div class="closeRow"><button id="pvBack">← Kembali</button><b>Detail PV</b><button id="pvClose">✕ Tutup</button></div><div id="pvBody"></div></div></div>
+<div class="modal" id="pvModal"><div class="sheet"><div class="closeRow"><button id="pvBack">← Kembali</button><b id="pvModalTitle">Detail PV</b><button id="pvClose">✕ Tutup</button></div><div id="pvBody"></div></div></div>
 
 <!-- FILTER -->
 <div class="modal" id="filterModal"><div class="sheet"><div class="closeRow"><button id="filterBack">← Kembali</button><b>Filter</b><button id="filterClose">✕ Tutup</button></div>
@@ -254,7 +254,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
+<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -271,7 +271,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -591,7 +591,7 @@ function render(){
       _payBtn.onclick=(e)=>{ e.stopPropagation(); selected=new Set(g.items.map(x=>x.id)); openPay('bulk'); };
       _cancelBtn.onclick=(e)=>{ e.stopPropagation(); cancelHoldGroup(g.holdId); };
       const _wrap=document.createElement('div'); _wrap.style.cssText='display:flex;flex-direction:column;width:100%'; _wrap.appendChild(d); _btnRow.appendChild(_payBtn); _btnRow.appendChild(_cancelBtn); _wrap.appendChild(_btnRow); box.appendChild(_wrap);
-      const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); if(g.items[0]) openDetail(g.items[0].id); };
+      d.style.cursor='pointer'; d.onclick=()=>{ openHoldDetail(g.holdId); }; const _th=d.querySelector('[data-thumb]'); if(_th) _th.onclick=(e)=>{ e.stopPropagation(); openHoldDetail(g.holdId); };
     });
     return;
   }
@@ -1471,6 +1471,7 @@ async function openEditInvoice(id){ const x=invoices.find(y=>y.id===id); if(!x) 
  /* FIX EDIT TAK FUNCTION (Viewer): sama macam Detail - jangan await recover PDF sebelum buka form. Form buka dulu, pulih belakang. */
  (function(){ const _eid=x.id, _origLen=pendingPages.length; (async()=>{ try{ if(_origLen<=1 && editId===_eid){ const _rec=await supaRecoverPages(_eid, pendingPages); if(_rec && _rec.length>pendingPages.length && editId===_eid && !_editPagesTouched && document.getElementById('addModal').classList.contains('open')){ pendingPages=_rec; _editOrigPages=_rec.slice(); try{ updatePagesUI(); showToast('Jumpa '+_rec.length+' pages dalam Storage - dipulihkan'); }catch(e){} } } }catch(e){} try{ if(pendingPages.length<=1 && x.pdf && editId===_eid && !_editPagesTouched && document.getElementById('addModal').classList.contains('open')){ const _fromPdf=await supaRecoverPagesFromPdf(x); if(_fromPdf && _fromPdf.length>pendingPages.length && editId===_eid && !_editPagesTouched && document.getElementById('addModal').classList.contains('open')){ pendingPages=_fromPdf.slice(); _editOrigPages=_fromPdf.slice(); try{ updatePagesUI(); showToast('Jumpa '+_fromPdf.length+' pages dalam PDF Asal - dipulihkan'); }catch(e){} } } }catch(e){} })(); })(); }
 function openPVDetail(pv, payDate){
+  try{ const _t=document.getElementById('pvModalTitle'); if(_t) _t.textContent='Detail PV'; const _b0=document.getElementById('pvBody'); if(_b0) _b0.classList.remove('pv-onepage','pv-onepage-xs'); }catch(e){}
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if(!items.length) return;
   const total=items.reduce((s,x)=>s+signedPrice(x),0);
@@ -1495,6 +1496,24 @@ function openPVDetail(pv, payDate){
   const _oneBtn=b.querySelector('#pvOnePageBtn'); if(_oneBtn) _oneBtn.onclick=()=>{ const _on=b.classList.toggle('pv-onepage'); _oneBtn.textContent=_on?'← Balik View Biasa':'📸 View 1 Page - Screenshot'; b.classList.remove('pv-onepage-xs'); if(_on){ setTimeout(()=>{ try{ const _h=b.getBoundingClientRect().height; const _avail=window.innerHeight-90; if(_h>_avail) b.classList.add('pv-onepage-xs'); }catch(e){} },50); } try{ document.getElementById('pvModal').scrollTop=0; }catch(e){} };
 
 
+  document.getElementById('pvModal').classList.add('open');
+}
+function openHoldDetail(holdId){
+  const items=invoices.filter(x=>!x.paid && x.onHold && String(x.holdId||'')===String(holdId)).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.inv||'').localeCompare(b.inv||''));
+  if(!items.length) return;
+  const total=items.reduce((s,x)=>s+signedPrice(x),0);
+  const holdDate=items[0].holdDate||items[0].date||'';
+  try{ const _t=document.getElementById('pvModalTitle'); if(_t) _t.textContent='Detail On Hold'; }catch(e){}
+  const b=document.getElementById('pvBody');
+  try{ b.classList.remove('pv-onepage','pv-onepage-xs'); }catch(e){}
+  b.innerHTML=`<button id="pvOnePageBtn" class="btn btn-light" style="width:100%;margin-bottom:8px">📸 View 1 Page - Screenshot</button><h2>⏸️ ${holdId}</h2><p><b>${fmt(total)}</b> • On Hold: ${fmtDate(holdDate)} • ${pvCountLabel(items)}</p><p style="color:#92400E;font-weight:700">Belum Bayar • Perlu bayar segera</p>`
+    + items.map((x,i)=>`<div class="card" data-hold-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div class="pv-onepage-note" style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
+    + `<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-green" id="holdDetailPayBtn" style="flex:1;padding:12px;font-size:14px">💰 Bayar Hold Ni</button><button class="btn btn-light" id="holdDetailCancelBtn" style="flex:1;padding:12px;font-size:14px">Batal Hold</button></div>`;
+  // Tekan invoice dalam Detail On Hold -> View gambar je, TAKDE Edit kat sini
+  b.querySelectorAll('[data-hold-inv]').forEach(el=>el.onclick=()=>{ openInvoiceViewFirst(el.dataset.holdInv); });
+  const _oneBtn=b.querySelector('#pvOnePageBtn'); if(_oneBtn) _oneBtn.onclick=()=>{ const _on=b.classList.toggle('pv-onepage'); _oneBtn.textContent=_on?'← Balik View Biasa':'📸 View 1 Page - Screenshot'; b.classList.remove('pv-onepage-xs'); if(_on){ setTimeout(()=>{ try{ const _h=b.getBoundingClientRect().height; const _avail=window.innerHeight-90; if(_h>_avail) b.classList.add('pv-onepage-xs'); }catch(e){} },50); } try{ document.getElementById('pvModal').scrollTop=0; }catch(e){} };
+  const _payBtn=b.querySelector('#holdDetailPayBtn'); if(_payBtn) _payBtn.onclick=()=>{ document.getElementById('pvModal').classList.remove('open'); selected=new Set(items.map(x=>x.id)); openPay('bulk'); };
+  const _cancelBtn=b.querySelector('#holdDetailCancelBtn'); if(_cancelBtn) _cancelBtn.onclick=()=>{ document.getElementById('pvModal').classList.remove('open'); cancelHoldGroup(holdId); };
   document.getElementById('pvModal').classList.add('open');
 }
 async function downloadPdfPV(pv, payDate){
