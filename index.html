@@ -1478,9 +1478,9 @@ function openPVDetail(pv, payDate){
   const resits=[...new Set(items.map(x=>x.paymentImg).filter(Boolean))];
   const resitPages=[...new Set(items.flatMap(x=>(x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []))).filter(Boolean))];
   const b=document.getElementById('pvBody');
-  b.innerHTML=`<button id="pvOnePageBtn" class="btn btn-light" style="width:100%;margin-bottom:8px">📸 View 1 Page - Screenshot</button><h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
+  b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
     + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div class="pv-onepage-note" style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
-    + ((resitPages.length?resitPages:resits).length?`<div class="pv-hide-onepage"><p style="font-weight:700">Resit Payment${resitPages.length>1?' • '+resitPages.length+' pages':''}</p>`+(resitPages.length?resitPages:resits).map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light pv-hide-onepage" id="editPVPayBtn" style="width:100%">✏️ Edit</button></div>`:`<p class="pv-hide-onepage">Resit Payment: Tiada</p><button class="btn btn-light pv-hide-onepage" id="editPVPayBtn" style="width:100%">✏️ Edit</button>`)
+    + ((resitPages.length?resitPages:resits).length?`<div class="pv-hide-onepage"><p style="font-weight:700">Resit Payment${resitPages.length>1?' • '+resitPages.length+' pages':''}</p>`+(resitPages.length?resitPages:resits).map((r,i)=>`<img src="${r}" data-resit="${i}" style="width:100%;border-radius:12px;cursor:pointer;margin-bottom:8px">`).join('')+`<button class="btn btn-light pv-hide-onepage" id="editPVPayBtn" style="width:100%">✏️ Edit Payment</button></div>`:`<p class="pv-hide-onepage">Resit Payment: Tiada</p><button class="btn btn-light pv-hide-onepage" id="editPVPayBtn" style="width:100%">✏️ Edit Payment</button>`)
     + `<button class="btn btn-dark pv-hide-onepage" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
   b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openInvoiceViewFirst(el.dataset.pvInv); }); // Tekan invoice dalam PV Detail -> VIEW PDF dulu semua pages, Edit dalam viewer baru pergi Edit Invoice
@@ -1493,9 +1493,6 @@ function openPVDetail(pv, payDate){
   }; });
   const epPV=b.querySelector('#editPVPayBtn'); if(epPV) epPV.onclick=()=>{ openEditPay(pv, payDate); };
   const dp=b.querySelector('#dlPdfPV'); if(dp) dp.onclick=()=>downloadPdfPV(pv,payDate);
-  const _oneBtn=b.querySelector('#pvOnePageBtn'); if(_oneBtn) _oneBtn.onclick=()=>{ const _on=b.classList.toggle('pv-onepage'); _oneBtn.textContent=_on?'← Balik View Biasa':'📸 View 1 Page - Screenshot'; b.classList.remove('pv-onepage-xs'); if(_on){ setTimeout(()=>{ try{ const _h=b.getBoundingClientRect().height; const _avail=window.innerHeight-90; if(_h>_avail) b.classList.add('pv-onepage-xs'); }catch(e){} },50); } try{ document.getElementById('pvModal').scrollTop=0; }catch(e){} };
-
-
   document.getElementById('pvModal').classList.add('open');
 }
 function openHoldDetail(holdId){
