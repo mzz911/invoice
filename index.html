@@ -1491,6 +1491,9 @@ function openPVDetail(pv, payDate){
     + `<button class="btn btn-dark pv-hide-onepage" id="dlPdfPV" style="width:100%;margin-top:8px">⬇️ Download PDF - ${pv}</button>`
 ;
   b.querySelectorAll('[data-pv-inv]').forEach(el=>el.onclick=()=>{ openInvoiceViewFirst(el.dataset.pvInv); }); // Tekan invoice dalam PV Detail -> VIEW PDF dulu semua pages, Edit dalam viewer baru pergi Edit Invoice
+  // DETAIL PV: resit dari cloud simpan sebagai SUPA: - kena resolve dulu baru <img> boleh load.
+  // Sebelum ni src="SUPA:..." terus, browser tak boleh load -> tajuk Resit Payment ada tapi gambar kosong.
+  b.querySelectorAll('[data-resit]').forEach(async (el,i)=>{ try{ const _raw=(resitPages.length?resitPages:resits)[i]; const _fixed=supaFixExpiredUrl(_raw); if(_fixed && String(_fixed).startsWith('SUPA:')){ const u=await supaResolveOne(_fixed); if(u && !String(u).startsWith('SUPA:')) el.src=u; } else if(_fixed && _fixed!==_raw){ el.src=_fixed; } }catch(e){} });
   b.querySelectorAll('[data-resit]').forEach((el,i)=>{ el.onclick=()=>{
     const _arr=(resitPages.length?resitPages:resits);
     if(_arr.length>1){
