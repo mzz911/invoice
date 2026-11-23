@@ -257,7 +257,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -274,7 +274,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1241,6 +1241,7 @@ function updatePayPagesUI(){ const strip=document.getElementById('payPagesStrip'
 async function rebuildPayPdfFromPages(){ try{ if(!pendingPayPages.length){ pendingPayPdf=''; updatePayPdfBadge(); updatePayPagesUI(); return; } if(!window.jspdf) return; const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'}); for(let i=0;i<pendingPayPages.length;i++){ if(i>0) doc.addPage(); const _psrc=await supaResolveForView(pendingPayPages[i]); const im=await new Promise((res)=>{ const x=new Image(); x.onload=()=>res(x); x.onerror=()=>res(null); x.src=_psrc; }); if(!im) continue; const pw=doc.internal.pageSize.getWidth(), ph=doc.internal.pageSize.getHeight(); const m=6, aw=pw-m*2, ah=ph-m*2; let w=aw, h=Math.round(aw*im.height/im.width); if(h>ah){ h=ah; w=Math.round(ah*im.width/im.height); } const small=await new Promise((r)=>{ const maxW=900, sc=Math.min(1,maxW/im.width); const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(im.width*sc)); cv.height=Math.max(1,Math.round(im.height*sc)); const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(im,0,0,cv.width,cv.height); r(cv.toDataURL('image/jpeg',0.62)); }); doc.addImage(small,'JPEG', m+Math.round((aw-w)/2), m+Math.round((ah-h)/2), w, h); await new Promise(r=>setTimeout(r,0)); } pendingPayPdf=doc.output('datauristring'); pendingPayImg=pendingPayPages[0]||''; updatePayPdfBadge(); updatePayPagesUI(); }catch(e){} }
 async function handleNewPayImage(img){ if(!img) return; if(_pendingPayPageAction && _pendingPayPageAction.mode==='replace'){ const idx=_pendingPayPageAction.idx||0; if(pendingPayPages[idx]) pendingPayPages[idx]=img; else pendingPayPages.push(img); } else if(_pendingPayPageAction && _pendingPayPageAction.mode==='add'){ pendingPayPages.push(img); } else { if(!pendingPayPages.length) pendingPayPages.push(img); else pendingPayPages[0]=img; } _pendingPayPageAction=null; pendingPayImg=pendingPayPages[0]||''; deletePayResit=false; setPayThumb(pendingPayImg); const b=document.getElementById('payPdfBadge'); if(b){ b.style.display='block'; b.textContent='Buat PDF... '+pendingPayPages.length+' page'; } await rebuildPayPdfFromPages(); showToast(pendingPayPages.length>1 ? 'Resit Page ditambah - total '+pendingPayPages.length+' pages, PDF auto update' : 'Resit -> PDF auto siap'); }
 function openPay(mode, singleId){
+  window._payDetailId=null;
   payMode=mode; editPVInfo=null; payTarget = mode==='single'? [singleId] : [...selected];
   const items=payTarget.map(id=>invoices.find(x=>x.id===id)).filter(Boolean);
   document.getElementById('payTitle').textContent='Bayar - '+pvCountLabel(items)+' • '+fmt(items.reduce((s,x)=>s+signedPrice(x),0));
@@ -1260,6 +1261,7 @@ async function openEditPay(pv, payDate){
   // Edit Bayar macam modal Bayar - tapi PV kekal, isi data lama
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate);
   if(!items.length) return;
+  window._payDetailId=null;
   document.getElementById('pvModal').classList.remove('open');
   // Kalau dari Detail invoice, tutup detail jugak
   const _dm=document.getElementById('detailModal'); if(_dm) _dm.classList.remove('open');
@@ -1696,8 +1698,8 @@ document.getElementById('srcCamera').onclick=()=>{ document.getElementById('imgS
 document.getElementById('srcGallery').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); document.getElementById('fImg').click(); };
 document.getElementById('srcFiles').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); document.getElementById('fImgFiles').click(); };
 document.getElementById('srcScan').onclick=()=>{ document.getElementById('imgSourceModal').classList.remove('open'); pendingScanMode=true; document.getElementById('fImgCamera').click(); };
-document.getElementById('fImg').onchange=e=>{ const tgt = window._payDetailId && imgTarget==='pay' ? 'payDetail' : imgTarget; if(tgt==='payDetail'){ processFile(e.target.files[0],false,'payDetail'); } else processFile(e.target.files[0],false,imgTarget); e.target.value=''; };
-document.getElementById('fImgCamera').onchange=e=>{ const isScan=pendingScanMode; pendingScanMode=false; const tgt = window._payDetailId && imgTarget==='pay' ? 'payDetail' : imgTarget; if(tgt==='payDetail'){ processFile(e.target.files[0],isScan,'payDetail'); } else processFile(e.target.files[0],isScan,imgTarget); e.target.value=''; };
+document.getElementById('fImg').onchange=e=>{ const _payOpen=document.getElementById('payModal')?.classList.contains('open'); const _detOpen=document.getElementById('detailModal')?.classList.contains('open'); const tgt = (!_payOpen && _detOpen && window._payDetailId && imgTarget==='pay') ? 'payDetail' : imgTarget; if(tgt==='payDetail'){ processFile(e.target.files[0],false,'payDetail'); } else processFile(e.target.files[0],false,imgTarget); e.target.value=''; };
+document.getElementById('fImgCamera').onchange=e=>{ const isScan=pendingScanMode; pendingScanMode=false; const _payOpen=document.getElementById('payModal')?.classList.contains('open'); const _detOpen=document.getElementById('detailModal')?.classList.contains('open'); const tgt = (!_payOpen && _detOpen && window._payDetailId && imgTarget==='pay') ? 'payDetail' : imgTarget; if(tgt==='payDetail'){ processFile(e.target.files[0],isScan,'payDetail'); } else processFile(e.target.files[0],isScan,imgTarget); e.target.value=''; };
 document.getElementById('fImgFiles').onchange=e=>{ processFile(e.target.files[0],false,imgTarget); e.target.value=''; };
 // ===== PDF SUPPORT - CamScanner PDF dalam iCloud =====
 // iPhone Files grey-out PDF sebab accept="image/*" je dulu. Sekarang accept dah include PDF.
