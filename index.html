@@ -190,7 +190,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -239,6 +239,9 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <label>Kategori</label><select id="fltCat"><option value="">Semua kategori</option><option value="stock">stock</option><option value="kegunaan kedai">kegunaan kedai</option><option value="utilities">utilities</option><option value="gaji">gaji</option><option value="personal">personal</option></select>
 <label>Status</label><select id="fltStatus"><option value="">Semua</option><option value="paid">Dah Bayar</option><option value="unpaid">Belum Bayar</option></select>
 <label>Cara Bayar</label><select id="fltPay"><option value="">Semua</option><option>Cash</option><option>Bank Transfer</option><option>QR / E-Wallet</option><option>Split Payment</option></select>
+<label>Bulan</label><input type="month" id="fltMonth"><div style="font-size:11px;color:#666;margin:-4px 0 8px">Contoh: pilih 2026-11 untuk Nov 2026 je.</div>
+<label>Ikut Tarikh</label><select id="fltDateBy"><option value="">Auto (ikut tab)</option><option value="inv">Tarikh Invoice</option><option value="pay">Tarikh Bayar (PV)</option></select><div style="font-size:11px;color:#666;margin:-4px 0 8px">Auto: tab Dah Bayar ikut Tarikh Bayar, tab lain ikut Tarikh Invoice.</div>
+<label>Dari — Hingga <span style="font-weight:400;color:#666">(kalau Bulan kosong)</span></label><div class="row"><input type="date" id="fltFrom" style="flex:1"><input type="date" id="fltTo" style="flex:1"></div>
 <div class="row" style="margin-top:14px"><button class="btn btn-light" id="filterReset" style="flex:1">Reset</button><button class="btn btn-green" id="filterApply" style="flex:1">Tunjuk</button></div></div></div>
 
 <!-- REPORT -->
@@ -324,7 +327,7 @@ let customCats = JSON.parse(localStorage.getItem('ik_cats')||'[]');
 let hiddenCats = JSON.parse(localStorage.getItem('ik_cats_hidden')||'[]');
 const DEFAULT_CATS = ['stock','kegunaan kedai','utilities','gaji','personal'];
 migrateCN();
-let tab='all', query='', filters={cat:'',status:'',pay:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
+let tab='all', query='', filters={cat:'',status:'',pay:'',month:'',from:'',to:'',dateBy:''}, selected=new Set(), editId=null, pendingImg='', pendingPdf='', pendingPayImg='', pendingPayPdf='', pendingScanMode=false, payMode='single', payTarget=null, imgTarget='invoice';
 let pendingInvImgs={}, pendingInvPdfs={}, pendingInvPages={}, deleteInvImgs={}, _payInvTargetId=null; let pendingPages=[], _pendingPageAction=null; let _editOrigPages=[], _editPagesTouched=false; let pendingPayPages=[], _pendingPayPageAction=null;
 function allCats(){ const fromInv=invoices.map(x=>(x.cat||'').trim()).filter(Boolean); const m=[...DEFAULT_CATS.filter(c=>!hiddenCats.includes(c))]; [...customCats,...fromInv].forEach(c=>{if(!m.includes(c))m.push(c)}); return m; }
 // ===== IndexedDB untuk PDF besar (multi-muka) - localStorage cuma ~5MB, PDF 2MB+ tak muat =====
@@ -545,7 +548,7 @@ function migrateCN(){ let changed=false; invoices.forEach(x=>{ if(isCN(x) && Num
 function today(){ return new Date().toISOString().slice(0,10); }
 function showToast(t){ const el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; setTimeout(()=>el.style.display='none',2200); }
 function rebuildCatList(){ const sel=document.getElementById('fCat'); if(sel){ const cur=sel.value; sel.innerHTML=allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur&&allCats().includes(cur))sel.value=cur; } const f=document.getElementById('fltCat'); if(f){ const cur=f.value; f.innerHTML='<option value="">Semua kategori</option>'+allCats().map(c=>`<option value="${c}">${c}</option>`).join(''); if(cur)f.value=cur; } }
-function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.holdId||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='hold') list=list.filter(x=>!x.paid && x.onHold); if(tab==='batal'){ return []; } return list; }
+function _fltMonthLabel(m){ try{ if(!m) return ''; const _mo=['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis']; const _y=String(m).slice(0,4); const _n=parseInt(String(m).slice(5,7),10); return (_mo[_n-1]||'')+' '+_y; }catch(e){ return String(m||''); } } function _fltDateMatch(x, _scopeTab){ try{ if(!filters.month && !filters.from && !filters.to) return true; const _t=_scopeTab||tab; let d=''; if(filters.dateBy==='pay') d=x.payDate||''; else if(filters.dateBy==='inv') d=x.date||''; else d=(_t==='paid' ? (x.payDate||x.date||'') : (x.date||'')); if(!d) return false; if(filters.month) return String(d).slice(0,7)===String(filters.month); if(filters.from && String(d)<String(filters.from)) return false; if(filters.to && String(d)>String(filters.to)) return false; return true; }catch(e){ return true; } } function _fltBatalMatch(c){ try{ if(!filters.month && !filters.from && !filters.to) return true; const d=c.date||''; if(!d) return false; if(filters.month) return String(d).slice(0,7)===String(filters.month); if(filters.from && String(d)<String(filters.from)) return false; if(filters.to && String(d)>String(filters.to)) return false; return true; }catch(e){ return true; } } function filtered(){ let list=[...invoices]; if(query){ const q=query.toLowerCase(); list=list.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.holdId||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q)); } if(filters.cat) list=list.filter(x=>x.cat===filters.cat); if(filters.status) list=list.filter(x=>filters.status==='paid'?x.paid:!x.paid); if(filters.pay) list=list.filter(x=>x.payMethod===filters.pay); if(filters.month||filters.from||filters.to) list=list.filter(x=>_fltDateMatch(x, tab)); if(tab==='paid') list=list.filter(x=>x.paid); if(tab==='unpaid') list=list.filter(x=>!x.paid); if(tab==='hold') list=list.filter(x=>!x.paid && x.onHold); if(tab==='batal'){ return []; } return list; }
 let _pinSavedId=''; let _pinSavedPv=''; let _pinJustSet=false; let _pinSavedIds=new Set(); function _pinMark(ids){ try{ (ids||[]).forEach(id=>{ if(id) _pinSavedIds.add(String(id)); }); }catch(e){} } function _pinHas(id){ try{ return _pinSavedIds.has(String(id)); }catch(e){ return false; } } function _pinHasAny(items){ try{ return (items||[]).some(x=>_pinSavedIds.has(String(x.id))); }catch(e){ return false; } }
 function gotoTab(name){ tab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===name)); selected.clear(); render(); }
 
@@ -558,12 +561,14 @@ function render(){
   const _tabLabel = tab==='paid' ? ' Dah Bayar' : tab==='unpaid' ? ' Belum Bayar' : tab==='hold' ? ' PV On Hold' : '';
   const _total=list.reduce((s,x)=>s+signedPrice(x),0);
   document.getElementById('infoBar').textContent = pvCountLabel(list)+_tabLabel+' • '+fmt(_total); try{ document.getElementById('infoBar').classList.remove('info-pin'); }catch(e){} // Banner BARU DISIMPAN kat atas dibuang ikut cakap user - infoBar kekal info biasa je
+  try{ const _fc=document.getElementById('filterCount'); if(_fc){ const _n=[filters.cat,filters.status,filters.pay,filters.month,filters.from||filters.to,filters.dateBy].filter(Boolean).length; _fc.textContent=_n?('('+_n+')'):''; } }catch(e){}
   const box=document.getElementById('list'); box.innerHTML='';
   if(tab==='batal'){
-    const _batalTotal=cancelledPVs.reduce((s,c)=>s+Number(c.price||0),0);
-    document.getElementById('infoBar').textContent = cancelledPVs.length+' PV Batal • '+fmt(_batalTotal);
-    if(!cancelledPVs.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada PV Batal</p>';
-    const _batalSorted=[...cancelledPVs].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); let _batalLastDay='';
+    const _batalList=(filters.month||filters.from||filters.to) ? cancelledPVs.filter(c=>_fltBatalMatch(c)) : cancelledPVs;
+    const _batalTotal=_batalList.reduce((s,c)=>s+Number(c.price||0),0);
+    document.getElementById('infoBar').textContent = _batalList.length+' PV Batal • '+fmt(_batalTotal);
+    if(!_batalList.length) box.innerHTML='<p style="text-align:center;color:#666">Tiada PV Batal</p>';
+    const _batalSorted=[..._batalList].sort((a,b)=>(b.date||'').localeCompare(a.date||'')); let _batalLastDay='';
     _batalSorted.forEach(c=>{ if(c.date!==_batalLastDay){ _batalLastDay=c.date; const _dayItems=_batalSorted.filter(x=>x.date===c.date); const _dayTotal=_dayItems.reduce((s,x)=>s+Number(x.price||0),0); const _hd=document.createElement('div'); _hd.style.cssText='background:#e8f5e9;border-radius:10px;padding:8px 10px;font-weight:700;font-size:13px;margin:10px 0 4px'; _hd.textContent=fmtDate(c.date)+' • '+_dayItems.length+' PV Batal • '+fmt(_dayTotal); box.appendChild(_hd); } const d=document.createElement('div'); d.className='card'; d.innerHTML=`<div class="meta"><b>${c.pv} - BATAL</b><div>${fmtDate(c.date)} • ${c.inv||''} • ${c.name||''}</div><div style="color:#dc2626;font-weight:700">PV Batal - ${fmt(c.price)}</div></div>`; box.appendChild(d); });
     return;
   }
@@ -1567,19 +1572,20 @@ const _qEl=document.getElementById('q'); const _liveSearch=e=>{ query=e.target.v
 document.getElementById('clearSearch').onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); const inp=document.getElementById('q'); inp.value=''; query=''; const box=document.getElementById('searchSuggest'); if(box) box.style.display='none'; updateClearSearch(); render(); inp.blur(); };
 document.addEventListener('click',e=>{ const box=document.getElementById('searchSuggest'); if(box && !e.target.closest('#searchSuggest') && e.target.id!=='q') box.style.display='none'; });
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{ const _ss=document.getElementById('searchSuggest'); if(_ss) _ss.style.display='none'; tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); selected.clear(); render(); });
-document.getElementById('filterBtn').onclick=()=>document.getElementById('filterModal').classList.add('open');
+document.getElementById('filterBtn').onclick=()=>{ try{ document.getElementById('fltMonth').value=filters.month||''; document.getElementById('fltFrom').value=filters.from||''; document.getElementById('fltTo').value=filters.to||''; document.getElementById('fltDateBy').value=filters.dateBy||''; }catch(e){} document.getElementById('filterModal').classList.add('open'); };
 document.getElementById('filterClose').onclick=document.getElementById('filterBack').onclick=()=>document.getElementById('filterModal').classList.remove('open');
-document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getElementById('fltCat').value; filters.status=document.getElementById('fltStatus').value; filters.pay=document.getElementById('fltPay').value; document.getElementById('filterModal').classList.remove('open'); render(); };
-document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
+document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getElementById('fltCat').value; filters.status=document.getElementById('fltStatus').value; filters.pay=document.getElementById('fltPay').value; filters.month=document.getElementById('fltMonth').value||''; filters.from=document.getElementById('fltFrom').value||''; filters.to=document.getElementById('fltTo').value||''; filters.dateBy=document.getElementById('fltDateBy').value||''; document.getElementById('filterModal').classList.remove('open'); render(); };
+document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:'',month:'',from:'',to:'',dateBy:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('fltMonth').value=''; document.getElementById('fltFrom').value=''; document.getElementById('fltTo').value=''; document.getElementById('fltDateBy').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
 // REPORT IKUT VIEW SEMASA: dulu Report tak tunjuk skop & tab PV Batal return [] (filtered() kosong untuk batal) - user ingat Report selalu generate semua.
 // Sekarang: default = View Semasa (tab + cari + filter yang tengah aktif). Boleh tukar skop dalam Report tanpa tutup modal. Download semua pakai list yang dah freeze masa buka Report, bukan filtered() baru.
 function reportListForScope(scope){
   const q=(query||'').toLowerCase();
   const _matchQ=x=>!q||((x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.note||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)||(x.cat||'').toLowerCase().includes(q)||(x.payMethod||'').toLowerCase().includes(q));
-  const _matchF=x=>{ if(filters.cat && x.cat!==filters.cat) return false; if(filters.status && (filters.status==='paid' ? !x.paid : x.paid)) return false; if(filters.pay && x.payMethod!==filters.pay) return false; return true; };
+  const _matchF=x=>{ if(filters.cat && x.cat!==filters.cat) return false; if(filters.status && (filters.status==='paid' ? !x.paid : x.paid)) return false; if(filters.pay && x.payMethod!==filters.pay) return false; if(!_fltDateMatch(x, scope==='paid'?'paid':(scope==='unpaid'?'unpaid':tab))) return false; return true; };
   if(scope==='batal'){
     let list=(cancelledPVs||[]).map(c=>({date:c.date, inv:c.inv, name:c.name, cat:'', payMethod:'', paid:false, payDate:c.date, pv:c.pv, price:Math.abs(Number(c.price||0)), note:'PV Batal', _isBatal:true}));
     if(q) list=list.filter(x=>((x.name||'').toLowerCase().includes(q)||(x.inv||'').toLowerCase().includes(q)||(x.pv||'').toLowerCase().includes(q)));
+    if(filters.month||filters.from||filters.to) list=list.filter(x=>_fltBatalMatch(x));
     return list;
   }
   if(scope==='current'){
@@ -1613,6 +1619,8 @@ function renderReport(scope){
   if(filters.cat) _extra+=' • Kategori: '+filters.cat;
   if(filters.status) _extra+=' • Status: '+(filters.status==='paid'?'Dah Bayar':'Belum Bayar');
   if(filters.pay) _extra+=' • Bayar: '+filters.pay;
+  if(filters.month) _extra+=' • Bulan: '+_fltMonthLabel(filters.month)+(filters.dateBy==='pay'?' (Tarikh Bayar)':filters.dateBy==='inv'?' (Tarikh Invoice)':'');
+  else if(filters.from||filters.to) _extra+=' • Tarikh: '+(filters.from?fmtDate(filters.from):'...')+' - '+(filters.to?fmtDate(filters.to):'...');
   document.getElementById('reportSummary').textContent='Skop: '+_scopeLabel+' • '+list.length+' invoice • '+fmt(total)+_extra;
   const csv=csvFor(list);
   document.getElementById('csvText').value=csv;
