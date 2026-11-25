@@ -21,6 +21,18 @@
 }
 </style><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Invoice Kedai - BASECODE</title>
+<!-- PWA: bagi app boleh Install / Add to Home Screen jadi app full-screen (iPhone + Android) -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Invoice Kedai">
+<meta name="theme-color" content="#4C1D95">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<script>
+  // Daftar service worker (fail sw.js sebelah index.html). Kalau sw.js belum upload, gagal senyap je, app jalan macam biasa.
+  if('serviceWorker' in navigator){ window.addEventListener('load', function(){ try{ navigator.serviceWorker.register('sw.js').catch(function(){}); }catch(e){} }); }
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
@@ -190,7 +202,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head>
 <body>
 <div class="wrap">
 <header><div><h1>Invoice Kedai</h1><div class="sub">Kedai • Invoice • PV • Bayar</div></div></header>
@@ -257,7 +269,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 
 <!-- SUPABASE LOGIN - FULL SCREEN MACAM APP BIASA -->
 <style>#supaLoginModal.open{display:flex !important}</style>
-<div id="supaLoginModal" style="position:fixed;inset:0;z-index:999;background:linear-gradient(180deg,#4C1D95 0%,#6D28D9 55%,#8B5CF6 100%);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="supaLoginModal" style="position: fixed; inset: 0px; z-index: 999; background: linear-gradient(rgb(76, 29, 149) 0%, rgb(109, 40, 217) 55%, rgb(139, 92, 246) 100%); display: flex; align-items: center; justify-content: center; padding: 20px;" class="open">
 <div style="width:100%;max-width:360px;background:#fff;border-radius:20px;padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center">
 <div style="font-size:44px">🧾</div>
 <div style="font-size:26px;font-weight:900;color:#2E1065;margin-top:6px">Invoice Kedai</div>
@@ -274,7 +286,7 @@ textarea.csv{height:160px;font-size:12px;font-family:monospace}
 <div class="modal" id="settingModal"><div class="sheet"><div class="closeRow"><button id="settingBack">← Kembali</button><b>⚙️ Setting</b><button id="settingClose">✕ Tutup</button></div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:8px;text-align:center">✅ Data simpan kat Supabase (cloud). Clear History pun tak hilang — login balik je.</div>
-<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login</div>
+<div id="supaStatusLabel" style="font-size:12px;color:#1E40AF;text-align:center;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:8px">☁️ Supabase: belum login — tekan Sync / buka app untuk login</div>
 <button class="btn btn-light" id="supaSyncBtn" style="padding:14px;text-align:left">☁️ Sync Sekarang — Naikkan Semua Ke Supabase (Full)</button>
 <button class="btn btn-light" id="supaLogoutBtn" style="padding:14px;text-align:left">🚪 Logout Supabase</button>
 <button class="btn btn-light" id="settingCatBtn" style="padding:16px;text-align:left">📂 Edit Kategori</button><button class="btn btn-light" id="renameSupplierBtn" style="padding:16px;text-align:left">✏️ Tukar Nama Supplier (Bulk) - Tukar Semua Sekaligus</button>
@@ -1052,7 +1064,7 @@ function openPVGroupGallery(items, pvLabel){
   const _it=_list[0]; openImgView(_it.img||'', 'Gambar Invoice - '+_it.name+' (1/'+_list.length+' • '+(pvLabel||'')+')', (_it.inv||'')+' • '+_it.date, _it.pdf||'', {kind:'invoice', id:_it.id});
   if(_list.length>1){ try{ setTimeout(()=>showToast('PV '+(pvLabel||'')+' ada '+_list.length+' invoice - ni yang pertama je. Nak lain, tekan card PV.'),600); }catch(e){} }
 }
-async function openImgView(src,title,meta,pdfSrc,ctx,gallery){
+async function openImgView(src,title,meta,pdfSrc,ctx,gallery){ autoResetFilters();
   try{ if(pdfSrc && typeof pdfSrc==='object' && ctx && typeof ctx==='object' && ctx.items && !gallery){ gallery=ctx; ctx=pdfSrc; pdfSrc=''; } }catch(e){}
   if(ctx) _viewCtx=ctx; try{ const _vm=document.getElementById('imgViewModal'); if(_vm) _vm.style.zIndex='100'; }catch(e){}
   // Buka modal terus + tunjuk Loading - jangan tunggu resolve SUPA / fetch siap baru buka, nanti user ingat tekan tak jadi.
@@ -1134,7 +1146,7 @@ function openImgViewOnlyImg(src,title,meta,ctx){ openImgView(src,title,meta,'',c
 function openImgViewOnlyPdf(pdf,title,meta,imgSrc,ctx){ _viewImgSrc=imgSrc||''; openImgView(imgSrc||'',title,meta,pdf,ctx); }
 function openInvoiceViewFirst(id){ const _xiv=invoices.find(y=>y.id===id); if(!_xiv) return; const _firstImg=_xiv.img||(_xiv.pages && _xiv.pages[0])||''; const _has=_firstImg||_xiv.pdf||(_xiv.pages && _xiv.pages.length); openImgView(_firstImg, 'Gambar Invoice - '+_xiv.name, (_xiv.inv||'')+' • '+_xiv.date+((_xiv.pages && _xiv.pages.length>1)?' • '+_xiv.pages.length+' pages':'')+(_has?'':' • Tiada gambar lagi - tekan Upload'), _xiv.pdf||'', {kind:'invoice', id:_xiv.id}); } // No.2 (ada gambar) -> Viewer + gambar dia. Takde gambar pun -> Viewer + Upload. Fallback pages[0] kalau img kosong tapi pages ada.
 
-async function openDetail(id){ const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
+async function openDetail(id){ autoResetFilters(); const x=invoices.find(y=>y.id===id); if(!x)return; editId=id; const b=document.getElementById('detailBody'); b.innerHTML=`<h2>${x.name}</h2><p><b>${fmt(signedPrice(x))}</b> • ${fmtDate(x.date)} • ${x.inv}</p><p>Kategori: ${x.cat||'-'}</p>${x.note?`<p>Nota / Remark: ${x.note}</p>`:''}
 ${x.img?`<div><p style="font-weight:700">Gambar Invoice ${x.pdf?'• 📄 PDF':''}${(x.pages && x.pages.length>1)?' • '+x.pages.length+' pages • Scroll bawah - semua muka ada':''}</p><div id="dInvPages"></div>${x.pdf && (!x.pages || x.pages.length<=1)?`<button class="btn btn-light" id="recoverPagesBtn" style="width:100%;margin-top:8px">🔄 Pulihkan Page 2 dari PDF Asal</button>`:''}</div>`:''}
 ${x.paid?`<p>Status: Dah Bayar • ${x.payMethod||''}<br>PV: ${x.pv||'-'} • Bayar: ${fmtDate(x.payDate)||'-'}</p>`:''}
 ${(!x.paid&&x.onHold)?`<p style="font-weight:700;color:#92400E">⏸️ PV On Hold • ${x.holdId||''} • On Hold: ${fmtDate(x.holdDate)||'-'}<br><span style="font-weight:400;color:#666;font-size:12px">Perlu bayar segera - belum dibayar lagi</span></p>`:''}
@@ -1477,13 +1489,19 @@ async function supaRecoverPages(id, curPages){ try{ if(!supaUser||!supaClient||!
 async function openEditInvoice(id){ const x=invoices.find(y=>y.id===id); if(!x) return; editId=id; try{ document.getElementById('pvModal').classList.remove('open'); }catch(e){} try{ document.getElementById('detailModal').classList.remove('open'); }catch(e){} document.getElementById('fName').value=x.name; document.getElementById('fInv').value=x.inv; document.getElementById('fPrice').value=x.price; document.getElementById('fDate').value=x.date; try{ rebuildCatList(); }catch(e){} document.getElementById('fCat').value=x.cat||''; if(document.getElementById('fNote')) document.getElementById('fNote').value=x.note||''; if(document.getElementById('fCash')) document.getElementById('fCash').checked=!!(x.paid && x.payMethod==='Cash'); if(document.getElementById('fBank')) document.getElementById('fBank').checked=!!(x.paid && x.payMethod==='Bank Transfer'); if(document.getElementById('bankPayDateWrap')) document.getElementById('bankPayDateWrap').style.display=(x.paid && x.payMethod==='Bank Transfer')?'block':'none'; if(document.getElementById('fPayDate')) document.getElementById('fPayDate').value=x.payDate||x.date||today(); document.getElementById('addTitle').textContent='Edit Invoice'; pendingImg=await resolveImgData(x.img||''); pendingPdf=x.pdf||''; _pendingPdfIsOriginal=!!x.pdf; _editOrigPages=(x.pages && x.pages.length ? x.pages.slice() : []); _editPagesTouched=false; pendingPages=await resolvePagesArray(_editOrigPages.length ? _editOrigPages.slice() : (x.img ? [x.img] : [])); _pendingPageAction=null; setThumb(pendingImg); updatePagesUI(); document.getElementById('addModal').classList.add('open');
  /* FIX EDIT TAK FUNCTION (Viewer): sama macam Detail - jangan await recover PDF sebelum buka form. Form buka dulu, pulih belakang. */
  (function(){ const _eid=x.id, _origLen=pendingPages.length; (async()=>{ try{ if(_origLen<=1 && editId===_eid){ const _rec=await supaRecoverPages(_eid, pendingPages); if(_rec && _rec.length>pendingPages.length && editId===_eid && !_editPagesTouched && document.getElementById('addModal').classList.contains('open')){ pendingPages=_rec; _editOrigPages=_rec.slice(); try{ updatePagesUI(); showToast('Jumpa '+_rec.length+' pages dalam Storage - dipulihkan'); }catch(e){} } } }catch(e){} try{ if(pendingPages.length<=1 && x.pdf && editId===_eid && !_editPagesTouched && document.getElementById('addModal').classList.contains('open')){ const _fromPdf=await supaRecoverPagesFromPdf(x); if(_fromPdf && _fromPdf.length>pendingPages.length && editId===_eid && !_editPagesTouched && document.getElementById('addModal').classList.contains('open')){ pendingPages=_fromPdf.slice(); _editOrigPages=_fromPdf.slice(); try{ updatePagesUI(); showToast('Jumpa '+_fromPdf.length+' pages dalam PDF Asal - dipulihkan'); }catch(e){} } } }catch(e){} })(); })(); }
-function openPVDetail(pv, payDate){
+function openPVDetail(pv, payDate){ autoResetFilters();
   try{ const _t=document.getElementById('pvModalTitle'); if(_t) _t.textContent='Detail PV'; const _b0=document.getElementById('pvBody'); if(_b0) _b0.classList.remove('pv-onepage','pv-onepage-xs'); }catch(e){}
   const items=invoices.filter(x=>x.paid&&x.pv===pv&&x.payDate===payDate).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if(!items.length) return;
   const total=items.reduce((s,x)=>s+signedPrice(x),0);
-  const resits=[...new Set(items.map(x=>x.paymentImg).filter(Boolean))];
-  const resitPages=[...new Set(items.flatMap(x=>(x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []))).filter(Boolean))];
+  // RESIT = 1 untuk 1 PV (1 bayaran), BUKAN 1 per invoice. Dulu Detail PV kutip resit dari SEMUA invoice,
+  // lepas sync cloud setiap invoice ada salinan sendiri dengan path SUPA: lain-lain (…/inv1/paymentPages_0.jpg vs …/inv2/…)
+  // -> gambar sama sebijik tapi string lain, Set tak boleh dedupe -> nampak 2 pages padahal upload 1 je.
+  // Sekarang ambil dari invoice pertama yang ada resit je. Kalau resit tu betul 2 muka (PDF 2 muka),
+  // invoice tu sendiri dah ada 2 pages, jadi tetap tunjuk 2.
+  const _pvResitSrc=items.find(x=>(x.paymentPages && x.paymentPages.length) || x.paymentImg);
+  const resits=_pvResitSrc ? [_pvResitSrc.paymentImg].filter(Boolean) : [];
+  const resitPages=_pvResitSrc ? ((_pvResitSrc.paymentPages && _pvResitSrc.paymentPages.length ? _pvResitSrc.paymentPages.slice() : (_pvResitSrc.paymentImg ? [_pvResitSrc.paymentImg] : []))).filter(Boolean) : [];
   const b=document.getElementById('pvBody');
   b.innerHTML=`<h2>${pv}</h2><p><b>${fmt(total)}</b> • ${fmtDate(payDate)} • ${pvCountLabel(items)}</p><p>Cara Bayar: ${items[0].payMethod||'-'}</p>`
     + items.map((x,i)=>`<div class="card" data-pv-inv="${x.id}" style="cursor:pointer"><div class="meta"><b>${i+1}. ${x.name}</b><div>${fmtDate(x.date)} • ${x.inv||''} • ${x.cat||''}</div>${x.note?`<div class="pv-onepage-note" style="font-size:11px;color:#666">📝 ${x.note}</div>`:''}</div><div class="right"><div class="price">${fmt(signedPrice(x))}</div></div></div>`).join('')
@@ -1505,7 +1523,7 @@ function openPVDetail(pv, payDate){
   const dp=b.querySelector('#dlPdfPV'); if(dp) dp.onclick=()=>downloadPdfPV(pv,payDate);
   document.getElementById('pvModal').classList.add('open');
 }
-function openHoldDetail(holdId){
+function openHoldDetail(holdId){ autoResetFilters();
   const items=invoices.filter(x=>!x.paid && x.onHold && String(x.holdId||'')===String(holdId)).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.inv||'').localeCompare(b.inv||''));
   if(!items.length) return;
   const total=items.reduce((s,x)=>s+signedPrice(x),0);
@@ -1541,7 +1559,9 @@ async function downloadPdfPV(pv, payDate){
   y+=3; doc.setFontSize(12); doc.text('Jumlah: RM '+Number(total).toFixed(2),10,y);
   // Jimat pages: gambar invoice + resit susun grid 2 lajur x 4 baris = 8 gambar 1 page, kecik je
   const _invImgs=items.flatMap(x=>{ const _p=(x.pages && x.pages.length ? x.pages : (x.img ? [x.img] : [])); return _p.map((src,pi)=>({label:((x.inv||x.name||'Invoice').slice(0,22)+( _p.length>1 ? ' P'+(pi+1) : '')),src})); });
-  const _resitImgs=[...new Set(items.flatMap(x=>(x.paymentPages && x.paymentPages.length ? x.paymentPages : (x.paymentImg ? [x.paymentImg] : []))).filter(Boolean))].map((r,i)=>({label:'Resit Payment '+(i+1),src:r}));
+  const _pvResitSrc2=items.find(x=>(x.paymentPages && x.paymentPages.length) || x.paymentImg);
+  const _pvResitPages2=_pvResitSrc2 ? ((_pvResitSrc2.paymentPages && _pvResitSrc2.paymentPages.length ? _pvResitSrc2.paymentPages.slice() : (_pvResitSrc2.paymentImg ? [_pvResitSrc2.paymentImg] : []))).filter(Boolean) : [];
+  const _resitImgs=_pvResitPages2.map((r,i)=>({label:'Resit Payment '+(i+1),src:r}));
   const _allImgs=[..._invImgs.map(o=>({...o,kind:'Gambar'})),..._resitImgs.map(o=>({...o,kind:'Resit'}))];
   if(!_allImgs.length){ y+=8; doc.setFontSize(11); doc.text('Resit Payment: Tiada',10,y); }
   else {
@@ -1578,6 +1598,11 @@ document.getElementById('clearSearch').onclick=(e)=>{ e.preventDefault(); e.stop
 document.addEventListener('click',e=>{ const box=document.getElementById('searchSuggest'); if(box && !e.target.closest('#searchSuggest') && e.target.id!=='q') box.style.display='none'; });
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{ const _ss=document.getElementById('searchSuggest'); if(_ss) _ss.style.display='none'; tab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); selected.clear(); render(); });
 document.getElementById('filterBtn').onclick=()=>{ try{ document.getElementById('fltMonth').value=filters.month||''; document.getElementById('fltFrom').value=filters.from||''; document.getElementById('fltTo').value=filters.to||''; document.getElementById('fltDateBy').value=filters.dateBy||''; }catch(e){} document.getElementById('filterModal').classList.add('open'); };
+// FILTER AUTO-RESET: lepas guna filter untuk cari & buka sesuatu, filter clear sendiri.
+// Sebelum ni filter melekat sampai user tekan Reset sendiri. Sekarang bila Detail Invoice / Detail PV /
+// Detail On Hold / viewer gambar dibuka dari list yang dah filter, filter reset kat belakang -
+// bila tutup detail tu, list dah balik normal. Report & Bayar TAK reset, sebab dia orang ikut view semasa.
+function autoResetFilters(){ try{ const _active=[filters.cat,filters.status,filters.pay,filters.month,filters.from||filters.to,filters.dateBy].filter(Boolean).length; if(!_active) return; filters={cat:'',status:'',pay:'',month:'',from:'',to:'',dateBy:''}; ['fltCat','fltStatus','fltPay','fltMonth','fltFrom','fltTo','fltDateBy'].forEach(_id=>{ const _el=document.getElementById(_id); if(_el) _el.value=''; }); render(); }catch(e){} }
 document.getElementById('filterClose').onclick=document.getElementById('filterBack').onclick=()=>document.getElementById('filterModal').classList.remove('open');
 document.getElementById('filterApply').onclick=()=>{ filters.cat=document.getElementById('fltCat').value; filters.status=document.getElementById('fltStatus').value; filters.pay=document.getElementById('fltPay').value; filters.month=document.getElementById('fltMonth').value||''; filters.from=document.getElementById('fltFrom').value||''; filters.to=document.getElementById('fltTo').value||''; filters.dateBy=document.getElementById('fltDateBy').value||''; document.getElementById('filterModal').classList.remove('open'); render(); };
 document.getElementById('filterReset').onclick=()=>{ filters={cat:'',status:'',pay:'',month:'',from:'',to:'',dateBy:''}; document.getElementById('fltCat').value=''; document.getElementById('fltStatus').value=''; document.getElementById('fltPay').value=''; document.getElementById('fltMonth').value=''; document.getElementById('fltFrom').value=''; document.getElementById('fltTo').value=''; document.getElementById('fltDateBy').value=''; document.getElementById('filterModal').classList.remove('open'); render(); };
